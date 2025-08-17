@@ -39,6 +39,7 @@
 
 
 /* ORDER RESERVED */
+// lua保留字定义
 static const char *const luaX_tokens [] = {
     "and", "break", "do", "else", "elseif",
     "end", "false", "for", "function", "goto", "if",

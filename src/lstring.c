@@ -190,7 +190,7 @@ static void growstrtab (lua_State *L, stringtable *tb) {
 /*
 ** Checks whether short string exists and reuses it or creates a new one.
 */
-// 创建段字符串，有可能复用
+// 创建短字符串，有可能复用
 static TString *internshrstr (lua_State *L, const char *str, size_t l) {
   TString *ts;
   global_State *g = G(L);
@@ -198,6 +198,7 @@ static TString *internshrstr (lua_State *L, const char *str, size_t l) {
   unsigned int h = luaS_hash(str, l, g->seed);
   TString **list = &tb->hash[lmod(h, tb->size)];
   lua_assert(str != NULL);  /* otherwise 'memcmp'/'memcpy' are undefined */
+  // 看看等否找到
   for (ts = *list; ts != NULL; ts = ts->u.hnext) {
     if (l == ts->shrlen && (memcmp(str, getshrstr(ts), l * sizeof(char)) == 0)) {
       /* found! */
@@ -207,6 +208,7 @@ static TString *internshrstr (lua_State *L, const char *str, size_t l) {
     }
   }
   /* else must create a new string */
+  // 防止退化成链表
   if (tb->nuse >= tb->size) {  /* need to grow string table? */
     growstrtab(L, tb);
     list = &tb->hash[lmod(h, tb->size)];  /* rehash with new size */

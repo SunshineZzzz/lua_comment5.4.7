@@ -47,6 +47,7 @@
 /*
 ** Union of all Lua values
 */
+// lua boolean 在类型字段中定义
 typedef union Value {
   // 只想需要GC的对象，比如：
   struct GCObject *gc;    /* collectable objects */
@@ -71,11 +72,50 @@ typedef union Value {
 // value_ - 值
 // 
 // tt_ - 类型
-// bit 0 ~ bit 3： 这里4个位，2的4次方即可以代表16个数值，用于存储变量的基本类型，变量的基本类型即为本文开始时图1中类型枚举中0到8分别代表的nil到thread
-// bit 4 ~ bit 5: 这里2个位，2的2次方即可以代表4个数值，用于存放类型变体，类型变体也属于它0到3位所对应的的基本类型。
-// bit 6: 这里1个位，2的1次方即可以代表2个数值，用于存储该变量是否可以垃圾回收
+// bit 0 ~ 3: 这里4个位，2的4次方即可以代表16个数值，用于存储变量的基本类型
+// bit 4 ~ 5: 这里2个位，2的2次方即可以代表4个数值，用于存放类型变体，类型变体也属于它0到3位所对应的的基本类型
+// bit     6: 这里1个位，2的1次方即可以代表2个数值，用于存储该变量是否可以垃圾回收
 #define TValuefields	Value value_; lu_byte tt_
 
+/*
+* TValue
+* {
+*   Value value_
+*   {
+*       struct GCObject *gc;
+*       {
+*           &GCUnion.gc
+*       }
+*       void* p;
+*       lua_CFunction f;
+*       lua_Integer i;
+*       lua_Number n; 
+*   }
+*   lu_byte tt_
+* };
+* 
+* typedef struct GCObject 
+* {
+*   struct GCObject *next; lu_byte tt; lu_byte marked
+* } GCObject;
+*
+* union GCUnion 
+* {
+*   GCObject gc;
+*   struct TString ts;
+*   struct Udata u;
+*   union Closure cl;
+*   struct Table h;
+*   struct Proto p;
+*   struct lua_State th;
+*   struct UpVal upv;
+* };
+* 
+* typedef struct GC对象 {
+*   GCObject
+*   其他定义
+* }
+*/
 typedef struct TValue {
   TValuefields;
 } TValue;
@@ -333,7 +373,7 @@ typedef union {
 // 这是所有GC对象的公共头部
 // next - 下一个GCObject指针
 // tt - 类型
-// marked - 状态标记
+// marked - GC状态标记
 #define CommonHeader	struct GCObject *next; lu_byte tt; lu_byte marked
 
 
@@ -425,6 +465,7 @@ typedef struct GCObject {
 
 // 是否是字符串类型
 #define ttisstring(o)		checktype((o), LUA_TSTRING)
+// 字符串类型肯定是需要GC
 // 是否是短字符串
 #define ttisshrstring(o)	checktag((o), ctb(LUA_VSHRSTR))
 // 是否是长字符串
@@ -457,7 +498,7 @@ typedef struct TString {
   // GC对象的公共头部
   CommonHeader;
   // TString为⻓字符串时：当extra=0时表示该字符串未进⾏哈希运算；当extra=1时表示该字符串已经进⾏过哈希运算。
-  // TString为短字符串时：当extra=0时表示它是普通字符串；当extra不为0时，它⼀般是关键字。
+  // TString为短字符串时：当extra=0时表示它是普通字符串；当extra不为0时，它⼀般是lua保留字。
   lu_byte extra;  /* reserved words for short strings; "has hash" for longs */
   // 短字符串长度
   lu_byte shrlen;  /* length for short strings, 0xFF for long strings */
