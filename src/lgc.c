@@ -989,6 +989,7 @@ static void dothecall (lua_State *L, void *ud) {
 
 
 // __gc元方法
+// 在对象要被销毁的时候调用，一般可用于控制一些资源的释放
 static void GCTM (lua_State *L) {
   global_State *g = G(L);
   const TValue *tm;

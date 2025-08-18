@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lvm.c $
 ** Lua virtual machine
 ** See Copyright Notice in lua.h
@@ -46,7 +46,7 @@
 
 
 /* limit for table tag-method chains (to avoid infinite loops) */
-// Ôª·½·¨²éÑ¯×î´óÑ­»·´ÎÊı
+// å…ƒæ–¹æ³•æŸ¥è¯¢æœ€å¤§å¾ªç¯æ¬¡æ•°
 #define MAXTAGLOOP	2000
 
 
@@ -121,7 +121,7 @@ int luaV_tonumber_ (const TValue *obj, lua_Number *n) {
 /*
 ** try to convert a float to an integer, rounding according to 'mode'.
 */
-// ×ª»»¸¡µãÊıÎªÕûÊı
+// è½¬æ¢æµ®ç‚¹æ•°ä¸ºæ•´æ•°
 int luaV_flttointeger (lua_Number n, lua_Integer *p, F2Imod mode) {
   lua_Number f = l_floor(n);
   if (n != f) {  /* not an integral value? */
@@ -207,7 +207,7 @@ static int forlimit (lua_State *L, lua_Integer init, const TValue *lim,
 **   ra + 2 : step
 **   ra + 3 : control variable
 */
-// OP_FORPREPºËĞÄ´úÂëÊµÏÖ
+// OP_FORPREPæ ¸å¿ƒä»£ç å®ç°
 static int forprep (lua_State *L, StkId ra) {
   TValue *pinit = s2v(ra);
   TValue *plimit = s2v(ra + 1);
@@ -289,15 +289,14 @@ static int floatforloop (StkId ra) {
 ** if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to
 ** t[k] entry (which must be empty).
 */
-// __indexÔª·½·¨
-// val = t[key]£¬slotÎªnullËµÃ÷t²»ÊÇtable
+// __indexå…ƒæ–¹æ³•
 void luaV_finishget (lua_State *L, const TValue *t, TValue *key, StkId val,
                       const TValue *slot) {
   int loop;  /* counter to avoid infinite loops */
   const TValue *tm;  /* metamethod */
-  // __indexÔª·½·¨µÄ²éÑ¯ÊÇÖ§³Ö¶à²ã¼¶»òÕßËµÊÇ¿É¡°µİ¹é¡±µÄ£¬ËùÒÔÕâÀï½øĞĞÁËÑ­»·²éÕÒ
+  // __indexå…ƒæ–¹æ³•çš„æŸ¥è¯¢æ˜¯æ”¯æŒå¤šå±‚çº§æˆ–è€…è¯´æ˜¯å¯â€œé€’å½’â€çš„ï¼Œæ‰€ä»¥è¿™é‡Œè¿›è¡Œäº†å¾ªç¯æŸ¥æ‰¾
   for (loop = 0; loop < MAXTAGLOOP; loop++) {
-    // ²»ÊÇtableÒ²¿ÉÒÔÓĞÔª·½·¨
+    // ä¸æ˜¯tableä¹Ÿå¯ä»¥æœ‰å…ƒæ–¹æ³•
     if (slot == NULL) {  /* 't' is not a table? */
       lua_assert(!ttistable(t));
       tm = luaT_gettmbyobj(L, t, TM_INDEX);
@@ -307,8 +306,8 @@ void luaV_finishget (lua_State *L, const TValue *t, TValue *key, StkId val,
     }
     else {  /* 't' is a table */
       lua_assert(isempty(slot));
-      // ÈôÎªtableÀàĞÍ±äÁ¿£¬Ôò²éÑ¯ËümetatableÖĞµÄ__index×Ö¶Î£¬ÈôÃ»ÓĞÉèÖÃmetatable£¬»òÕßmetatable¶ÔÓ¦µÄ__index±äÁ¿Îª¿Õ£¬ÕâÀï¶¼½«·µ»Ø¿Õ¡£
-      // ÈôÓĞ·µ»ØÖµ£¬ÕâÀï°ÑËüÃüÃûÎªtm
+      // è‹¥ä¸ºtableç±»å‹å˜é‡ï¼Œåˆ™æŸ¥è¯¢å®ƒmetatableä¸­çš„__indexå­—æ®µï¼Œè‹¥æ²¡æœ‰è®¾ç½®metatableï¼Œæˆ–è€…metatableå¯¹åº”çš„__indexå˜é‡ä¸ºç©ºï¼Œè¿™é‡Œéƒ½å°†è¿”å›ç©ºã€‚
+      // è‹¥æœ‰è¿”å›å€¼ï¼Œè¿™é‡ŒæŠŠå®ƒå‘½åä¸ºtm
       tm = fasttm(L, hvalue(t)->metatable, TM_INDEX);  /* table's metamethod */
       if (tm == NULL) {  /* no metamethod? */
         setnilvalue(s2v(val));  /* result is nil */
@@ -316,12 +315,12 @@ void luaV_finishget (lua_State *L, const TValue *t, TValue *key, StkId val,
       }
       /* else will try the metamethod */
     }
-    // ÈôtmÎªº¯Êı£¬Ôòµ÷ÓÃ¸Ãº¯Êı»ñÈ¡·µ»ØÖµ
+    // è‹¥tmä¸ºå‡½æ•°ï¼Œåˆ™è°ƒç”¨è¯¥å‡½æ•°è·å–è¿”å›å€¼
     if (ttisfunction(tm)) {  /* is metamethod a function? */
       luaT_callTMres(L, tm, t, key, val);  /* call it */
       return;
     }
-    // ·ñÔòtmÎªtable£¬Ôò³¢ÊÔÓÃÍ¬ÑùµÄkeyÖµ´ÓtmÕâ¸ötableÖĞÈ¡µÃÊı¾İ
+    // å¦åˆ™tmä¸ºtableï¼Œåˆ™å°è¯•ç”¨åŒæ ·çš„keyå€¼ä»tmè¿™ä¸ªtableä¸­å–å¾—æ•°æ®
     t = tm;  /* else try to access 'tm[key]' */
     if (luaV_fastget(L, t, key, slot, luaH_get)) {  /* fast track? */
       setobj2s(L, val, slot);  /* done */
@@ -340,19 +339,19 @@ void luaV_finishget (lua_State *L, const TValue *t, TValue *key, StkId val,
 ** is no such entry.  (The value at 'slot' must be empty, otherwise
 ** 'luaV_fastget' would have done the job.)
 */
-// __newindexÔª·½·¨
+// __newindexå…ƒæ–¹æ³•
 void luaV_finishset (lua_State *L, const TValue *t, TValue *key,
                      TValue *val, const TValue *slot) {
   int loop;  /* counter to avoid infinite loops */
   for (loop = 0; loop < MAXTAGLOOP; loop++) {
     const TValue *tm;  /* '__newindex' metamethod */
     if (slot != NULL) {  /* is 't' a table? */
-      // tÊÇtable
+      // tæ˜¯table
       Table *h = hvalue(t);  /* save 't' table */
       lua_assert(isempty(slot));  /* slot must be empty */
       tm = fasttm(L, h->metatable, TM_NEWINDEX);  /* get metamethod */
       if (tm == NULL) {  /* no metamethod? */
-        // Ã»ÓĞ__newindexÔª·½·¨£¬
+        // æ²¡æœ‰__newindexå…ƒæ–¹æ³•ï¼Œ
         luaH_finishset(L, h, key, slot, val);  /* set new value */
         invalidateTMcache(h);
         luaC_barrierback(L, obj2gco(h), val);
@@ -361,21 +360,21 @@ void luaV_finishset (lua_State *L, const TValue *t, TValue *key,
       /* else will try the metamethod */
     }
     else {  /* not a table; check metamethod */
-      // t²»ÊÇtableĞèÒª²éÕÒÔª·½·¨
+      // tä¸æ˜¯tableéœ€è¦æŸ¥æ‰¾å…ƒæ–¹æ³•
       tm = luaT_gettmbyobj(L, t, TM_NEWINDEX);
       if (l_unlikely(notm(tm)))
         luaG_typeerror(L, t, "index");
     }
     /* try the metamethod */
     if (ttisfunction(tm)) {
-      // Ôª·½·¨ÊÇ¸öº¯ÊıÅ¶
+      // å…ƒæ–¹æ³•æ˜¯ä¸ªå‡½æ•°å“¦
       luaT_callTM(L, tm, t, key, val);
       return;
     }
-    // ÔªÊÇtable
+    // å…ƒæ˜¯table
     t = tm;  /* else repeat assignment over 'tm' */
     if (luaV_fastget(L, t, key, slot, luaH_get)) {
-      // ÕÒµ½Ö±½ÓÉèÖÃ£¬ÕÒ²»µ½½Ó×Å±éÀú
+      // æ‰¾åˆ°ç›´æ¥è®¾ç½®ï¼Œæ‰¾ä¸åˆ°æ¥ç€éå†
       luaV_finishfastset(L, t, slot, val);
       return;  /* done */
     }
@@ -792,7 +791,7 @@ lua_Number luaV_modf (lua_State *L, lua_Number m, lua_Number n) {
 /*
 ** Shift left operation. (Shift right just negates 'y'.)
 */
-// ×óÎ»ÒÆº¯Êı£¬ÎªÁË¸´ÓÃº¯Êı£¬²ÎÊıCÈôÎª¸ºÊıµ÷ÓÃ´Ëº¯Êı£¬¼´ÊµÏÖÁËÓÒÎ»ÒÆµÄĞ§¹û¡£
+// å·¦ä½ç§»å‡½æ•°ï¼Œä¸ºäº†å¤ç”¨å‡½æ•°ï¼Œå‚æ•°Cè‹¥ä¸ºè´Ÿæ•°è°ƒç”¨æ­¤å‡½æ•°ï¼Œå³å®ç°äº†å³ä½ç§»çš„æ•ˆæœã€‚
 lua_Integer luaV_shiftl (lua_Integer x, lua_Integer y) {
   if (y < 0) {  /* shift right? */
     if (y <= -NBITS) return 0;
@@ -809,7 +808,7 @@ lua_Integer luaV_shiftl (lua_Integer x, lua_Integer y) {
 ** create a new Lua closure, push it in the stack, and initialize
 ** its upvalues.
 */
-// ´´½¨Lua±Õ°ü
+// åˆ›å»ºLuaé—­åŒ…
 static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
                          StkId ra) {
   int nup = p->sizeupvalues;
@@ -905,7 +904,7 @@ void luaV_finishOp (lua_State *L) {
 ** ===================================================================
 */
 
-// ÕûÊıÔËËãº¯Êı
+// æ•´æ•°è¿ç®—å‡½æ•°
 #define l_addi(L,a,b)	intop(+, a, b)
 #define l_subi(L,a,b)	intop(-, a, b)
 #define l_muli(L,a,b)	intop(*, a, b)
@@ -923,8 +922,8 @@ void luaV_finishOp (lua_State *L) {
 ** Arithmetic operations with immediate operands. 'iop' is the integer
 ** operation, 'fop' is the float operation.
 */
-// Êµ¼ÊÖĞ¸ù¾İÒªÔËËãµÄÁ½¸öÊı×ÖµÄÀàĞÍ¶¯Ì¬Ñ¡ÔñÊ¹ÓÃÄÄ¸öº¯Êı½øĞĞÔËËã
-// ÉÏÍ¼ÖĞµÄ²ÎÊıiopÎªÕûÊıÔËËãº¯Êı£¬fopÎª¸¡µãÊıÔËËãº¯Êı£¬
+// å®é™…ä¸­æ ¹æ®è¦è¿ç®—çš„ä¸¤ä¸ªæ•°å­—çš„ç±»å‹åŠ¨æ€é€‰æ‹©ä½¿ç”¨å“ªä¸ªå‡½æ•°è¿›è¡Œè¿ç®—
+// ä¸Šå›¾ä¸­çš„å‚æ•°iopä¸ºæ•´æ•°è¿ç®—å‡½æ•°ï¼Œfopä¸ºæµ®ç‚¹æ•°è¿ç®—å‡½æ•°ï¼Œ
 #define op_arithI(L,iop,fop) {  \
   StkId ra = RA(i); \
   TValue *v1 = vRB(i);  \
@@ -986,8 +985,8 @@ void luaV_finishOp (lua_State *L) {
 /*
 ** Arithmetic operations with register operands.
 */
-// Êµ¼ÊÖĞ¸ù¾İÒªÔËËãµÄÁ½¸öÊı×ÖµÄÀàĞÍ¶¯Ì¬Ñ¡ÔñÊ¹ÓÃÄÄ¸öº¯Êı½øĞĞÔËËã
-// ÉÏÍ¼ÖĞµÄ²ÎÊıiopÎªÕûÊıÔËËãº¯Êı£¬fopÎª¸¡µãÊıÔËËãº¯Êı£¬
+// å®é™…ä¸­æ ¹æ®è¦è¿ç®—çš„ä¸¤ä¸ªæ•°å­—çš„ç±»å‹åŠ¨æ€é€‰æ‹©ä½¿ç”¨å“ªä¸ªå‡½æ•°è¿›è¡Œè¿ç®—
+// ä¸Šå›¾ä¸­çš„å‚æ•°iopä¸ºæ•´æ•°è¿ç®—å‡½æ•°ï¼Œfopä¸ºæµ®ç‚¹æ•°è¿ç®—å‡½æ•°ï¼Œ
 #define op_arith(L,iop,fop) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = vRC(i);  \
@@ -997,8 +996,8 @@ void luaV_finishOp (lua_State *L) {
 /*
 ** Arithmetic operations with K operands.
 */
-// ¸ù¾İÒªÔËËãµÄÁ½¸öÊı×ÖµÄÀàĞÍ¶¯Ì¬Ñ¡ÔñÊ¹ÓÃÄÄ¸öº¯Êı½øĞĞÔËËã
-// iopÎªÕûÊıÔËËãº¯Êı£¬fopÎª¸¡µãÊıÔËËãº¯Êı
+// æ ¹æ®è¦è¿ç®—çš„ä¸¤ä¸ªæ•°å­—çš„ç±»å‹åŠ¨æ€é€‰æ‹©ä½¿ç”¨å“ªä¸ªå‡½æ•°è¿›è¡Œè¿ç®—
+// iopä¸ºæ•´æ•°è¿ç®—å‡½æ•°ï¼Œfopä¸ºæµ®ç‚¹æ•°è¿ç®—å‡½æ•°
 #define op_arithK(L,iop,fop) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = KC(i); lua_assert(ttisnumber(v2));  \
@@ -1008,8 +1007,8 @@ void luaV_finishOp (lua_State *L) {
 /*
 ** Bitwise operations with constant operand.
 */
-// ²ÎÊıopÎªÎ»ÔËËãº¯Êı£¬²»Çø·ÖÕûÊıºÍ¸¡µã£¬ÒòÎªÎ»ÔËËãÖ»ÄÜÊÇÕûÊıÔËËã£¬
-// Ò²Ö»ÓĞÁ½¸öÊı×Ö¶¼ÄÜ³É¹¦×ª»¯ÎªÕûÊıÊ±Î»ÔËËãº¯Êı²ÅÄÜ±»ÕıÈ·Ö´ĞĞ¡£
+// å‚æ•°opä¸ºä½è¿ç®—å‡½æ•°ï¼Œä¸åŒºåˆ†æ•´æ•°å’Œæµ®ç‚¹ï¼Œå› ä¸ºä½è¿ç®—åªèƒ½æ˜¯æ•´æ•°è¿ç®—ï¼Œ
+// ä¹Ÿåªæœ‰ä¸¤ä¸ªæ•°å­—éƒ½èƒ½æˆåŠŸè½¬åŒ–ä¸ºæ•´æ•°æ—¶ä½è¿ç®—å‡½æ•°æ‰èƒ½è¢«æ­£ç¡®æ‰§è¡Œã€‚
 #define op_bitwiseK(L,op) {  \
   StkId ra = RA(i); \
   TValue *v1 = vRB(i);  \
@@ -1024,8 +1023,8 @@ void luaV_finishOp (lua_State *L) {
 /*
 ** Bitwise operations with register operands.
 */
-// ²ÎÊıopÎªÎ»ÔËËãº¯Êı£¬²»Çø·ÖÕûÊıºÍ¸¡µã£¬ÒòÎªÎ»ÔËËãÖ»ÄÜÊÇÕûÊıÔËËã£¬
-// Ò²Ö»ÓĞÁ½¸öÊı×Ö¶¼ÄÜ³É¹¦×ª»¯ÎªÕûÊıÊ±Î»ÔËËãº¯Êı²ÅÄÜ±»ÕıÈ·Ö´ĞĞ¡£
+// å‚æ•°opä¸ºä½è¿ç®—å‡½æ•°ï¼Œä¸åŒºåˆ†æ•´æ•°å’Œæµ®ç‚¹ï¼Œå› ä¸ºä½è¿ç®—åªèƒ½æ˜¯æ•´æ•°è¿ç®—ï¼Œ
+// ä¹Ÿåªæœ‰ä¸¤ä¸ªæ•°å­—éƒ½èƒ½æˆåŠŸè½¬åŒ–ä¸ºæ•´æ•°æ—¶ä½è¿ç®—å‡½æ•°æ‰èƒ½è¢«æ­£ç¡®æ‰§è¡Œã€‚
 #define op_bitwise(L,op) {  \
   StkId ra = RA(i); \
   TValue *v1 = vRB(i);  \
@@ -1092,25 +1091,25 @@ void luaV_finishOp (lua_State *L) {
 */
 
 
-// »ñÈ¡¼Ä´æÆ÷A²ÎÊı
+// è·å–å¯„å­˜å™¨Aå‚æ•°
 #define RA(i)	(base+GETARG_A(i))
-// »ñÈ¡¼Ä´æÆ÷B²ÎÊı
+// è·å–å¯„å­˜å™¨Bå‚æ•°
 #define RB(i)	(base+GETARG_B(i))
 #define vRB(i)	s2v(RB(i))
 #define KB(i)	(k+GETARG_B(i))
-// »ñÈ¡¼Ä´æÆ÷C²ÎÊı
+// è·å–å¯„å­˜å™¨Cå‚æ•°
 #define RC(i)	(base+GETARG_C(i))
 #define vRC(i)	s2v(RC(i))
-// ¸ù¾İCµÄÖµ´Ó³£Á¿±íKÖĞÈ¡Öµ
+// æ ¹æ®Cçš„å€¼ä»å¸¸é‡è¡¨Kä¸­å–å€¼
 #define KC(i)	(k+GETARG_C(i))
-// ÈôkÎª1£¬Ôò¶ÁÈ¡k³£Á¿Êı×é£¬·ñÔò²ÅÊÇ¶ÁÈ¡¼Ä´æÆ÷
+// è‹¥kä¸º1ï¼Œåˆ™è¯»å–kå¸¸é‡æ•°ç»„ï¼Œå¦åˆ™æ‰æ˜¯è¯»å–å¯„å­˜å™¨
 #define RKC(i)	((TESTARG_k(i)) ? k + GETARG_C(i) : s2v(base + GETARG_C(i)))
 
 
 
 #define updatetrap(ci)  (trap = ci->u.l.trap)
 
-// ¸üĞÂbase
+// æ›´æ–°base
 #define updatebase(ci)	(base = ci->func.p + 1)
 
 
@@ -1122,7 +1121,7 @@ void luaV_finishOp (lua_State *L) {
 ** Execute a jump instruction. The 'updatetrap' allows signals to stop
 ** tight loops. (Without it, the local copy of 'trap' could never change.)
 */
-// OP_JMPºËĞÄÔ´ÂëÊµÏÖÈçÏÂ£¬ÆäÊµ¾ÍÊÇÖ±½ÓÈÃpcÖ¸Õë¼ÓÉÏ²ÎÊıJµÄÖµ
+// OP_JMPæ ¸å¿ƒæºç å®ç°å¦‚ä¸‹ï¼Œå…¶å®å°±æ˜¯ç›´æ¥è®©pcæŒ‡é’ˆåŠ ä¸Šå‚æ•°Jçš„å€¼
 #define dojump(ci,i,e)	{ pc += GETARG_sJ(i) + e; updatetrap(ci); }
 
 
@@ -1134,14 +1133,14 @@ void luaV_finishOp (lua_State *L) {
 ** was expected (parameter 'k'), else do next instruction, which must
 ** be a jump.
 */
-// º¯ÊıÎª¸ù¾İÅĞ¶ÏµÄ½á¹ûÓëÖ¸ÁîµÄ²ÎÊıkÀ´¾ö¶¨ÈçºÎÌø×ªµÄº¯Êı
+// å‡½æ•°ä¸ºæ ¹æ®åˆ¤æ–­çš„ç»“æœä¸æŒ‡ä»¤çš„å‚æ•°kæ¥å†³å®šå¦‚ä½•è·³è½¬çš„å‡½æ•°
 #define docondjump()	if (cond != GETARG_k(i)) pc++; else donextjump(ci);
 
 
 /*
 ** Correct global 'pc'.
 */
-// °Ñpc´æ´¢ÔÚci->u.l.savedpc
+// æŠŠpcå­˜å‚¨åœ¨ci->u.l.savedpc
 #define savepc(L)	(ci->u.l.savedpc = pc)
 
 
@@ -1177,7 +1176,7 @@ void luaV_finishOp (lua_State *L) {
 
 
 /* fetch an instruction and prepare its execution */
-// È¡³öÒªÖ´ĞĞµÄÖ¸Áî
+// å–å‡ºè¦æ‰§è¡Œçš„æŒ‡ä»¤
 #define vmfetch()	{ \
   if (l_unlikely(trap)) {  /* stack reallocation or hooks? */ \
     trap = luaG_traceexec(L, pc);  /* handle hooks */ \
@@ -1191,7 +1190,7 @@ void luaV_finishOp (lua_State *L) {
 #define vmbreak		break
 
 
-// Ö´ĞĞ±àÒëºÃµÄÖ¸Áî
+// æ‰§è¡Œç¼–è¯‘å¥½çš„æŒ‡ä»¤
 void luaV_execute (lua_State *L, CallInfo *ci) {
   LClosure *cl;
   TValue *k;
@@ -1204,18 +1203,18 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
  startfunc:
   trap = L->hookmask;
 returning:  /* trap already set */
-  // »ñÈ¡lua±Õ°ü
+  // è·å–luaé—­åŒ…
   cl = ci_func(ci);
-  // ³£Á¿Ëù´æ´¢ÔÚµÄÊı×é
+  // å¸¸é‡æ‰€å­˜å‚¨åœ¨çš„æ•°ç»„
   k = cl->p->k;
-  // ³õÊ¼»¯pcÖ¸Õë
+  // åˆå§‹åŒ–pcæŒ‡é’ˆ
   pc = ci->u.l.savedpc;
   if (l_unlikely(trap))
     trap = luaG_tracecall(L);
   base = ci->func.p + 1;
   /* main loop of interpreter */
   for (;;) {
-    // Ñ­»·²»¶ÏÄÃ³öpcÖ¸ÕëÖ¸ÏòµÄopcode½øĞĞÖ´ĞĞ
+    // å¾ªç¯ä¸æ–­æ‹¿å‡ºpcæŒ‡é’ˆæŒ‡å‘çš„opcodeè¿›è¡Œæ‰§è¡Œ
     Instruction i;  /* instruction being executed */
     vmfetch();
     #if 0
@@ -1246,18 +1245,18 @@ returning:  /* trap already set */
       }
       vmcase(OP_LOADK) {
         // R[A] := K[Bx]
-        // i£º´ú±íµ±Ç°ÕıÔÚÖ´ĞĞµÄInstruction£»
-        // GETARG_Bx(i)£º¸ù¾İÖ¸ÁîÄ£Ê½£¬ÄÃ³öInstructionµÄB²ÎÊı£»
-        // k£º³£Á¿Êı×éµÄ³¬Ê¼µØÖ·£»
-        // setobj2sº¯Êı£ºÉèÖÃÕ»ÉÏÃæÒ»¸öÔªËØµÄÊı¾İ£»
-        // ra£ºÏÂ±êÎªAµÄ¼Ä´æÆ÷¶ÔÓ¦µÄÕ»ÔªËØÊı¾İ£¨StackValue£©;
+        // iï¼šä»£è¡¨å½“å‰æ­£åœ¨æ‰§è¡Œçš„Instructionï¼›
+        // GETARG_Bx(i)ï¼šæ ¹æ®æŒ‡ä»¤æ¨¡å¼ï¼Œæ‹¿å‡ºInstructionçš„Bå‚æ•°ï¼›
+        // kï¼šå¸¸é‡æ•°ç»„çš„è¶…å§‹åœ°å€ï¼›
+        // setobj2så‡½æ•°ï¼šè®¾ç½®æ ˆä¸Šé¢ä¸€ä¸ªå…ƒç´ çš„æ•°æ®ï¼›
+        // raï¼šä¸‹æ ‡ä¸ºAçš„å¯„å­˜å™¨å¯¹åº”çš„æ ˆå…ƒç´ æ•°æ®ï¼ˆStackValueï¼‰;
         StkId ra = RA(i);
         TValue *rb = k + GETARG_Bx(i);
         setobj2s(L, ra, rb);
         vmbreak;
       }
       vmcase(OP_LOADKX) {
-        // OP_LOADKXµÄÏÂÒ»ÌõÖ¸ÁîÊÇiAx¸ñÊ½£¬¶ÔÓ¦OpCodeÎªOP_EXTRAARG
+        // OP_LOADKXçš„ä¸‹ä¸€æ¡æŒ‡ä»¤æ˜¯iAxæ ¼å¼ï¼Œå¯¹åº”OpCodeä¸ºOP_EXTRAARG
         StkId ra = RA(i);
         TValue *rb;
         rb = k + GETARG_Ax(*pc); pc++;
@@ -1298,7 +1297,7 @@ returning:  /* trap already set */
         StkId ra = RA(i);
         UpVal *uv = cl->upvals[GETARG_B(i)];
         setobj(L, uv->v.p, s2v(ra));
-        // LuaÖĞµÄGCObject¶ÔÏóµÄÒıÓÃ×´Ì¬ÈôÔÚÔËĞĞÊ±·¢Éú¸Ä±ä£¬ĞèÒªÊ¹ÓÃÆÁÕÏ£¨Barrier£©¶Ô±ê¼Ç×´Ì¬½øĞĞĞŞÕı
+        // Luaä¸­çš„GCObjectå¯¹è±¡çš„å¼•ç”¨çŠ¶æ€è‹¥åœ¨è¿è¡Œæ—¶å‘ç”Ÿæ”¹å˜ï¼Œéœ€è¦ä½¿ç”¨å±éšœï¼ˆBarrierï¼‰å¯¹æ ‡è®°çŠ¶æ€è¿›è¡Œä¿®æ­£
         luaC_barrier(L, uv, s2v(ra));
         vmbreak;
       }
@@ -1734,7 +1733,7 @@ returning:  /* trap already set */
         int b = GETARG_B(i);
         int nresults = GETARG_C(i) - 1;
         if (b != 0)  /* fixed number of arguments? */
-          // Ç°Ãæº¯ÊıºÍ²ÎÊı¶ÔÓ¦µÄ¼Ä´æÆ÷ÉèÖÃ¶¼Ã»¸Ä±äL->topÎ»ÖÃ£¬ÕâÀïĞŞ¸Ä
+          // å‰é¢å‡½æ•°å’Œå‚æ•°å¯¹åº”çš„å¯„å­˜å™¨è®¾ç½®éƒ½æ²¡æ”¹å˜L->topä½ç½®ï¼Œè¿™é‡Œä¿®æ”¹
           L->top.p = ra + b;  /* top signals number of arguments */
         /* else previous instruction set top */
         savepc(L);  /* in case of errors */
@@ -1939,13 +1938,13 @@ returning:  /* trap already set */
         vmbreak;
       }
       vmcase(OP_VARARGPREP) {
-        // µ÷Õû¶ÑÕ»²¼¾Ö
+        // è°ƒæ•´å †æ ˆå¸ƒå±€
         ProtectNT(luaT_adjustvarargs(L, GETARG_A(i), ci, cl->p));
         if (l_unlikely(trap)) {  /* previous "Protect" updated trap */
           luaD_hookcall(L, ci);
           L->oldpc = 1;  /* next opcode will be seen as a "new" line */
         }
-        // Õâ¸öÊ±ºòº¯Êı(Lclouser)ÒÑ¾­µ÷ÕûÁËÎ»ÖÃÁË£¬baseÒ²ĞèÒªµ÷Õû
+        // è¿™ä¸ªæ—¶å€™å‡½æ•°(Lclouser)å·²ç»è°ƒæ•´äº†ä½ç½®äº†ï¼Œbaseä¹Ÿéœ€è¦è°ƒæ•´
         updatebase(ci);  /* function has new base after adjustment */
         vmbreak;
       }

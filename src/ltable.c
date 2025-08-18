@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: ltable.c $
 ** Lua tables (hash)
 ** See Copyright Notice in lua.h
@@ -96,7 +96,7 @@ static const Node dummynode_ = {
 };
 
 
-// 
+// æ‰¾ä¸åˆ°çš„key
 static const TValue absentkey = {ABSTKEYCONSTANT};
 
 
@@ -149,7 +149,7 @@ static int l_hashfloat (lua_Number n) {
 ** returns the 'main' position of an element in a table (that is,
 ** the index of its hash value).
 */
-// ¸ù¾İÀàĞÍ²»Í¬¼ÆËãÏÂ±ê
+// æ ¹æ®ç±»å‹ä¸åŒè®¡ç®—ä¸‹æ ‡
 static Node *mainpositionTV (const Table *t, const TValue *key) {
   switch (ttypetag(key)) {
     case LUA_VNUMINT: {
@@ -188,7 +188,7 @@ static Node *mainpositionTV (const Table *t, const TValue *key) {
 }
 
 
-// nodeÊÇ²»ÊÇÈ·¶¨hashµ½ÕâÕâ¸öÎ»ÖÃÁË
+// nodeæ˜¯ä¸æ˜¯ç¡®å®šhashåˆ°è¿™è¿™ä¸ªä½ç½®äº†
 l_sinline Node *mainpositionfromnode (const Table *t, Node *nd) {
   TValue key;
   getnodekey(cast(lua_State *, NULL), &key, nd);
@@ -216,10 +216,10 @@ l_sinline Node *mainpositionfromnode (const Table *t, Node *nd) {
 ** positive does not break anything.  (In particular, 'next' will return
 ** some other valid item on the table or nil.)
 */
-// ¸ù¾İn2²»Í¬ÀàĞÍ£¬ÅĞ¶Ïk1ºÍn2ÊÇ·ñÏàµÈ
-// deadokÓÃÀ´±êÊ¶ÊÇ·ñĞèÒª¼ì²én2ÊÇ·ñ±»ÊÍ·Å
+// æ ¹æ®n2ä¸åŒç±»å‹ï¼Œåˆ¤æ–­k1å’Œn2æ˜¯å¦ç›¸ç­‰
+// deadokç”¨æ¥æ ‡è¯†æ˜¯å¦éœ€è¦æ£€æŸ¥n2æ˜¯å¦è¢«é‡Šæ”¾
 static int equalkey (const TValue *k1, const Node *n2, int deadok) {
-  // Èç¹ûk1ºÍn2µÄÀàĞÍ±êÇ©²»Í¬£¬²¢ÇÒ²»Âú×ãdeadok¡¢n2ÊÇËÀ¼üÒÔ¼°k1ÊÇ¿ÉÊÕ¼¯µÄÌõ¼ş£¬Ôò·µ»Ø0£¬±íÊ¾¼ü²»ÏàµÈ¡£
+  // å¦‚æœk1å’Œn2çš„ç±»å‹æ ‡ç­¾ä¸åŒï¼Œå¹¶ä¸”ä¸æ»¡è¶³deadokã€n2æ˜¯æ­»é”®ä»¥åŠk1æ˜¯å¯æ”¶é›†çš„æ¡ä»¶ï¼Œåˆ™è¿”å›0ï¼Œè¡¨ç¤ºé”®ä¸ç›¸ç­‰ã€‚
   if ((rawtt(k1) != keytt(n2)) &&  /* not the same variants? */
        !(deadok && keyisdead(n2) && iscollectable(k1)))
    return 0;  /* cannot be same key */
@@ -247,14 +247,15 @@ static int equalkey (const TValue *k1, const Node *n2, int deadok) {
 ** part of table 't'. (Otherwise, the array part must be larger than
 ** 'alimit'.)
 */
-// ÊÇÕæÊµ´óĞ¡ »òÕß ÊÇ2µÄÃİ´Î·½·µ»Øtrue
+// t->flagsç¬¬8ä½æ˜¯0ï¼Œalimitæ˜¯æ•°ç»„é•¿åº¦
+// t->alimitæ˜¯2çš„å¹‚æ¬¡ï¼Œalimitæ˜¯æ•°ç»„é•¿åº¦
 #define limitequalsasize(t)	(isrealasize(t) || ispow2((t)->alimit))
 
 
 /*
 ** Returns the real size of the 'array' array
 */
-// Í¨¹ıÒ»ÏµÁĞµÄÎ»ÔËËã£¬¼ÆËã³ö´óÓÚÇÒ×î½Ó½üalimitµÄ2µÄn´Î·½³¤¶È
+// é€šè¿‡ä¸€ç³»åˆ—çš„ä½è¿ç®—ï¼Œè®¡ç®—å‡ºå¤§äºä¸”æœ€æ¥è¿‘alimitçš„2çš„næ¬¡æ–¹é•¿åº¦
 LUAI_FUNC unsigned int luaH_realasize (const Table *t) {
   if (limitequalsasize(t))
     return t->alimit;  /* this is the size */
@@ -283,11 +284,7 @@ LUAI_FUNC unsigned int luaH_realasize (const Table *t) {
 ** (If it is not, 'alimit' cannot be changed to any other value
 ** without changing the real size.)
 */
-// ¼ì²éÊı×éµÄÊµ¼Ê´óĞ¡ÊÇ·ñÊÇ2µÄÃİ
-//£¨Èç¹û²»ÊÇ£¬³ı·Ç¸Ä±äÊı×éµÄÊµ¼Ê´óĞ¡£¬·ñÔòÎŞ·¨¸ü¸ÄalimitµÄÖµ¡££©
 static int ispow2realasize (const Table *t) {
-  // ÊÇÊµ¼Ê´óĞ¡µÄÇé¿öÏÂÊÇ¶ş´ÎÃİ£¬·µ»Øtrue
-  // ²»ÊÇÊµ¼Ê´óĞ¡µÄÇé¿öÏÂ£¬·µ»Øtrue
   return (!isrealasize(t) || ispow2(t->alimit));
 }
 
@@ -308,9 +305,9 @@ static unsigned int setlimittosize (Table *t) {
 ** which may be in array part, nor for floats with integral values.)
 ** See explanation about 'deadok' in function 'equalkey'.
 */
-// Í¨ÓÃµÄ»ñÈ¡°æ±¾¡££¨²¢·ÇÕæÕıÍ¨ÓÃ£º²»ÊÊÓÃÓÚÕûÊı£¬ÌØ±ğÊÇÄÇĞ©Î»ÓÚÊı×é²¿·ÖµÄÕûÊı£¬ÒÔ¼°¾ßÓĞÕûÊıÖµµÄ¸¡µãÊı¡££©
-// Çë²ÎÔÄº¯Êı`equalkey`ÖĞ¹ØÓÚ`deadok`µÄ½âÊÍ¡£
-// deadokÊÇ·ñ¼ì²éËÑµ½µÄµãÊÇ·ñ±»ÊÍ·Å
+// é€šç”¨çš„è·å–ç‰ˆæœ¬ã€‚ï¼ˆå¹¶éçœŸæ­£é€šç”¨ï¼šä¸é€‚ç”¨äºæ•´æ•°ï¼Œç‰¹åˆ«æ˜¯é‚£äº›ä½äºæ•°ç»„éƒ¨åˆ†çš„æ•´æ•°ï¼Œä»¥åŠå…·æœ‰æ•´æ•°å€¼çš„æµ®ç‚¹æ•°ã€‚ï¼‰
+// è¯·å‚é˜…å‡½æ•°`equalkey`ä¸­å…³äº`deadok`çš„è§£é‡Šã€‚
+// deadokæ˜¯å¦æ£€æŸ¥æœåˆ°çš„ç‚¹æ˜¯å¦è¢«é‡Šæ”¾
 static const TValue *getgeneric (Table *t, const TValue *key, int deadok) {
   Node *n = mainpositionTV(t, key);
   for (;;) {  /* check whether 'key' is somewhere in the chain */
@@ -403,6 +400,8 @@ static void freehash (lua_State *L, Table *t) {
 ** will go to the array part; return the optimal size.  (The condition
 ** 'twotoi > 0' in the for loop stops the loop if 'twotoi' overflows.)
 */
+// è¡¨çš„æ•°ç»„éƒ¨åˆ†æ‰¾åˆ°ä¸€ä¸ªæœ€ä¼˜çš„å¤§å°ï¼Œè¿™ä¸ªå¤§å°åº”è¯¥æ˜¯2çš„å¹‚æ¬¡æ–¹ï¼Œå¹¶ä¸”èƒ½å¤Ÿå®¹çº³è¡¨ä¸­å°½å¯èƒ½å¤šçš„è¿ç»­æ•´æ•°é”®,
+// è¿ç»­æ•´æ•°é”®çš„ä¸ªæ•°å æ®æœ€ä¼˜çš„å¤§å°çš„ä¸€åŠä»¥ä¸Š
 static unsigned int computesizes (unsigned int nums[], unsigned int *pna) {
   int i;
   unsigned int twotoi;  /* 2^i (candidate for optimal size) */
@@ -410,10 +409,12 @@ static unsigned int computesizes (unsigned int nums[], unsigned int *pna) {
   unsigned int na = 0;  /* number of elements to go to array part */
   unsigned int optimal = 0;  /* optimal size for array part */
   /* loop while keys can fill more than half of total size */
+  // æ£€æŸ¥æ‰€æœ‰æ•´æ•°é”®çš„æ€»æ•°æ˜¯å¦è¶…è¿‡å½“å‰å€™é€‰å¤§å°çš„ä¸€åŠã€‚å¦‚æœè¿™ä¸ªæ¡ä»¶ä¸æ»¡è¶³ï¼Œè¯´æ˜æ•´æ•°é”®å¤ªç¨€ç–ï¼Œä¸å€¼å¾—å†æ‰©å¤§æ•°ç»„ï¼Œå¾ªç¯å°±ä¼šåœæ­¢
   for (i = 0, twotoi = 1;
        twotoi > 0 && *pna > twotoi / 2;
        i++, twotoi *= 2) {
     a += nums[i];
+    // æ£€æŸ¥åˆ°ç›®å‰ä¸ºæ­¢ç´¯åŠ çš„é”®æ•°æ˜¯å¦è¶…è¿‡äº†å½“å‰å€™é€‰å¤§å°çš„ä¸€åŠ
     if (a > twotoi/2) {  /* more than half elements present? */
       optimal = twotoi;  /* optimal size (till now) */
       na = a;  /* all elements up to 'optimal' will go to array part */
@@ -441,6 +442,7 @@ static int countint (lua_Integer key, unsigned int *nums) {
 ** number of keys that will go into corresponding slice and return
 ** total number of non-nil keys.
 */
+// è¡¨çš„æ•°ç»„éƒ¨åˆ†ä¸ä¸ºnilä¸ªæ•°å†™å…¥num[i] = ä¸ªæ•°ï¼Œä¸‹æ ‡å€¼åœ¨(2^i-1, 2^i]èŒƒå›´å†…, i=0,1,2,3,...,31
 static unsigned int numusearray (const Table *t, unsigned int *nums) {
   int lg;
   unsigned int ttlg;  /* 2^lg */
@@ -468,6 +470,7 @@ static unsigned int numusearray (const Table *t, unsigned int *nums) {
 }
 
 
+// è¡¨çš„hashtableéƒ¨åˆ†ä¸ä¸ºnilä¸ªæ•°å†™å…¥num[key] = ä¸ªæ•°ï¼Œkeyå€¼åœ¨(2i-1, 2i]èŒƒå›´å†…
 static int numusehash (const Table *t, unsigned int *nums, unsigned int *pna) {
   int totaluse = 0;  /* total number of elements */
   int ause = 0;  /* elements added to 'nums' (can go to array part) */
@@ -492,7 +495,7 @@ static int numusehash (const Table *t, unsigned int *nums, unsigned int *pna) {
 ** comparison ensures that the shift in the second one does not
 ** overflow.
 */
-// ÉèÖÃhashtable³¤¶È£¬²¢ÇÒ¶Ô½Úµã½øĞĞÄ¬ÈÏ³õÊ¼»¯
+// è®¾ç½®hashtableé•¿åº¦ï¼Œå¹¶ä¸”å¯¹èŠ‚ç‚¹è¿›è¡Œé»˜è®¤åˆå§‹åŒ–
 static void setnodevector (lua_State *L, Table *t, unsigned int size) {
   if (size == 0) {  /* no elements to hash part? */
     t->node = cast(Node *, dummynode);  /* use common 'dummynode' */
@@ -566,6 +569,7 @@ static void exchangehashpart (Table *t1, Table *t2) {
 ** nils and reinserts the elements of the old hash back into the new
 ** parts of the table.
 */
+// è¡¨é‡æ–°åˆ†é…
 void luaH_resize (lua_State *L, Table *t, unsigned int newasize,
                                           unsigned int nhsize) {
   unsigned int i;
@@ -610,9 +614,8 @@ void luaH_resizearray (lua_State *L, Table *t, unsigned int nasize) {
 
 /*
 ** nums[i] = number of keys 'k' where 2^(i - 1) < k <= 2^i
-*/
-// nums[i]±íÊ¾keyÖµÎªintĞÍ£¬ÇÒkeyÖµÔÚ(2^(i-1), 2^i]·¶Î§ÄÚ(lua½Å±¾ÀïtableµÄintĞÍÏÂ±ê£¬Èçt[1]µÄkeyÔÚ(2^-1, 2^0]Õâ¸öÇø¼ä)£¬²¢ÇÒvalue²»ÎªnilµÄÔªËØ¸öÊı
-// 
+*/ 
+// è¡¨é‡æ–°è®¡ç®—æ•°ç»„å’Œhashtableéƒ¨åˆ†é•¿åº¦
 static void rehash (lua_State *L, Table *t, const TValue *ek) {
   unsigned int asize;  /* optimal size for array part */
   unsigned int na;  /* number of keys in the array part */
@@ -641,7 +644,7 @@ static void rehash (lua_State *L, Table *t, const TValue *ek) {
 */
 
 
-// ´´½¨lua table
+// åˆ›å»ºlua table
 Table *luaH_new (lua_State *L) {
   GCObject *o = luaC_newobj(L, LUA_VTABLE, sizeof(Table));
   Table *t = gco2t(o);
@@ -653,7 +656,7 @@ Table *luaH_new (lua_State *L) {
   return t;
 }
 
-
+// é‡Šæ”¾lua table
 void luaH_free (lua_State *L, Table *t) {
   freehash(L, t);
   luaM_freearray(L, t->array, luaH_realasize(t));
@@ -661,7 +664,7 @@ void luaH_free (lua_State *L, Table *t) {
 }
 
 
-// »ñÈ¡¿ÕÏĞÎ»ÖÃ
+// è·å–ç©ºé—²ä½ç½®
 static Node *getfreepos (Table *t) {
   if (!isdummy(t)) {
     while (t->lastfree > t->node) {
@@ -682,7 +685,7 @@ static Node *getfreepos (Table *t) {
 ** put new key in its main position; otherwise (colliding node is in its main
 ** position), new key goes to an empty position.
 */
-// Ïò¹şÏ£±íÖĞ²åÈëĞÂµÄ¼ü
+// å‘å“ˆå¸Œè¡¨ä¸­æ’å…¥æ–°çš„é”®
 static void luaH_newkey (lua_State *L, Table *t, const TValue *key,
                                                  TValue *value) {
   Node *mp;
@@ -701,50 +704,50 @@ static void luaH_newkey (lua_State *L, Table *t, const TValue *key,
   }
   if (ttisnil(value))
     return;  /* do not insert nil values */
-  // ¼ÆËã³öÏÂ±ê
+  // è®¡ç®—å‡ºä¸‹æ ‡
   mp = mainpositionTV(t, key);
-  // ¿Õ±í»òÕßÎ»ÖÃ±»Õ¼ÓÃĞèÒª×öÌØÊâ´¦Àí£¬²»ÊÇ¿Õ±í²¢ÇÒÎ»ÖÃÃ»ÓĞ±»Õ¼ÓÃÖ±½ÓĞ´Èë¼´¿É
+  // ç©ºè¡¨æˆ–è€…ä½ç½®è¢«å ç”¨éœ€è¦åšç‰¹æ®Šå¤„ç†ï¼Œä¸æ˜¯ç©ºè¡¨å¹¶ä¸”ä½ç½®æ²¡æœ‰è¢«å ç”¨ç›´æ¥å†™å…¥å³å¯
   if (!isempty(gval(mp)) || isdummy(t)) {  /* main position is taken? */
     Node *othern;
-    // ÊÔÊÔÕÒÕÒÏÖÔÚ±íÖĞÓĞÃ»ÓĞ¿ÕÎ»ÖÃ
+    // è¯•è¯•æ‰¾æ‰¾ç°åœ¨è¡¨ä¸­æœ‰æ²¡æœ‰ç©ºä½ç½®
     Node *f = getfreepos(t);  /* get a free place */
     if (f == NULL) {  /* cannot find a free place? */
-      // Ã»ÓĞ¿ÕÎ»ÖÃ£¬À©³äÖØĞÂ¹şÏ££¬ÖØĞÂÉèÖÃ
+      // æ²¡æœ‰ç©ºä½ç½®ï¼Œæ‰©å……é‡æ–°å“ˆå¸Œï¼Œé‡æ–°è®¾ç½®
       rehash(L, t, key);  /* grow table */
       /* whatever called 'newkey' takes care of TM cache */
       luaH_set(L, t, key, value);  /* insert key into grown table */
       return;
     }
     lua_assert(!isdummy(t));
-    // ¿´¿´µ±Ç°¹şÏ£³åÍ»Î»ÖÃÊÇ²»ÊÇ¾ÍÓ¦¸ÃÔÚÕâ¸öÎ»ÖÃ
+    // çœ‹çœ‹å½“å‰å“ˆå¸Œå†²çªä½ç½®æ˜¯ä¸æ˜¯å°±åº”è¯¥åœ¨è¿™ä¸ªä½ç½®
     othern = mainpositionfromnode(t, mp);
     if (othern != mp) {  /* is colliding node out of its main position? */
-      // ²»Ó¦¸ÃÔÚÕâ¸öÎ»ÖÃÉÏ
+      // ä¸åº”è¯¥åœ¨è¿™ä¸ªä½ç½®ä¸Š
       /* yes; move colliding node into free position */
-      // ¼ÈÈ»²»ÔÚÕâ¸öÎ»ÖÃÉÏ£¬ËµÃ÷Ôø¾­¹şÏ£³åÍ»ÁË£¬±»·Åµ½ÁËÕâ¸öÎ»ÖÃÉÏÁË
-      // ÕâÀïÄ¿µÄ¾ÍÊÇÕÒµ½Ç°Ò»¸öË÷ÒıËûµÄ½Úµã
+      // æ—¢ç„¶ä¸åœ¨è¿™ä¸ªä½ç½®ä¸Šï¼Œè¯´æ˜æ›¾ç»å“ˆå¸Œå†²çªäº†ï¼Œè¢«æ”¾åˆ°äº†è¿™ä¸ªä½ç½®ä¸Šäº†
+      // è¿™é‡Œç›®çš„å°±æ˜¯æ‰¾åˆ°å‰ä¸€ä¸ªç´¢å¼•ä»–çš„èŠ‚ç‚¹
       while (othern + gnext(othern) != mp)  /* find previous */
         othern += gnext(othern);
-      // ÉÏÒ»¸öË÷ÒıËûµÄĞèÒªÖØĞÂÖ¸¶¨Ïà¶ÔÎ»ÖÃ
+      // ä¸Šä¸€ä¸ªç´¢å¼•ä»–çš„éœ€è¦é‡æ–°æŒ‡å®šç›¸å¯¹ä½ç½®
       gnext(othern) = cast_int(f - othern);  /* rechain to point to 'f' */
-      // mp¾Í·ÅÕâÀï
+      // mpå°±æ”¾è¿™é‡Œ
       *f = *mp;  /* copy colliding node into free pos. (mp->next also goes) */
-      // ×ÔÉíÒ²ÒıÓÃÁËÏÂÒ»¸ö£¬ĞèÒªÖØĞÂµ÷Õû
+      // è‡ªèº«ä¹Ÿå¼•ç”¨äº†ä¸‹ä¸€ä¸ªï¼Œéœ€è¦é‡æ–°è°ƒæ•´
       if (gnext(mp) != 0) {
         gnext(f) += cast_int(mp - f);  /* correct 'next' */
         gnext(mp) = 0;  /* now 'mp' is free */
       }
-      // Î»ÖÃÈÃ³öÀ´ÁË£¬ÖÃÎª¿Õ
+      // ä½ç½®è®©å‡ºæ¥äº†ï¼Œç½®ä¸ºç©º
       setempty(gval(mp));
     }
     else {  /* colliding node is in its own main position */
-      // È·ÊµÔÚÕâ¸öÎ»ÖÃ
+      // ç¡®å®åœ¨è¿™ä¸ªä½ç½®
       /* new node will go into free position */
-      // ĞÂµÄÖ¸ÏòmpµÄÏÂÒ»¸ö
+      // æ–°çš„æŒ‡å‘mpçš„ä¸‹ä¸€ä¸ª
       if (gnext(mp) != 0)
         gnext(f) = cast_int((mp + gnext(mp)) - f);  /* chain new position */
       else lua_assert(gnext(f) == 0);
-      // mpÖ¸ÏòĞÂµÄ
+      // mpæŒ‡å‘æ–°çš„
       gnext(mp) = cast_int(f - mp);
       mp = f;
     }
@@ -780,21 +783,21 @@ static void luaH_newkey (lua_State *L, Table *t, const TValue *key,
 */
 const TValue *luaH_getint (Table *t, lua_Integer key) {
   lua_Unsigned alimit = t->alimit;
-  // ÔÚÊı×é´óĞ¡·¶Î§
+  // åœ¨æ•°ç»„å¤§å°èŒƒå›´
   if (l_castS2U(key) - 1u < alimit)  /* 'key' in [1, t->alimit]? */
-    // ·µ»ØÊı×é¶ÔÓ¦µÄÏÂ±êÄÚÈİ
+    // è¿”å›æ•°ç»„å¯¹åº”çš„ä¸‹æ ‡å†…å®¹
     return &t->array[key - 1];
-  // ²»ÊÇÊµ¼Ê´óĞ¡£¬Õâ¸ö´óĞ¡ÓĞ¿ÉÄÜÊÇÄ¿Ç°µÄÊµ¼Ê´óĞ¡£¬Ò²ÓĞ¿ÉÄÜ²»ÊÇ£¬µ«ÊÇ¿Ï¶¨´æÔÚÌõ¼ş£º
-  // alimitÔÚ´ó²¿·İÇé¿öÏÂÎªÊı×éµÄ³¤¶È£¨2´ÎÃİÊı£©£¬Èô²»µÈÓÚÊı×é³¤¶ÈµÄÊ±ºò£¬
-  // ÔòÊı×é³¤¶ÈÎª¸ÕºÃ±ÈÕâ¸öÊı´óµÄÏÂÒ»¸ö2´ÎÃİÊı¡£
+  // ä¸æ˜¯å®é™…å¤§å°ï¼Œè¿™ä¸ªå¤§å°æœ‰å¯èƒ½æ˜¯ç›®å‰çš„å®é™…å¤§å°ï¼Œä¹Ÿæœ‰å¯èƒ½ä¸æ˜¯ï¼Œä½†æ˜¯è‚¯å®šå­˜åœ¨æ¡ä»¶ï¼š
+  // alimitåœ¨å¤§éƒ¨ä»½æƒ…å†µä¸‹ä¸ºæ•°ç»„çš„é•¿åº¦ï¼ˆ2æ¬¡å¹‚æ•°ï¼‰ï¼Œè‹¥ä¸ç­‰äºæ•°ç»„é•¿åº¦çš„æ—¶å€™ï¼Œ
+  // åˆ™æ•°ç»„é•¿åº¦ä¸ºåˆšå¥½æ¯”è¿™ä¸ªæ•°å¤§çš„ä¸‹ä¸€ä¸ª2æ¬¡å¹‚æ•°ã€‚
   else if (!isrealasize(t) &&  /* key still may be in the array part? */
            (((l_castS2U(key) - 1u) & ~(alimit - 1u)) < alimit)) {
-    // ËµÃ÷»¹ÊÇÔÚÊı×éÖĞ
+    // è¯´æ˜è¿˜æ˜¯åœ¨æ•°ç»„ä¸­
     t->alimit = cast_uint(key);  /* probably '#t' is here now */
     return &t->array[key - 1];
   }
   else {  /* key is not in the array part; check the hash */
-    // ÕÒµ½Ö»ÄÜÔÚhash±íÖĞÕÒÁË
+    // æ‰¾åˆ°åªèƒ½åœ¨hashè¡¨ä¸­æ‰¾äº†
     Node *n = hashint(t, key);
     for (;;) {  /* check whether 'key' is somewhere in the chain */
       if (keyisinteger(n) && keyival(n) == key)
@@ -813,9 +816,9 @@ const TValue *luaH_getint (Table *t, lua_Integer key) {
 /*
 ** search function for short strings
 */
-// tÖĞ²éÕÒ¶Ì×Ö·û´®Îª¼üµÄÖµ
+// tä¸­æŸ¥æ‰¾çŸ­å­—ç¬¦ä¸²ä¸ºé”®çš„å€¼
 const TValue *luaH_getshortstr (Table *t, TString *key) {
-  // ¸ù¾İ¶Ì×Ö·û´®µÄhashÖµ»ñÈ¡¶ÔÓ¦µÄ½Úµã
+  // æ ¹æ®çŸ­å­—ç¬¦ä¸²çš„hashå€¼è·å–å¯¹åº”çš„èŠ‚ç‚¹
   Node *n = hashstr(t, key);
   lua_assert(key->tt == LUA_VSHRSTR);
   for (;;) {  /* check whether 'key' is somewhere in the chain */
@@ -831,7 +834,7 @@ const TValue *luaH_getshortstr (Table *t, TString *key) {
 }
 
 
-// ·µ»ØtÖĞkey¶ÔÓ¦µÄÖµ
+// è¿”å›tä¸­keyå¯¹åº”çš„å€¼
 const TValue *luaH_getstr (Table *t, TString *key) {
   if (key->tt == LUA_VSHRSTR)
     return luaH_getshortstr(t, key);
@@ -847,7 +850,7 @@ const TValue *luaH_getstr (Table *t, TString *key) {
 ** main search function
 */
 
-// ±íÖĞ²éÕÒkey£¬ÕÒµ½¶ÔÓ¦µÄÖµ
+// è¡¨ä¸­æŸ¥æ‰¾keyï¼Œæ‰¾åˆ°å¯¹åº”çš„å€¼
 const TValue *luaH_get (Table *t, const TValue *key) {
   switch (ttypetag(key)) {
     case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));
@@ -871,7 +874,7 @@ const TValue *luaH_get (Table *t, const TValue *key) {
 ** Beware: when using this function you probably need to check a GC
 ** barrier and invalidate the TM cache.
 */
-// ÕÒ²»µ½¾Í²åÈëĞÂµÄ£¬ÕÒµÃµ½¾ÍÖ±½Ó½øĞĞÉèÖÃ
+// æ‰¾ä¸åˆ°å°±æ’å…¥æ–°çš„ï¼Œæ‰¾å¾—åˆ°å°±ç›´æ¥è¿›è¡Œè®¾ç½®
 void luaH_finishset (lua_State *L, Table *t, const TValue *key,
                                    const TValue *slot, TValue *value) {
   if (isabstkey(slot))
@@ -885,7 +888,7 @@ void luaH_finishset (lua_State *L, Table *t, const TValue *key,
 ** beware: when using this function you probably need to check a GC
 ** barrier and invalidate the TM cache.
 */
-// 
+// t[key] = value
 void luaH_set (lua_State *L, Table *t, const TValue *key, TValue *value) {
   const TValue *slot = luaH_get(t, key);
   luaH_finishset(L, t, key, slot, value);
@@ -917,6 +920,7 @@ void luaH_setint (lua_State *L, Table *t, lua_Integer key, TValue *value) {
 ** boundary. ('j + 1' cannot be a present integer key because it is
 ** not a valid integer in Lua.)
 */
+// #tï¼Œè¡¨çš„å“ˆå¸Œéƒ¨åˆ†ä¸­ï¼Œå¯»æ‰¾è¾¹ç•Œ
 static lua_Unsigned hash_search (Table *t, lua_Unsigned j) {
   lua_Unsigned i;
   if (j == 0) j++;  /* the caller ensures 'j + 1' is present */
@@ -985,25 +989,30 @@ static unsigned int binsearch (const TValue *array, unsigned int i,
 ** (In those cases, the boundary is not inside the array part, and
 ** therefore cannot be used as a new limit.)
 */
-// __lenÔª·½·¨
-// ³¢ÊÔÕÒµ½tableµÄ±ß½ç£¬±ß½çÊÇÒ»¸öÕûÊıË÷Òı£¬ÀıÈçt[i]´æÔÚµ«ÊÇt[i+1]²»´æÔÚÊ±i¾ÍÊÇtµÄ±ß½ç£¬
-// »òÕßµ±t[1]²»´æÔÚÊ±0¾ÍÊÇtµÄ±ß½ç£¬µ±t[maxinteger]´æÔÚÊ±£¬maxinteger¾ÍÊÇtµÄ±ß½ç¡£
-// (1).Èç¹ût[limit]Îª¿Õ£¬ÔòËüÒ»¶¨ÓĞÒ»¸öÔÚËüÇ°ÃæµÄ±ß½ç£¬ÕâÊ±ºò¿ÉÒÔ¼ì²élimit-1ÊÇ·ñ´æÔÚ£¬Èç¹û´æÔÚÔòËüÊÇtµÄ±ß½ç¡£
-// Èç¹û²»´æÔÚ£¬ÔòÔÚ[0,limit]ÉÏ×öÒ»¸ö¶ş·Ö²éÕÒÀ´Ñ°ÕÒ±ß½ç¡£ÕâÁ½ÖÖÇé¿öÏÂÕÒµ½±ß½çÒÔºó¶¼Òª¸üĞÂtµÄalimit×Ö¶Î¡£
-// (2).Èç¹ût[limit]²»Îª¿Õ£¬Í¬Ê±Êı×éÖĞÓĞÔÚlimitÖ®ºóµÄÊı¾İÊ±£¬Ò²¿ÉÒÔÕÒ³ötµÄ±ß½ç¡£Èç¹ût[limit+1]Îª¿Õ£¬Ôòlimit¾ÍÊÇ±ß½ç£¬
-// ·ñÔò¼ì²éÊı×é²¿·ÖµÄ×îºóÒ»¸öÔªËØ£¬Èç¹ûËüÊÇ¿Õ£¬Ôò±ß½çÒ»¶¨´æÔÚÓÚlimitºÍ×îºóÒ»¸öÔªËØÖ®¼ä£¬Í¨¹ı¶ş·Ö²éÕÒÕÒ³öÀ´¡£
-// (3).×îºóÒ»ÖÖÇé¿öÊÇtµÄÊı×é²¿·ÖÎª¿Õ£¬»òÕßËüµÄ×îºóÒ»¸öÔªËØ´æÔÚ¡£ÕâÁ½ÖÖÇé¿öÏÂĞèÒª¼ì²é¹şÏ£²¿·Ö¡£
-// Èç¹û¹şÏ£²¿·ÖÒ²Îª¿Õ£¬»òÕßlimit+1²»´æÔÚ£¬ÔòlimitÎª±ß½ç¡£·ñÔòÍ¨¹ıhash_search²éÕÒÔÚ¹şÏ£²¿·ÖµÄ±ß½ç¡£
+// __lenå…ƒæ–¹æ³•,#t
+// å°è¯•æ‰¾åˆ°tableçš„è¾¹ç•Œï¼Œè¾¹ç•Œæ˜¯ä¸€ä¸ªæ•´æ•°ç´¢å¼•ï¼Œä¾‹å¦‚t[i]å­˜åœ¨ä½†æ˜¯t[i+1]ä¸å­˜åœ¨æ—¶iå°±æ˜¯tçš„è¾¹ç•Œï¼Œ
+// æˆ–è€…å½“t[1]ä¸å­˜åœ¨æ—¶0å°±æ˜¯tçš„è¾¹ç•Œï¼Œå½“t[maxinteger]å­˜åœ¨æ—¶ï¼Œmaxintegerå°±æ˜¯tçš„è¾¹ç•Œã€‚
+// (1).å¦‚æœt[alimit]ä¸ºç©ºï¼Œåˆ™å®ƒä¸€å®šæœ‰ä¸€ä¸ªåœ¨å®ƒå‰é¢çš„è¾¹ç•Œï¼Œè¿™æ—¶å€™å¯ä»¥æ£€æŸ¥alimit-1æ˜¯å¦å­˜åœ¨ï¼Œå¦‚æœå­˜åœ¨åˆ™å®ƒæ˜¯tçš„è¾¹ç•Œã€‚
+// å¦‚æœä¸å­˜åœ¨ï¼Œåˆ™åœ¨[0,alimit]ä¸Šåšä¸€ä¸ªäºŒåˆ†æŸ¥æ‰¾æ¥å¯»æ‰¾è¾¹ç•Œã€‚è¿™ä¸¤ç§æƒ…å†µä¸‹æ‰¾åˆ°è¾¹ç•Œä»¥åéƒ½è¦æ›´æ–°tçš„alimitå­—æ®µã€‚
+// æ¯”å¦‚ï¼šæ•°ç»„çš„é•¿åº¦è‚¯å®šæ˜¯2æ¬¡å¹‚ï¼Œå…ƒç´ ä¸ªæ•°å¿…ç„¶æ˜¯å¤§äº2æ¬¡å¹‚çš„ä¸€åŠï¼Œè¿™ä¸ªæ—¶å€™t[alimit]æ˜¯ç©ºï¼Œå°±éœ€è¦åœ¨[0,alimit]
+// æ‰¾è¾¹ç•Œï¼Œæ‰¾åˆ°å†™å…¥å…¶ä¸­
+// 
+// (2).å¦‚æœt[alimit]ä¸ä¸ºç©ºï¼ŒåŒæ—¶æ•°ç»„ä¸­æœ‰åœ¨alimitä¹‹åçš„æ•°æ®æ—¶ï¼Œä¹Ÿå¯ä»¥æ‰¾å‡ºtçš„è¾¹ç•Œã€‚å¦‚æœt[alimit+1]ä¸ºç©ºï¼Œåˆ™alimitå°±æ˜¯è¾¹ç•Œï¼Œ
+// å¦åˆ™æ£€æŸ¥æ•°ç»„éƒ¨åˆ†çš„æœ€åä¸€ä¸ªå…ƒç´ ï¼Œå¦‚æœå®ƒæ˜¯ç©ºï¼Œåˆ™è¾¹ç•Œä¸€å®šå­˜åœ¨äºlimitå’Œæœ€åä¸€ä¸ªå…ƒç´ ä¹‹é—´ï¼Œé€šè¿‡äºŒåˆ†æŸ¥æ‰¾æ‰¾å‡ºæ¥ã€‚
+// æ¯”å¦‚ï¼šè¿˜æ˜¯æ¥ä¸Šé¢çš„ï¼Œå¦‚æœæ²¡æ’å…¥å…ƒç´ ï¼Œç›´æ¥è¿”å›å³å¯ï¼Œå¦‚æœæ’å…¥äº†å…ƒç´ ï¼Œå°±éœ€è¦[alimit,æ•°ç»„é•¿åº¦]æŸ¥æ‰¾è¾¹ç•Œï¼Œæ‰¾åˆ°å†™å…¥å…¶ä¸­
+// 
+// (3).æœ€åä¸€ç§æƒ…å†µæ˜¯tçš„æ•°ç»„éƒ¨åˆ†ä¸ºç©ºï¼Œæˆ–è€…å®ƒçš„æœ€åä¸€ä¸ªå…ƒç´ å­˜åœ¨ã€‚è¿™ä¸¤ç§æƒ…å†µä¸‹éœ€è¦æ£€æŸ¥å“ˆå¸Œéƒ¨åˆ†ã€‚
+// å¦‚æœå“ˆå¸Œéƒ¨åˆ†ä¹Ÿä¸ºç©ºï¼Œæˆ–è€…limit+1ä¸å­˜åœ¨ï¼Œåˆ™limitä¸ºè¾¹ç•Œã€‚å¦åˆ™é€šè¿‡hash_searchæŸ¥æ‰¾åœ¨å“ˆå¸Œéƒ¨åˆ†çš„è¾¹ç•Œã€‚
 lua_Unsigned luaH_getn (Table *t) {
   unsigned int limit = t->alimit;
   // (1)
-  // Èç¹ûlimit>0ÇÒt->array[limit-1]ÊÇ¿ÕµÄ£¬ËµÃ÷±ß½ç£¨boundary£©Ò»¶¨ÔÚlimitÖ®Ç°
+  // å¦‚æœlimit>0ä¸”t->array[limit-1]æ˜¯ç©ºçš„ï¼Œè¯´æ˜è¾¹ç•Œï¼ˆboundaryï¼‰ä¸€å®šåœ¨limitä¹‹å‰
   if (limit > 0 && isempty(&t->array[limit - 1])) {  /* (1)? */
     /* there must be a boundary before 'limit' */
-    // Èç¹ûlimit-2²»ÊÇ¿ÕµÄ£¬ÄÇÃ´limit-1¾ÍÊÇ±ß½ç
+    // å¦‚æœlimit-2ä¸æ˜¯ç©ºçš„ï¼Œé‚£ä¹ˆlimit-1å°±æ˜¯è¾¹ç•Œ
     if (limit >= 2 && !isempty(&t->array[limit - 2])) {
       /* 'limit - 1' is a boundary; can it be a new limit? */
-      // ÕâÀïĞèÒª¼ì²é£ºlimit-1ÊÇ±ß½ç£¬¼ì²élimit-1ÊÇ·ñ¿ÉÒÔ×÷ÎªĞÂµÄalimit
+      // è¿™é‡Œéœ€è¦æ£€æŸ¥ï¼šlimit-1æ˜¯è¾¹ç•Œï¼Œæ£€æŸ¥limit-1æ˜¯å¦å¯ä»¥ä½œä¸ºæ–°çš„alimit
       if (ispow2realasize(t) && !ispow2(limit - 1)) {
         t->alimit = limit - 1;
         setnorealasize(t);  /* now 'alimit' is not the real size */
@@ -1011,11 +1020,11 @@ lua_Unsigned luaH_getn (Table *t) {
       return limit - 1;
     }
     else {  /* must search for a boundary in [0, limit] */
-      // Èç¹û²»´æÔÚ£¬ÔòÔÚ[0,limit]ÉÏ×öÒ»¸ö¶ş·Ö²éÕÒÀ´Ñ°ÕÒ±ß½ç¡£ÕâÁ½ÖÖÇé¿öÏÂÕÒµ½±ß½çÒÔºó¶¼Òª¸üĞÂtµÄalimit×Ö¶Î
+      // å¦‚æœä¸å­˜åœ¨ï¼Œåˆ™åœ¨[0,limit]ä¸Šåšä¸€ä¸ªäºŒåˆ†æŸ¥æ‰¾æ¥å¯»æ‰¾è¾¹ç•Œã€‚è¿™ä¸¤ç§æƒ…å†µä¸‹æ‰¾åˆ°è¾¹ç•Œä»¥åéƒ½è¦æ›´æ–°tçš„alimitå­—æ®µ
       unsigned int boundary = binsearch(t->array, 0, limit);
       /* can this boundary represent the real size of the array? */
-      // boundary > luaH_realasize(t) / 2£¬Õâ¸öÌõ¼şÎÒÀí½â£¬È·±£±ß½çÏÂÒ»¸ö2´ÎÃİÊÇÊı×é´óĞ¡
-      // ispow2realasize£¬ÊÇÊµ¼Ê´óĞ¡µÄÇé¿öÏÂÊÇ¶ş´ÎÃİ£¬·µ»Øtrue | ²»ÊÇÊµ¼Ê´óĞ¡µÄÇé¿öÏÂ£¬·µ»Øtrue
+      // boundary > luaH_realasize(t) / 2ï¼Œè¿™ä¸ªæ¡ä»¶æˆ‘ç†è§£ï¼Œç¡®ä¿è¾¹ç•Œä¸‹ä¸€ä¸ª2æ¬¡å¹‚æ˜¯æ•°ç»„å¤§å°
+      // ispow2realasizeï¼Œæ˜¯å®é™…å¤§å°çš„æƒ…å†µä¸‹æ˜¯äºŒæ¬¡å¹‚ï¼Œè¿”å›true | ä¸æ˜¯å®é™…å¤§å°çš„æƒ…å†µä¸‹ï¼Œè¿”å›true
       if (ispow2realasize(t) && boundary > luaH_realasize(t) / 2) {
         t->alimit = boundary;  /* use it as the new limit */
         setnorealasize(t);

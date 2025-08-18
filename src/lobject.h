@@ -965,7 +965,7 @@ typedef union Node {
 #define isrealasize(t)		(!((t)->flags & BITRAS))
 // 将flags的第8位设置为0，表示alimit是数组的实际长度
 #define setrealasize(t)		((t)->flags &= cast_byte(~BITRAS))
-// 将flags的第8位设置为1，表示alimit不是数组的实际长度
+// 将flags的第8位设置为1，表示alimit不是数组的实际长度，而是表数组部分的边界
 #define setnorealasize(t)	((t)->flags |= BITRAS)
 
 
@@ -973,22 +973,22 @@ typedef union Node {
 typedef struct Table {
   // GC公共部分
   CommonHeader;
-  // 其他含义？
   // flags用第8位0表达当前alimit是真正的数组长度
   // TM_EQ以前的元方法做了优化，如果第一次查找没找到，对应位置为1，下次直接就知道没找到了
   lu_byte flags;  /* 1<<p means tagmethod(p) is not present */
   // 哈希部分的长度，实际长度：2^lsizenode
   lu_byte lsizenode;  /* log2 of size of 'node' array */
-  // alimit在大部份情况下为数组的长度（2次幂数），若不等于数组长度的时候，
-  // 则数组长度为刚好比这个数大的下一个2次幂数，此时其数值为上次计算边界后缓存的返回值，
-  // 而flags用第8位0表达当前alimit是真正的数组长度
-  // 数组长度肯定为2次幂值，数组部分的结点数量必须要大于数组长度的一半
+  // alimit在大部份情况下为数组的长度（2次幂数），若不等于数组长度的时候，则数组长度为刚好比这个数大的下一个2次幂数，
+  // 此时其数值为上次计算边界后缓存的返回值，而flags用第8位0表达当前alimit是真正的数组长度，1的话则不是，
+  // 1的话就表示数组部分的边界
+  // local test1 = {1, 2, 3,  [1] = 1 , [3] = 3 , [4] = 4 , [2] = 2}
+  // 数组部分长度就是3，hash部分需要强制成2^n
   unsigned int alimit;  /* "limit" of 'array' array */
   // 数组
   TValue *array;  /* array part */
   // hashtable
   Node *node;
-  // 上一次空的结点位置
+  // hashtable上一次空的结点位置
   Node *lastfree;  /* any free position is before this position */
   // 存放元表
   struct Table *metatable;
