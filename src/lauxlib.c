@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lauxlib.c $
 ** Auxiliary functions for building Lua libraries
 ** See Copyright Notice in lua.h
@@ -311,7 +311,7 @@ LUALIB_API int luaL_execresult (lua_State *L, int stat) {
 ** =======================================================
 */
 
-// ´´½¨Ò»¸öĞÂtable×÷ÎªuserdataµÄÔª±í£¬Õâ¸öÔª±í´æ´¢ÔÚ×¢²á±íÖĞ, ²¢ÒÔtnameÎªkey£¬½«¸ÃÔª±íÖÃÓÚÕ»¶¥
+// åˆ›å»ºå…ƒè¡¨ï¼Œè¿™ä¸ªå…ƒè¡¨å­˜å‚¨åœ¨æ³¨å†Œè¡¨ä¸­, å¹¶ä»¥tnameä¸ºkeyï¼Œå°†è¯¥å…ƒè¡¨ç½®äºæ ˆé¡¶
 LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
   if (luaL_getmetatable(L, tname) != LUA_TNIL)  /* name already in use? */
     return 0;  /* leave previous value on top, but return 0 */
@@ -325,14 +325,14 @@ LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
 }
 
 
-// ½«Õ»¶¥ÔªËØ´æ´¢µ½×¢²á±íÖĞ, ËüµÄkeyÎªtname
+// ä»æ³¨å†Œè¡¨ä¸­æŸ¥æ‰¾é”®ä¸ºtnameçš„å…ƒè¡¨ï¼Œå¹¶å°†å…¶è®¾ç½®ä¸ºâ€‹å½“å‰æ ˆé¡¶å¯¹è±¡â€‹â€‹çš„å…ƒè¡¨
 LUALIB_API void luaL_setmetatable (lua_State *L, const char *tname) {
   luaL_getmetatable(L, tname);
   lua_setmetatable(L, -2);
 }
 
 
-// ud´¦µÄÖµÊÇ·ñÊÇ¾ßÓĞÌØ¶¨Ôª±ítnameµÄÓÃ»§Êı¾İ£¬ÊÇµÄ»°·µ»ØÓÃ»§Êı¾İµÄÖ¸Õë£¬·ñÔò·µ»ØNULL
+// udå¤„çš„å€¼æ˜¯å¦æ˜¯å…·æœ‰ç‰¹å®šå…ƒè¡¨tnameçš„ç”¨æˆ·æ•°æ®ï¼Œæ˜¯çš„è¯è¿”å›ç”¨æˆ·æ•°æ®çš„æŒ‡é’ˆï¼Œå¦åˆ™è¿”å›NULL
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
   void *p = lua_touserdata(L, ud);
   if (p != NULL) {  /* value is a userdata? */
@@ -348,7 +348,7 @@ LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
 }
 
 
-// ÓÃÓÚ¼ì²éudÕ»ÖĞÖ¸¶¨Î»ÖÃµÄ²ÎÊıÊÇ·ñÊÇÒ»¸öÌØ¶¨Ôª±ítnameµÄuserdata£¬²¢·µ»Ø¸ÃuserdataµÄÖ¸Õë£¬Èç¹û²ÎÊı²»ÊÇuserdata»òÀàĞÍ²»Æ¥Åä£¬Ôò»áÅ×³ö´íÎó
+// ç”¨äºæ£€æŸ¥udæ ˆä¸­æŒ‡å®šä½ç½®çš„å‚æ•°æ˜¯å¦æ˜¯ä¸€ä¸ªç‰¹å®šå…ƒè¡¨tnameçš„userdataï¼Œå¹¶è¿”å›è¯¥userdataçš„æŒ‡é’ˆï¼Œå¦‚æœå‚æ•°ä¸æ˜¯userdataæˆ–ç±»å‹ä¸åŒ¹é…ï¼Œåˆ™ä¼šæŠ›å‡ºé”™è¯¯
 LUALIB_API void *luaL_checkudata (lua_State *L, int ud, const char *tname) {
   void *p = luaL_testudata(L, ud, tname);
   luaL_argexpected(L, p != NULL, ud, tname);
@@ -393,21 +393,21 @@ LUALIB_API void luaL_checkstack (lua_State *L, int space, const char *msg) {
   }
 }
 
-// ¼ì²éº¯ÊıµÄµÚarg¸ö²ÎÊıÀàĞÍÊÇ·ñÎªÀàĞÍt£¬²»ÊÇ£¬luaÔò»áÅ×³ö´íÎó
+// æ£€æŸ¥å‡½æ•°çš„ç¬¬argä¸ªå‚æ•°ç±»å‹æ˜¯å¦ä¸ºç±»å‹tï¼Œä¸æ˜¯ï¼Œluaåˆ™ä¼šæŠ›å‡ºé”™è¯¯
 LUALIB_API void luaL_checktype (lua_State *L, int arg, int t) {
   if (l_unlikely(lua_type(L, arg) != t))
     tag_error(L, arg, t);
 }
 
 
-// ÓÃÓÚ¼ì²éidxÕ»ÖĞÖ¸¶¨Î»ÖÃµÄ²ÎÊıÊÇ·ñ´æÔÚ£¨¼´²»ÎªLUA_TNONE£©£¬Èç¹û²ÎÊı²»´æÔÚ£¬Å×³öÒ»¸ö´íÎó£¬ÌáÊ¾ÓÃ»§ĞèÒªÒ»¸öÖµ
+// ç”¨äºæ£€æŸ¥idxæ ˆä¸­æŒ‡å®šä½ç½®çš„å‚æ•°æ˜¯å¦å­˜åœ¨ï¼ˆå³ä¸ä¸ºLUA_TNONEï¼‰ï¼Œå¦‚æœå‚æ•°ä¸å­˜åœ¨ï¼ŒæŠ›å‡ºä¸€ä¸ªé”™è¯¯ï¼Œæç¤ºç”¨æˆ·éœ€è¦ä¸€ä¸ªå€¼
 LUALIB_API void luaL_checkany (lua_State *L, int arg) {
   if (l_unlikely(lua_type(L, arg) == LUA_TNONE))
     luaL_argerror(L, arg, "value expected");
 }
 
 
-// idx´¦µÄÖµÊÇ·ñÎª×Ö·û´®£¬ÊÇµÄ»°·µ»Ø×Ö·û´®µÄÖ¸Õë£¬²»ÊÇ£¬luaÔò»áÅ×³ö´íÎó
+// idxå¤„çš„å€¼æ˜¯å¦ä¸ºå­—ç¬¦ä¸²ï¼Œæ˜¯çš„è¯è¿”å›å­—ç¬¦ä¸²çš„æŒ‡é’ˆï¼Œä¸æ˜¯ï¼Œluaåˆ™ä¼šæŠ›å‡ºé”™è¯¯
 LUALIB_API const char *luaL_checklstring (lua_State *L, int arg, size_t *len) {
   const char *s = lua_tolstring(L, arg, len);
   if (l_unlikely(!s)) tag_error(L, arg, LUA_TSTRING);
@@ -426,7 +426,7 @@ LUALIB_API const char *luaL_optlstring (lua_State *L, int arg,
 }
 
 
-// ÓÃÓÚ¼ì²éidxÕ»ÖĞÖ¸¶¨Î»ÖÃµÄ²ÎÊıÊÇ·ñÊÇÒ»¸ö¸¡µãÊı£¨»ò¿ÉÒÔ×ª»»Îª¸¡µãÊı£©£¬²¢·µ»Ø¸ÃÊı×ÖÖµ£¬Èç¹û²ÎÊı²»ÊÇÊı×Ö£¬Ôò»áÅ×³ö´íÎó
+// ç”¨äºæ£€æŸ¥idxæ ˆä¸­æŒ‡å®šä½ç½®çš„å‚æ•°æ˜¯å¦æ˜¯ä¸€ä¸ªæµ®ç‚¹æ•°ï¼ˆæˆ–å¯ä»¥è½¬æ¢ä¸ºæµ®ç‚¹æ•°ï¼‰ï¼Œå¹¶è¿”å›è¯¥æ•°å­—å€¼ï¼Œå¦‚æœå‚æ•°ä¸æ˜¯æ•°å­—ï¼Œåˆ™ä¼šæŠ›å‡ºé”™è¯¯
 LUALIB_API lua_Number luaL_checknumber (lua_State *L, int arg) {
   int isnum;
   lua_Number d = lua_tonumberx(L, arg, &isnum);
@@ -449,7 +449,7 @@ static void interror (lua_State *L, int arg) {
 }
 
 
-// ¼ì²éidxÕ»ÖĞÖ¸¶¨Î»ÖÃµÄ²ÎÊıÊÇ·ñÊÇÒ»¸öÕûÊı£¨»ò¿ÉÒÔ×ª»»ÎªÕûÊı£©£¬²¢·µ»Ø¸ÃÕûÊıÖµ£¬Èç¹û²ÎÊı²»ÊÇÕûÊı£¬Ôò»áÅ×³ö´íÎó
+// æ£€æŸ¥idxæ ˆä¸­æŒ‡å®šä½ç½®çš„å‚æ•°æ˜¯å¦æ˜¯ä¸€ä¸ªæ•´æ•°ï¼ˆæˆ–å¯ä»¥è½¬æ¢ä¸ºæ•´æ•°ï¼‰ï¼Œå¹¶è¿”å›è¯¥æ•´æ•°å€¼ï¼Œå¦‚æœå‚æ•°ä¸æ˜¯æ•´æ•°ï¼Œåˆ™ä¼šæŠ›å‡ºé”™è¯¯
 LUALIB_API lua_Integer luaL_checkinteger (lua_State *L, int arg) {
   int isnum;
   lua_Integer d = lua_tointegerx(L, arg, &isnum);
@@ -475,16 +475,16 @@ LUALIB_API lua_Integer luaL_optinteger (lua_State *L, int arg,
 */
 
 /* userdata to box arbitrary data */
-// ³Ğ×°ÈÎÒâÊı¾İ
+// æ‰¿è£…ä»»æ„æ•°æ®
 typedef struct UBox {
-  // ÈİÄÉÊı¾İÖ¸Õë
+  // å®¹çº³æ•°æ®æŒ‡é’ˆ
   void *box;
-  // ÈİÄÉÊı¾İµÄ´óĞ¡
+  // å®¹çº³æ•°æ®çš„å¤§å°
   size_t bsize;
 } UBox;
 
 
-// µ÷ÕûLuaÕ»ÖĞÖ¸¶¨Ë÷Òı´¦µÄboxÈİÄÉÊı¾İ´óĞ¡
+// è°ƒæ•´Luaæ ˆä¸­æŒ‡å®šç´¢å¼•å¤„çš„boxå®¹çº³æ•°æ®å¤§å°
 static void *resizebox (lua_State *L, int idx, size_t newsize) {
   void *ud;
   lua_Alloc allocf = lua_getallocf(L, &ud);
@@ -500,14 +500,14 @@ static void *resizebox (lua_State *L, int idx, size_t newsize) {
 }
 
 
-// ÊÍ·Åbox×ÊÔ´
+// é‡Šæ”¾boxèµ„æº
 static int boxgc (lua_State *L) {
   resizebox(L, 1, 0);
   return 0;
 }
 
 
-// boxÔª±í
+// boxå…ƒè¡¨
 static const luaL_Reg boxmt[] = {  /* box metamethods */
   {"__gc", boxgc},
   {"__close", boxgc},
@@ -515,7 +515,7 @@ static const luaL_Reg boxmt[] = {  /* box metamethods */
 };
 
 
-// ´´½¨Ò»¸öĞÂµÄUBoxÀàĞÍµÄuserdata£¬²¢ÎªÆäÉèÖÃÔª±í
+// åˆ›å»ºä¸€ä¸ªæ–°çš„UBoxç±»å‹çš„userdataï¼Œå¹¶ä¸ºå…¶è®¾ç½®å…ƒè¡¨
 static void newbox (lua_State *L) {
   UBox *box = (UBox *)lua_newuserdatauv(L, sizeof(UBox), 0);
   box->box = NULL;
@@ -530,7 +530,7 @@ static void newbox (lua_State *L) {
 ** check whether buffer is using a userdata on the stack as a temporary
 ** buffer
 */
-// ÊÇ·ñÕıÔÚÊ¹ÓÃ¶ÑÄÚ´æ×÷ÎªÁÙÊ±»º³åÇø
+// æ˜¯å¦æ­£åœ¨ä½¿ç”¨å †å†…å­˜ä½œä¸ºä¸´æ—¶ç¼“å†²åŒº
 #define buffonstack(B)	((B)->b != (B)->init.b)
 
 
@@ -538,8 +538,8 @@ static void newbox (lua_State *L) {
 ** Whenever buffer is accessed, slot 'idx' must either be a box (which
 ** cannot be NULL) or it is a placeholder for the buffer.
 */
-// Èç¹ûBÊÇ¶ÑÄÚ´æ»º³åÇø£¬idxÎ»ÖÃ±ØĞëÊÇÒ»¸ö·Ç¿ÕµÄuserdata
-// Èç¹ûBÊÇÕ»ÄÚ´æ»º³åÇø£¬idxÎ»ÖÃ±ØĞëÊÇNULL
+// å¦‚æœBæ˜¯å †å†…å­˜ç¼“å†²åŒºï¼Œidxä½ç½®å¿…é¡»æ˜¯ä¸€ä¸ªéç©ºçš„userdata
+// å¦‚æœBæ˜¯æ ˆå†…å­˜ç¼“å†²åŒºï¼Œidxä½ç½®å¿…é¡»æ˜¯NULL
 #define checkbufferlevel(B,idx)  \
   lua_assert(buffonstack(B) ? lua_touserdata(B->L, idx) != NULL  \
                             : lua_touserdata(B->L, idx) == (void*)B)
@@ -550,7 +550,7 @@ static void newbox (lua_State *L) {
 ** bytes. (The test for "not big enough" also gets the case when the
 ** computation of 'newsize' overflows.)
 */
-// ¼ÆËã»º³åÇøBµÄĞÂ´óĞ¡£¬ÒÔÈ·±£Ëü¿ÉÒÔÈİÄÉ¶îÍâµÄ sz ×Ö½ÚÊı¾İ
+// è®¡ç®—ç¼“å†²åŒºBçš„æ–°å¤§å°ï¼Œä»¥ç¡®ä¿å®ƒå¯ä»¥å®¹çº³é¢å¤–çš„ sz å­—èŠ‚æ•°æ®
 static size_t newbuffsize (luaL_Buffer *B, size_t sz) {
   size_t newsize = (B->size / 2) * 3;  /* buffer size * 1.5 */
   if (l_unlikely(MAX_SIZET - sz < B->n))  /* overflow in (B->n + sz)? */
@@ -566,12 +566,12 @@ static size_t newbuffsize (luaL_Buffer *B, size_t sz) {
 ** 'B'. 'boxidx' is the relative position in the stack where is the
 ** buffer's box or its placeholder.
 */
-// ÓÃÓÚÈ·±£»º³åÇøBÖĞÓĞÖÁÉÙsz×Ö½ÚµÄ¿ÉÓÃ¿Õ¼ä£¬²¢·µ»ØÖ¸ÏòÕâ¶Î¿Õ¼äµÄÖ¸Õë
-// boxidx£ºÕ»Ë÷Òı£¬±íÊ¾»º´æµÄÎ»ÖÃ
+// ç”¨äºç¡®ä¿ç¼“å†²åŒºBä¸­æœ‰è‡³å°‘szå­—èŠ‚çš„å¯ç”¨ç©ºé—´ï¼Œå¹¶è¿”å›æŒ‡å‘è¿™æ®µç©ºé—´çš„æŒ‡é’ˆ
+// boxidxï¼šæ ˆç´¢å¼•ï¼Œè¡¨ç¤ºç¼“å­˜çš„ä½ç½®
 static char *prepbuffsize (luaL_Buffer *B, size_t sz, int boxidx) {
   checkbufferlevel(B, boxidx);
   if (B->size - B->n >= sz)  /* enough space? */
-    // ×ã¹»Ö±½Ó·µ»Ø
+    // è¶³å¤Ÿç›´æ¥è¿”å›
     return B->b + B->n;
   else {
     lua_State *L = B->L;
@@ -579,7 +579,7 @@ static char *prepbuffsize (luaL_Buffer *B, size_t sz, int boxidx) {
     size_t newsize = newbuffsize(B, sz);
     /* create larger buffer */
     if (buffonstack(B))  /* buffer already has a box? */
-      // ¶¼ÔÚ¶ÑÉÏÁË£¬Ö±½ÓÀ©³ä°É
+      // éƒ½åœ¨å †ä¸Šäº†ï¼Œç›´æ¥æ‰©å……å§
       newbuff = (char *)resizebox(L, boxidx, newsize);  /* resize it */
     else {  /* no box yet */
       lua_remove(L, boxidx);  /* remove placeholder */
@@ -598,13 +598,13 @@ static char *prepbuffsize (luaL_Buffer *B, size_t sz, int boxidx) {
 /*
 ** returns a pointer to a free area with at least 'sz' bytes
 */
-// ÓÃÓÚÎªluaL_Buffer»º´æÔ¤·ÖÅäÖÁÉÙsz×Ö½ÚµÄ¿Õ¼ä£¬²¢·µ»ØÖ¸Ïò¸Ã¿Õ¼äµÄÖ¸Õë
+// ç”¨äºä¸ºluaL_Bufferç¼“å­˜é¢„åˆ†é…è‡³å°‘szå­—èŠ‚çš„ç©ºé—´ï¼Œå¹¶è¿”å›æŒ‡å‘è¯¥ç©ºé—´çš„æŒ‡é’ˆ
 LUALIB_API char *luaL_prepbuffsize (luaL_Buffer *B, size_t sz) {
   return prepbuffsize(B, sz, -1);
 }
 
 
-// ½«Ö¸¶¨³¤¶ÈµÄ×Ö·û´®Ìí¼Óµ½Lua»º³åÇøBÖĞ
+// å°†æŒ‡å®šé•¿åº¦çš„å­—ç¬¦ä¸²æ·»åŠ åˆ°Luaç¼“å†²åŒºBä¸­
 LUALIB_API void luaL_addlstring (luaL_Buffer *B, const char *s, size_t l) {
   if (l > 0) {  /* avoid 'memcpy' when 's' can be NULL */
     char *b = prepbuffsize(B, l, -1);
@@ -614,13 +614,13 @@ LUALIB_API void luaL_addlstring (luaL_Buffer *B, const char *s, size_t l) {
 }
 
 
-// ÏòluaL_Buffer»º´æÖĞÌí¼Ó×Ö·û´®
+// å‘luaL_Bufferç¼“å­˜ä¸­æ·»åŠ å­—ç¬¦ä¸²
 LUALIB_API void luaL_addstring (luaL_Buffer *B, const char *s) {
   luaL_addlstring(B, s, strlen(s));
 }
 
 
-// ½«Lua»º³åÇøBÖĞµÄÄÚÈİ¹¹½¨ÎªÒ»¸öLua×Ö·û´®£¬²¢½«ÆäÑ¹ÈëÕ»ÖĞ£¬Í¬Ê±ÇåÀí»º³åÇøÏà¹ØµÄÕ»¿Õ¼ä
+// å°†Luaç¼“å†²åŒºBä¸­çš„å†…å®¹æ„å»ºä¸ºä¸€ä¸ªLuaå­—ç¬¦ä¸²ï¼Œå¹¶å°†å…¶å‹å…¥æ ˆä¸­ï¼ŒåŒæ—¶æ¸…ç†ç¼“å†²åŒºç›¸å…³çš„æ ˆç©ºé—´
 LUALIB_API void luaL_pushresult (luaL_Buffer *B) {
   lua_State *L = B->L;
   checkbufferlevel(B, -1);
@@ -631,11 +631,11 @@ LUALIB_API void luaL_pushresult (luaL_Buffer *B) {
 }
 
 
-// ÓÃÓÚÔÚÊÖ¶¯¹ÜÀí»º´æÄÚÈİÊ±£¬½«×îÖÕ½á¹û×÷Îª×Ö·û´®Ñ¹ÈëLuaÕ»
+// ç”¨äºåœ¨æ‰‹åŠ¨ç®¡ç†ç¼“å­˜å†…å®¹æ—¶ï¼Œå°†æœ€ç»ˆç»“æœä½œä¸ºå­—ç¬¦ä¸²å‹å…¥Luaæ ˆ
 LUALIB_API void luaL_pushresultsize (luaL_Buffer *B, size_t sz) {
-  // ¸üĞÂ»º´æBµÄ´óĞ¡£¬±íÊ¾ÒÑ¾­Ïò»º´æÖĞÌí¼ÓÁËsz×Ö½ÚµÄÊı¾İ
+  // æ›´æ–°ç¼“å­˜Bçš„å¤§å°ï¼Œè¡¨ç¤ºå·²ç»å‘ç¼“å­˜ä¸­æ·»åŠ äº†szå­—èŠ‚çš„æ•°æ®
   luaL_addsize(B, sz);
-  // ½«»º´æBÖĞµÄÄÚÈİ×÷Îª×Ö·û´®Ñ¹ÈëLuaÕ»
+  // å°†ç¼“å­˜Bä¸­çš„å†…å®¹ä½œä¸ºå­—ç¬¦ä¸²å‹å…¥Luaæ ˆ
   luaL_pushresult(B);
 }
 
@@ -649,7 +649,7 @@ LUALIB_API void luaL_pushresultsize (luaL_Buffer *B, size_t sz) {
 ** trigger an emergency GC, so we should not remove the string from the
 ** stack before we have the space guaranteed.)
 */
-// ½«Õ»¶¥µÄÖµÌí¼Óµ½×Ö·û´®»º³åÇøBÖĞ£¬Ëæºó½«Æäµ¯³öÕ»
+// å°†æ ˆé¡¶çš„å€¼æ·»åŠ åˆ°å­—ç¬¦ä¸²ç¼“å†²åŒºBä¸­ï¼Œéšåå°†å…¶å¼¹å‡ºæ ˆ
 LUALIB_API void luaL_addvalue (luaL_Buffer *B) {
   lua_State *L = B->L;
   size_t len;
@@ -661,7 +661,7 @@ LUALIB_API void luaL_addvalue (luaL_Buffer *B) {
 }
 
 
-// ³õÊ¼»¯×Ö·û´®»º³åÇøB
+// åˆå§‹åŒ–å­—ç¬¦ä¸²ç¼“å†²åŒºB
 LUALIB_API void luaL_buffinit (lua_State *L, luaL_Buffer *B) {
   B->L = L;
   B->b = B->init.b;
@@ -671,7 +671,7 @@ LUALIB_API void luaL_buffinit (lua_State *L, luaL_Buffer *B) {
 }
 
 
-// ³õÊ¼»¯×Ö·û´®»º³åÇøB£¬²¢Ô¤·ÖÅäsz´óĞ¡µÄÄÚ´æ
+// åˆå§‹åŒ–å­—ç¬¦ä¸²ç¼“å†²åŒºBï¼Œå¹¶é¢„åˆ†é…szå¤§å°çš„å†…å­˜
 LUALIB_API char *luaL_buffinitsize (lua_State *L, luaL_Buffer *B, size_t sz) {
   luaL_buffinit(L, B);
   return prepbuffsize(B, sz, -1);
@@ -687,15 +687,15 @@ LUALIB_API char *luaL_buffinitsize (lua_State *L, luaL_Buffer *B, size_t sz) {
 */
 
 /* index of free-list header (after the predefined values) */
-// ¹ÜÀí±íÖĞµÄ¿ÕÏĞÒıÓÃË÷Òı
+// ç®¡ç†è¡¨ä¸­çš„ç©ºé—²å¼•ç”¨ç´¢å¼•
 /*
 * 1.luaL_ref
 * t[freelist] = 0
-* t[freelist + 1] = Õ»¶¥
+* t[freelist + 1] = æ ˆé¡¶
 * 2.luaL_ref
-* t[freelist + 1 + 1] = Õ»¶¥
+* t[freelist + 1 + 1] = æ ˆé¡¶
 * 3.luaL_ref
-* t[freelist + 1 + 1 + 1] = Õ»¶¥
+* t[freelist + 1 + 1 + 1] = æ ˆé¡¶
 * 4.luaL_unref 3
 * t[freelist + 1 + 1 + 1] = 0
 * t[freelist] = 3
@@ -708,8 +708,8 @@ LUALIB_API char *luaL_buffinitsize (lua_State *L, luaL_Buffer *B, size_t sz) {
 ** t[freelist] is the index of a first free index, or zero if list is
 ** empty; t[t[freelist]] is the index of the second element; etc.
 */
-// ¸øLuaÕ»¶¥µÄÖµ·ÖÅäÒ»¸öÎ¨Ò»µÄÒıÓÃ£¬²¢½«Æä´æ´¢ÔÚÖ¸¶¨µÄ±ítÖĞ
-// Õâ¸öÒıÓÃ¿ÉÒÔÓÃÓÚºóĞø¿ìËÙ·ÃÎÊ¸ÃÖµ£¬¶ø²»ĞèÒªÔÙ´Î´ÓÕ»ÖĞ»ñÈ¡
+// ç»™Luaæ ˆé¡¶çš„å€¼åˆ†é…ä¸€ä¸ªå”¯ä¸€çš„å¼•ç”¨ï¼Œå¹¶å°†å…¶å­˜å‚¨åœ¨æŒ‡å®šçš„è¡¨tä¸­
+// è¿™ä¸ªå¼•ç”¨å¯ä»¥ç”¨äºåç»­å¿«é€Ÿè®¿é—®è¯¥å€¼ï¼Œè€Œä¸éœ€è¦å†æ¬¡ä»æ ˆä¸­è·å–
 LUALIB_API int luaL_ref (lua_State *L, int t) {
   int ref;
   if (lua_isnil(L, -1)) {
@@ -718,40 +718,40 @@ LUALIB_API int luaL_ref (lua_State *L, int t) {
   }
   t = lua_absindex(L, t);
   if (lua_rawgeti(L, t, freelist) == LUA_TNIL) {  /* first access? */
-    // ²»´æÔÚ£¨¼´µÚÒ»´Î·ÃÎÊ£©£¬³õÊ¼»¯¿ÕÏĞÁĞ±í
+    // ä¸å­˜åœ¨ï¼ˆå³ç¬¬ä¸€æ¬¡è®¿é—®ï¼‰ï¼Œåˆå§‹åŒ–ç©ºé—²åˆ—è¡¨
     ref = 0;  /* list is empty */
     lua_pushinteger(L, 0);  /* initialize as an empty list */
     lua_rawseti(L, t, freelist);  /* ref = t[freelist] = 0 */
   }
   else {  /* already initialized */
-    // ÒÑ¾­´æÔÚ
+    // å·²ç»å­˜åœ¨
     lua_assert(lua_isinteger(L, -1));
     ref = (int)lua_tointeger(L, -1);  /* ref = t[freelist] */
   }
-  // ÒÆ³ıÕ»¶¥ÓÃÀ´¸øref¸³ÖµµÄÔªËØ
+  // ç§»é™¤æ ˆé¡¶ç”¨æ¥ç»™refèµ‹å€¼çš„å…ƒç´ 
   lua_pop(L, 1);  /* remove element from stack */
   if (ref != 0) {  /* any free element? */
-    // ÀÏµÄ·Åµ½t[freelist] = t[ref]
+    // è€çš„æ”¾åˆ°t[freelist] = t[ref]
     lua_rawgeti(L, t, ref);  /* remove it from list */
     lua_rawseti(L, t, freelist);  /* (t[freelist] = t[ref]) */
   }
   else  /* no free elements */
-    // ÏÂÒ»¸ö¿ÕÏĞÒıÓÃ
+    // ä¸‹ä¸€ä¸ªç©ºé—²å¼•ç”¨
     ref = (int)lua_rawlen(L, t) + 1;  /* get a new reference */
-  // t[ref] = Õ»¶¥
+  // t[ref] = æ ˆé¡¶
   lua_rawseti(L, t, ref);
   return ref;
 }
 
 
-// ÊÍ·ÅÖ¸¶¨µÄÒıÓÃË÷Òı£¬½«ÆäÌí¼Óµ½¿ÕÏĞÁĞ±íÖĞ
+// é‡Šæ”¾æŒ‡å®šçš„å¼•ç”¨ç´¢å¼•ï¼Œå°†å…¶æ·»åŠ åˆ°ç©ºé—²åˆ—è¡¨ä¸­
 LUALIB_API void luaL_unref (lua_State *L, int t, int ref) {
   if (ref >= 0) {
     t = lua_absindex(L, t);
-    // ¿ÕÏĞË÷ÒıÖµ·ÅÈëÕ»¶¥
+    // ç©ºé—²ç´¢å¼•å€¼æ”¾å…¥æ ˆé¡¶
     lua_rawgeti(L, t, freelist);
     lua_assert(lua_isinteger(L, -1));
-    // t[ref] = Õ»¶¥
+    // t[ref] = æ ˆé¡¶
     lua_rawseti(L, t, ref);  /* t[ref] = t[freelist] */
     lua_pushinteger(L, ref);
 	// t[freelist] = ref
@@ -768,35 +768,35 @@ LUALIB_API void luaL_unref (lua_State *L, int t, int ref) {
 ** =======================================================
 */
 
-// ×Ö·û»º´æ
+// å­—ç¬¦ç¼“å­˜
 typedef struct LoadF {
-  // µ±Ç°ÒÑ¾­¶ÁÈ¡µÄ×Ö·ûÊıÁ¿
+  // å½“å‰å·²ç»è¯»å–çš„å­—ç¬¦æ•°é‡
   int n;  /* number of pre-read characters */
-  // ÎÄ¼ş¾ä±ú
+  // æ–‡ä»¶å¥æŸ„
   FILE *f;  /* file being read */
-  // ×Ö·û»º´æ
+  // å­—ç¬¦ç¼“å­˜
   char buff[BUFSIZ];  /* area for reading file */
 } LoadF;
 
-// »ñÈ¡×Ö·û
+// è·å–å­—ç¬¦
 static const char *getF (lua_State *L, void *ud, size_t *size) {
   LoadF *lf = (LoadF *)ud;
   (void)L;  /* not used */
   if (lf->n > 0) {  /* are there pre-read characters to be read? */
-    // ´æÔÚÔ¤¶ÁµÄ×Ö·û£¬Ö±½ÓÄÃÀ´ÓÃ°É
-    // ·µ»ØÔ¤¶Á¸öÊı
+    // å­˜åœ¨é¢„è¯»çš„å­—ç¬¦ï¼Œç›´æ¥æ‹¿æ¥ç”¨å§
+    // è¿”å›é¢„è¯»ä¸ªæ•°
     *size = lf->n;  /* return them (chars already in buffer) */
-    // ÖÃÎª0
+    // ç½®ä¸º0
     lf->n = 0;  /* no more pre-read characters */
   }
   else {  /* read a block from file */
-    // Ã»ÓĞÔ¤¶ÁµÄ×Ö·û
+    // æ²¡æœ‰é¢„è¯»çš„å­—ç¬¦
     /* 'fread' can return > 0 *and* set the EOF flag. If next call to
        'getF' called 'fread', it might still wait for user input.
        The next check avoids this problem. */
-    // ÎÄ¼şÎ²Ö±½Ó·µ»ØNULL
+    // æ–‡ä»¶å°¾ç›´æ¥è¿”å›NULL
     if (feof(lf->f)) return NULL;
-    // ¶Á
+    // è¯»
     *size = fread(lf->buff, 1, sizeof(lf->buff), lf->f);  /* read block */
   }
   return lf->buff;
@@ -821,7 +821,7 @@ static int errfile (lua_State *L, const char *what, int fnameindex) {
 ** not), returns the first character anyway to force an error
 ** (as no chunk can start with 0xEF).
 */
-// Ìø¹ıbomÍ·£¬·µ»ØµÚÒ»¸ö×Ö·û
+// è·³è¿‡bomå¤´ï¼Œè¿”å›ç¬¬ä¸€ä¸ªå­—ç¬¦
 static int skipBOM (FILE *f) {
   int c = getc(f);  /* read first character */
   if (c == 0xEF && getc(f) == 0xBB && getc(f) == 0xBF)  /* correct BOM? */
@@ -838,7 +838,7 @@ static int skipBOM (FILE *f) {
 ** first "valid" character of the file (after the optional BOM and
 ** a first-line comment).
 */
-// Ìø¹ıbomÍ·+'#'£¬·µ»ØµÚÒ»¸öÓĞĞ§×Ö·û
+// è·³è¿‡bomå¤´+'#'ï¼Œè¿”å›ç¬¬ä¸€ä¸ªæœ‰æ•ˆå­—ç¬¦
 static int skipcomment (FILE *f, int *cp) {
   int c = *cp = skipBOM(f);
   if (c == '#') {  /* first line is a comment (Unix exec. file)? */
@@ -851,8 +851,8 @@ static int skipcomment (FILE *f, int *cp) {
   else return 0;  /* no comment */
 }
 
-// ½«Ò»¸öÎÄ¼ş¼ÓÔØÎªLua´úÂë¿é
-// ºÍlua_loadÒ»Ñù£¬´Ëº¯ÊıÖ»ÊÇ¼ÓÔØ´úÂë¿é¶ø²»ÔËĞĞ
+// å°†ä¸€ä¸ªæ–‡ä»¶åŠ è½½ä¸ºLuaä»£ç å—
+// å’Œlua_loadä¸€æ ·ï¼Œæ­¤å‡½æ•°åªæ˜¯åŠ è½½ä»£ç å—è€Œä¸è¿è¡Œ
 LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
                                              const char *mode) {
   LoadF lf;
@@ -912,7 +912,7 @@ static const char *getS (lua_State *L, void *ud, size_t *size) {
 }
 
 
-// ½«Ò»¿é»º³åÇø¼ÓÔØÎªLua´úÂë¿é
+// å°†ä¸€å—ç¼“å†²åŒºåŠ è½½ä¸ºLuaä»£ç å—
 LUALIB_API int luaL_loadbufferx (lua_State *L, const char *buff, size_t size,
                                  const char *name, const char *mode) {
   LoadS ls;
@@ -922,7 +922,7 @@ LUALIB_API int luaL_loadbufferx (lua_State *L, const char *buff, size_t size,
 }
 
 
-// ½«Ò»¸ö×Ö·û´®¼ÓÔØÎªLua´úÂë¿é
+// å°†ä¸€ä¸ªå­—ç¬¦ä¸²åŠ è½½ä¸ºLuaä»£ç å—
 LUALIB_API int luaL_loadstring (lua_State *L, const char *s) {
   return luaL_loadbuffer(L, s, strlen(s), s);
 }
@@ -932,8 +932,8 @@ LUALIB_API int luaL_loadstring (lua_State *L, const char *s) {
 
 
 
-// ½«Ë÷Òıobj´¦µÄ¶ÔÏóµÄÔª±íÖĞµÄ×Ö¶ÎeventÑ¹ÈëÕ»ÖĞ£¬²¢·µ»ØÆäÀàĞÍ¡£
-// Èç¹û¶ÔÏóÃ»ÓĞÔª±í»òÔª±íÖĞÃ»ÓĞ¸Ã×Ö¶Î£¬Ôò²»»áÑ¹Õ»ÇÒ·µ»ØLUA_TNIL¡£
+// å°†ç´¢å¼•objå¤„çš„å¯¹è±¡çš„å…ƒè¡¨ä¸­çš„å­—æ®µeventå‹å…¥æ ˆä¸­ï¼Œå¹¶è¿”å›å…¶ç±»å‹ã€‚
+// å¦‚æœå¯¹è±¡æ²¡æœ‰å…ƒè¡¨æˆ–å…ƒè¡¨ä¸­æ²¡æœ‰è¯¥å­—æ®µï¼Œåˆ™ä¸ä¼šå‹æ ˆä¸”è¿”å›LUA_TNILã€‚
 LUALIB_API int luaL_getmetafield (lua_State *L, int obj, const char *event) {
   if (!lua_getmetatable(L, obj))  /* no metatable? */
     return LUA_TNIL;
@@ -950,16 +950,16 @@ LUALIB_API int luaL_getmetafield (lua_State *L, int obj, const char *event) {
 }
 
 
-// µ÷ÓÃÄ³¸öÔªº¯Êı
-// Èç¹û´¦ÓÚË÷Òıobj´¦µÄ¶ÔÏóÓµÓĞÔª±í²¢ÇÒÆäÖĞ°üº¬×Ö¶Îe£¬
-// ÄÇÃ´´Ëº¯Êı¾Í»á½«¸Ã¶ÔÏó×÷ÎªÎ¨Ò»²ÎÊıµ÷ÓÃ¶ÔÓ¦×Ö¶Î¡£ÕâÖÖÇé¿öÏÂ´Ëº¯Êı»á·µ»Ø true²¢½«µ÷ÓÃ½á¹ûÑ¹ÈëÕ»ÖĞ¡£Èç¹ûÃ»ÓĞÕÒµ½Ôª±í»òÔªº¯Êı£¬´Ëº¯Êı»á·µ»Ø false ²¢ÇÒ²»»áÑ¹Õ»¡£
+// è°ƒç”¨æŸä¸ªå…ƒå‡½æ•°
+// å¦‚æœå¤„äºç´¢å¼•objå¤„çš„å¯¹è±¡æ‹¥æœ‰å…ƒè¡¨å¹¶ä¸”å…¶ä¸­åŒ…å«å­—æ®µeï¼Œ
+// é‚£ä¹ˆæ­¤å‡½æ•°å°±ä¼šå°†è¯¥å¯¹è±¡ä½œä¸ºå”¯ä¸€å‚æ•°è°ƒç”¨å¯¹åº”å­—æ®µã€‚è¿™ç§æƒ…å†µä¸‹æ­¤å‡½æ•°ä¼šè¿”å› trueå¹¶å°†è°ƒç”¨ç»“æœå‹å…¥æ ˆä¸­ã€‚å¦‚æœæ²¡æœ‰æ‰¾åˆ°å…ƒè¡¨æˆ–å…ƒå‡½æ•°ï¼Œæ­¤å‡½æ•°ä¼šè¿”å› false å¹¶ä¸”ä¸ä¼šå‹æ ˆã€‚
 LUALIB_API int luaL_callmeta (lua_State *L, int obj, const char *event) {
   obj = lua_absindex(L, obj);
   if (luaL_getmetafield(L, obj, event) == LUA_TNIL)  /* no metafield? */
     return 0;
-  // ÕÒµ½ÁË²»²ÎÊı·Å½øÈ¥
+  // æ‰¾åˆ°äº†ä¸å‚æ•°æ”¾è¿›å»
   lua_pushvalue(L, obj);
-  // µ÷ÓÃ
+  // è°ƒç”¨
   lua_call(L, 1, 1);
   return 1;
 }
@@ -977,7 +977,7 @@ LUALIB_API lua_Integer luaL_len (lua_State *L, int idx) {
 }
 
 
-// ½«Lua¶ÑÕ»ÖĞÖ¸¶¨Ë÷ÒıÎ»ÖÃµÄÖµ£¨idx£©×ª»»Îª×Ö·û´®£¬Ñ¹ÈëÕ»ÖĞ
+// å°†Luaå †æ ˆä¸­æŒ‡å®šç´¢å¼•ä½ç½®çš„å€¼ï¼ˆidxï¼‰è½¬æ¢ä¸ºå­—ç¬¦ä¸²ï¼Œå‹å…¥æ ˆä¸­
 LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
   idx = lua_absindex(L,idx);
   if (luaL_callmeta(L, idx, "__tostring")) {  /* metafield? */
@@ -1022,15 +1022,15 @@ LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
 ** function gets the 'nup' elements at the top as upvalues.
 ** Returns with only the table at the stack.
 */
-// ½«Êı×élÖĞµÄËùÓĞº¯Êı×¢²áµ½Õ»¶¥µÄ±íÖĞ
-// µ±nup²»ÎªÁãÊ±£¬ËùÓĞµÄº¯Êı´´½¨Ê±¶¼»á´øÉÏnup¸öÉÏÖµ£¬ÕâĞ©ÉÏÖµÊ¹ÓÃÖ®Ç°Ñ¹ÈëÕ»¶¥µÄnup¸öÖµµÄ¿½±´À´³õÊ¼»¯£¬
-// ÔÚÕ»ÖĞÕâĞ©ÖµµÄÏÂ±ß²ÅÊÇ×¢²áÄ¿±êµÄ±í¡£ÕâĞ©Öµ¶¼»áÔÚ×¢²áÍêÖ®ºó´ÓÕ»ÖĞµ¯³ö¡£
-// µ±Ä³¸öfuncµÄÖµÎªNULLÊ±£¬Æä±íÊ¾Ö»Õ¼Î»£¬ÔÚ±íÖĞ×¢²áÊ±»áÓÉfalse×÷Îª¼üÖµÌî³ä£¬¼´t[name]=false
+// å°†æ•°ç»„lä¸­çš„æ‰€æœ‰å‡½æ•°æ³¨å†Œåˆ°æ ˆé¡¶çš„è¡¨ä¸­
+// å½“nupä¸ä¸ºé›¶æ—¶ï¼Œæ‰€æœ‰çš„å‡½æ•°åˆ›å»ºæ—¶éƒ½ä¼šå¸¦ä¸Šnupä¸ªä¸Šå€¼ï¼Œè¿™äº›ä¸Šå€¼ä½¿ç”¨ä¹‹å‰å‹å…¥æ ˆé¡¶çš„nupä¸ªå€¼çš„æ‹·è´æ¥åˆå§‹åŒ–ï¼Œ
+// åœ¨æ ˆä¸­è¿™äº›å€¼çš„ä¸‹è¾¹æ‰æ˜¯æ³¨å†Œç›®æ ‡çš„è¡¨ã€‚è¿™äº›å€¼éƒ½ä¼šåœ¨æ³¨å†Œå®Œä¹‹åä»æ ˆä¸­å¼¹å‡ºã€‚
+// å½“æŸä¸ªfuncçš„å€¼ä¸ºNULLæ—¶ï¼Œå…¶è¡¨ç¤ºåªå ä½ï¼Œåœ¨è¡¨ä¸­æ³¨å†Œæ—¶ä¼šç”±falseä½œä¸ºé”®å€¼å¡«å……ï¼Œå³t[name]=false
 LUALIB_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
   luaL_checkstack(L, nup, "too many upvalues");
   for (; l->name != NULL; l++) {  /* fill the table with given functions */
     if (l->func == NULL)  /* placeholder? */
-      // ÓÃfalseÕ¼Î»
+      // ç”¨falseå ä½
       lua_pushboolean(L, 0);
     else {
       int i;
@@ -1048,8 +1048,8 @@ LUALIB_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
 ** ensure that stack[idx][fname] has a table and push that table
 ** into the stack
 */
-// È·±£t[fname]µÄÖµ£¨ÆäÖĞtÊÇË÷Òıidx´¦µÄÖµ£©ÊÇÒ»¸ö±í¸ñ£¬²¢½«¸Ã±í¸ñÍÆÈëÕ»ÖĞ¡£
-// Èç¹ûÕÒµ½ÏÈÇ°µÄ±í¸ñ£¬Ôò·µ»Øtrue£»Èç¹û´´½¨ÁËÒ»¸öĞÂµÄ±í¸ñ£¬Ôò·µ»Øfalse¡£
+// ç¡®ä¿t[fname]çš„å€¼ï¼ˆå…¶ä¸­tæ˜¯ç´¢å¼•idxå¤„çš„å€¼ï¼‰æ˜¯ä¸€ä¸ªè¡¨æ ¼ï¼Œå¹¶å°†è¯¥è¡¨æ ¼æ¨å…¥æ ˆä¸­ã€‚
+// å¦‚æœæ‰¾åˆ°å…ˆå‰çš„è¡¨æ ¼ï¼Œåˆ™è¿”å›trueï¼›å¦‚æœåˆ›å»ºäº†ä¸€ä¸ªæ–°çš„è¡¨æ ¼ï¼Œåˆ™è¿”å›falseã€‚
 LUALIB_API int luaL_getsubtable (lua_State *L, int idx, const char *fname) {
   if (lua_getfield(L, idx, fname) == LUA_TTABLE)
     return 1;  /* table already there */
@@ -1070,32 +1070,32 @@ LUALIB_API int luaL_getsubtable (lua_State *L, int idx, const char *fname) {
 ** if 'glb' is true, also registers the result in the global table.
 ** Leaves resulting module on the top.
 */
-// Èç¹ûpackage.loaded[modname]½á¹û²»ÎªnilÊ±£¬»áÊ¹ÓÃ×Ö·û´®modname×÷Îªº¯ÊıopenfµÄ²ÎÊı´«Èë²¢µ÷ÓÃ£¬
-// ²¢½«µ÷ÓÃ½á¹û·Åµ½package.loaded[modname]ÖĞ£¬¾ÍºÃÏñÕâ¸öº¯ÊıÓÉrequireµ÷ÓÃµÄÒ»Ñù
-// Èç¹û²ÎÊıglbÎªtrue£¬Ôò½«µ¼ÈëµÄÄ£¿éÒ²´æµ½ÓëmodnameÍ¬ÃûµÄÈ«¾Ö±äÁ¿ÖĞ
-// ×îºó»á½«Ä£¿éµÄ¿½±´µ½Õ»¶¥ÉÏ
+// å¦‚æœpackage.loaded[modname]ç»“æœä¸ä¸ºnilæ—¶ï¼Œä¼šä½¿ç”¨å­—ç¬¦ä¸²modnameä½œä¸ºå‡½æ•°openfçš„å‚æ•°ä¼ å…¥å¹¶è°ƒç”¨ï¼Œ
+// å¹¶å°†è°ƒç”¨ç»“æœæ”¾åˆ°package.loaded[modname]ä¸­ï¼Œå°±å¥½åƒè¿™ä¸ªå‡½æ•°ç”±requireè°ƒç”¨çš„ä¸€æ ·
+// å¦‚æœå‚æ•°glbä¸ºtrueï¼Œåˆ™å°†å¯¼å…¥çš„æ¨¡å—ä¹Ÿå­˜åˆ°ä¸modnameåŒåçš„å…¨å±€å˜é‡ä¸­
+// æœ€åä¼šå°†æ¨¡å—çš„æ‹·è´åˆ°æ ˆé¡¶ä¸Š
 LUALIB_API void luaL_requiref (lua_State *L, const char *modname,
                                lua_CFunction openf, int glb) {
-  // g->l_registry["_LOADED"] = {}£¬Õ»¶¥¾ÍÊÇÕâ¸ö{}
+  // g->l_registry["_LOADED"] = {}ï¼Œæ ˆé¡¶å°±æ˜¯è¿™ä¸ª{}
   luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-  // °Ñg->l_registry["_LOADED"][modname]Ñ¹ÈëÕ»¶¥£¬Ã»ÕÒµ½¾ÍÑ¹Èënil
+  // æŠŠg->l_registry["_LOADED"][modname]å‹å…¥æ ˆé¡¶ï¼Œæ²¡æ‰¾åˆ°å°±å‹å…¥nil
   lua_getfield(L, -1, modname);  /* LOADED[modname] */
-  // ¿´¿´ÉÏÃæ²Ù×÷ÊÇ·ñÕÒµ½ÁËmodname£¬Ã»ÕÒ¾ÍÊÇnil£¬·µ»Øfalse
+  // çœ‹çœ‹ä¸Šé¢æ“ä½œæ˜¯å¦æ‰¾åˆ°äº†modnameï¼Œæ²¡æ‰¾å°±æ˜¯nilï¼Œè¿”å›false
   if (!lua_toboolean(L, -1)) {  /* package not already loaded? */
-    // ËµÃ÷g->l_registry["_LOADED"]ÕÒ²»µ½modnameµÄkey
+    // è¯´æ˜g->l_registry["_LOADED"]æ‰¾ä¸åˆ°modnameçš„key
     lua_pop(L, 1);  /* remove field */
     lua_pushcfunction(L, openf);
     lua_pushstring(L, modname);  /* argument to open function */
     lua_call(L, 1, 1);  /* call 'openf' to open module */
-    // °Ñ·µ»ØÖµÔÙ´ÎÑ¹ÈëÕ»¶¥
+    // æŠŠè¿”å›å€¼å†æ¬¡å‹å…¥æ ˆé¡¶
     lua_pushvalue(L, -1);  /* make copy of module (call result) */
-    // g->l_registry["_LOADED"][modname] = lua_call(L, 1, 1)µÄ·µ»ØÖµ
+    // g->l_registry["_LOADED"][modname] = lua_call(L, 1, 1)çš„è¿”å›å€¼
     lua_setfield(L, -3, modname);  /* LOADED[modname] = module */
   }
-  // ÒÆ³ıg->l_registry["_LOADED"]¶ÔÓ¦µÄ±í
+  // ç§»é™¤g->l_registry["_LOADED"]å¯¹åº”çš„è¡¨
   lua_remove(L, -2);  /* remove LOADED table */
   if (glb) {
-    // ×¢²áµ½È«¾Ö±íÖĞ
+    // æ³¨å†Œåˆ°å…¨å±€è¡¨ä¸­
     lua_pushvalue(L, -1);  /* copy of module */
     lua_setglobal(L, modname);  /* _G[modname] = module */
   }
@@ -1126,13 +1126,13 @@ LUALIB_API const char *luaL_gsub (lua_State *L, const char *s,
 
 
 
-// ³¢ÊÔÖØĞÂµ÷ÕûÖ®Ç°µ÷ÓÃreallocËù·ÖÅäµÄptrËùÖ¸ÏòµÄÄÚ´æ¿éµÄ´óĞ¡¡£
-// ud - Ä¿Ç°Ã»ÓĞÓÃµ½
-// ptr - Ö¸ÕëÖ¸ÏòÒ»¸öÒªÖØĞÂ·ÖÅäÄÚ´æµÄÄÚ´æ¿é£¬¸ÃÄÚ´æ¿éÖ®Ç°ÊÇÍ¨¹ıµ÷ÓÃrealloc 
-// ½øĞĞ·ÖÅäÄÚ´æµÄ¡£Èç¹ûÎª¿ÕÖ¸Õë£¬Ôò»á·ÖÅäÒ»¸öĞÂµÄÄÚ´æ¿é£¬ÇÒº¯Êı·µ»ØÒ»¸öÖ¸ÏòËüµÄÖ¸Õë¡£
-// osize - Ä¿Ç°Ã»ÓĞÓÃµ½
-// nsize - ÄÚ´æ¿éµÄĞÂµÄ´óĞ¡£¬ÒÔ×Ö½ÚÎªµ¥Î»¡£Èç¹û´óĞ¡Îª0£¬ÇÒptrÖ¸ÏòÒ»¸öÒÑ´æÔÚµÄÄÚ´æ¿é£¬
-// ÔòptrËùÖ¸ÏòµÄÄÚ´æ¿é»á±»ÊÍ·Å£¬²¢·µ»ØÒ»¸ö¿ÕÖ¸Õë
+// å°è¯•é‡æ–°è°ƒæ•´ä¹‹å‰è°ƒç”¨reallocæ‰€åˆ†é…çš„ptræ‰€æŒ‡å‘çš„å†…å­˜å—çš„å¤§å°ã€‚
+// ud - ç›®å‰æ²¡æœ‰ç”¨åˆ°
+// ptr - æŒ‡é’ˆæŒ‡å‘ä¸€ä¸ªè¦é‡æ–°åˆ†é…å†…å­˜çš„å†…å­˜å—ï¼Œè¯¥å†…å­˜å—ä¹‹å‰æ˜¯é€šè¿‡è°ƒç”¨realloc 
+// è¿›è¡Œåˆ†é…å†…å­˜çš„ã€‚å¦‚æœä¸ºç©ºæŒ‡é’ˆï¼Œåˆ™ä¼šåˆ†é…ä¸€ä¸ªæ–°çš„å†…å­˜å—ï¼Œä¸”å‡½æ•°è¿”å›ä¸€ä¸ªæŒ‡å‘å®ƒçš„æŒ‡é’ˆã€‚
+// osize - ç›®å‰æ²¡æœ‰ç”¨åˆ°
+// nsize - å†…å­˜å—çš„æ–°çš„å¤§å°ï¼Œä»¥å­—èŠ‚ä¸ºå•ä½ã€‚å¦‚æœå¤§å°ä¸º0ï¼Œä¸”ptræŒ‡å‘ä¸€ä¸ªå·²å­˜åœ¨çš„å†…å­˜å—ï¼Œ
+// åˆ™ptræ‰€æŒ‡å‘çš„å†…å­˜å—ä¼šè¢«é‡Šæ”¾ï¼Œå¹¶è¿”å›ä¸€ä¸ªç©ºæŒ‡é’ˆ
 static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
   (void)ud; (void)osize;  /* not used */
   if (nsize == 0) {
@@ -1148,7 +1148,7 @@ static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
 ** Standard panic funcion just prints an error message. The test
 ** with 'lua_type' avoids possible memory errors in 'lua_tostring'.
 */
-// ´òÓ¡´íÎó,²¢·µ»Ø¸ølua½øĞĞ³ÌĞòÖĞÖ¹
+// æ‰“å°é”™è¯¯,å¹¶è¿”å›ç»™luaè¿›è¡Œç¨‹åºä¸­æ­¢
 static int panic (lua_State *L) {
   const char *msg = (lua_type(L, -1) == LUA_TSTRING)
                   ? lua_tostring(L, -1)
@@ -1216,7 +1216,7 @@ static void warnfon (void *ud, const char *message, int tocont) {
 }
 
 
-// ´´½¨Ò»¸ö×´Ì¬»ú
+// åˆ›å»ºä¸€ä¸ªçŠ¶æ€æœº
 LUALIB_API lua_State *luaL_newstate (void) {
   lua_State *L = lua_newstate(l_alloc, NULL);
   if (l_likely(L)) {
@@ -1227,7 +1227,7 @@ LUALIB_API lua_State *luaL_newstate (void) {
 }
 
 
-// ¼ì²éÕıÔÚµ÷ÓÃµÄ´úÂëºÍÕıÔÚµ÷ÓÃµÄLua¿âËùÊ¹ÓÃµÄLua°æ±¾ÊÇ·ñÏàÍ¬£¬ÒÔ¼°ÏàÍ¬µÄÊıÖµÀàĞÍ¡£
+// æ£€æŸ¥æ­£åœ¨è°ƒç”¨çš„ä»£ç å’Œæ­£åœ¨è°ƒç”¨çš„Luaåº“æ‰€ä½¿ç”¨çš„Luaç‰ˆæœ¬æ˜¯å¦ç›¸åŒï¼Œä»¥åŠç›¸åŒçš„æ•°å€¼ç±»å‹ã€‚
 LUALIB_API void luaL_checkversion_ (lua_State *L, lua_Number ver, size_t sz) {
   lua_Number v = lua_version(L);
   if (sz != LUAL_NUMSIZES)  /* check numeric types */

@@ -600,6 +600,8 @@ typedef struct Udata {
   // 用户自定义值内容
   UValue uv[1];  /* user values */
 } Udata;
+// 紧跟着的内存:
+// C语言结构体占用内存
 
 
 /*
@@ -615,6 +617,7 @@ typedef struct Udata {
 // 为什么没有gclist域：
 // Header for userdata with no user values. These userdata do not need
 // to be gray during GC, and therefore do not need a 'gclist' field.
+// 不会直接去创建这个对象，用来做偏移
 typedef struct Udata0 {
   CommonHeader;
   unsigned short nuvalue;  /* number of user values */
@@ -622,6 +625,8 @@ typedef struct Udata0 {
   struct Table *metatable;
   union {LUAI_MAXALIGN;} bindata;
 } Udata0;
+// 紧跟着的内存:
+// C语言结构体占用内存
 
 
 /* compute the offset of the memory area of a userdata */
@@ -657,6 +662,7 @@ typedef struct Udata0 {
 typedef struct Upvaldesc {
   // 上值名称
   TString *name;  /* upvalue name (for debug information) */
+  // 本函数的upvalue，是否指向外层函数的栈(不是则指向外层函数的某个upvalue值)
   // 1表示该上值在外层函数的栈上，0表示该上值引⽤的是外层函数的上值
   lu_byte instack;  /* whether it is in stack (register) */
   // 如果instack为1，idx表示该上值是外层函数栈上第idx位置的值
@@ -703,7 +709,7 @@ typedef struct AbsLineInfo {
 /*
 ** Function Prototypes
 */
-// 函数原型，存放字节码(opcode)
+// lua函数原型，存放字节码(opcode)
 // 字节码是⼀种能够被虚拟机识别的中间代码。⼀些解释型语⾔，
 // 能够通过它们的编译器将源代码编译成字节码，再交给虚拟机去执⾏。
 // ⼀个Lua函数对应⼀个Proto实例
@@ -863,7 +869,7 @@ typedef struct CClosure {
 // Lua闭包
 typedef struct LClosure {
   ClosureHeader;
-  // 内部数据
+  // 描述lua函数，还是c语言闭包最简单，就一个函数指针即可
   struct Proto *p;
   // 外部数据
   // 在嵌套函数中，内层函数如果仍然有被引用处于有效状态，而外层函数已经没有被引用了已经无效了，

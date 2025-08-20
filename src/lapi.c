@@ -882,6 +882,7 @@ LUA_API int lua_getmetatable (lua_State *L, int objindex) {
 }
 
 
+// 获取full user data中用户数据
 LUA_API int lua_getiuservalue (lua_State *L, int idx, int n) {
   TValue *o;
   int t;
@@ -1067,6 +1068,7 @@ LUA_API int lua_setmetatable (lua_State *L, int objindex) {
 }
 
 
+// 设置full user data中的用户数据
 LUA_API int lua_setiuservalue (lua_State *L, int idx, int n) {
   TValue *o;
   int res;
@@ -1472,6 +1474,7 @@ LUA_API void *lua_newuserdatauv (lua_State *L, size_t size, int nuvalue) {
 
 
 
+// 根据索引n访问一个闭包的upvalue，并返回upvalue的名称以及指向其值和所有者的指针
 static const char *aux_upvalue (TValue *fi, int n, TValue **val,
                                 GCObject **owner) {
   switch (ttypetag(fi)) {

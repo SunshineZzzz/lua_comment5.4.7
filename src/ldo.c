@@ -495,7 +495,7 @@ l_sinline void moveresults (lua_State *L, StkId res, int nres, int wanted) {
 ** info. If function has to close variables, hook must be called after
 ** that.
 */
-// 一次函数调用的善后
+// 函数调用的善后
 void luaD_poscall (lua_State *L, CallInfo *ci, int nres) {
   int wanted = ci->nresults;
   if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted)))

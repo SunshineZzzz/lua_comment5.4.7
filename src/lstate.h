@@ -323,6 +323,7 @@ typedef struct global_State {
   // LUA_RIDX_MAINTHREAD(1-1=0)：指向 主线程
   // LUA_RIDX_GLOBALS(2-1=1)：存储全局变量
   // LUA_LOADED_TABLE("_LOADED")：存储模块（包括系统默认加载的模块，以及用户 require 的模块）
+  // full user data 的 tname <-> 原表{__name=tname}
   TValue l_registry;
   // 空值
   TValue nilvalue;  /* a nil value */
@@ -428,7 +429,7 @@ typedef struct global_State {
 /*
 ** 'per thread' state
 */
-// lua线程
+// lua状态机
 struct lua_State {
   CommonHeader;
   // 当前状态机的状态
