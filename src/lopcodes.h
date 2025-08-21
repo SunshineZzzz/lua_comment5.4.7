@@ -180,6 +180,7 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define GETARG_sC(i)	sC2int(GETARG_C(i))
 #define SETARG_C(i,v)	setarg(i, v, POS_C, SIZE_C)
 
+//  «∑Ò…Ë÷√¡À	K
 #define TESTARG_k(i)	check_exp(checkopm(i, iABC), (cast_int(((i) & (1u << POS_k)))))
 #define GETARG_k(i)	check_exp(checkopm(i, iABC), getarg(i, POS_k, 1))
 #define SETARG_k(i,v)	setarg(i, v, POS_k, 1)

@@ -1,0 +1,1 @@
+lua_cfunc_print("hello", "world")
