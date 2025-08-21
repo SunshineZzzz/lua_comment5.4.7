@@ -932,8 +932,8 @@ LUALIB_API int luaL_loadstring (lua_State *L, const char *s) {
 
 
 
-// 将索引obj处的对象的元表中的字段event压入栈中，并返回其类型。
-// 如果对象没有元表或元表中没有该字段，则不会压栈且返回LUA_TNIL。
+// 将索引obj处的对象的元表中的字段event压入栈中，如果对象没有元表或元表中没有该字段，则不会压栈且返回LUA_TNIL，
+// 如果存在字段，返回字段的类型
 LUALIB_API int luaL_getmetafield (lua_State *L, int obj, const char *event) {
   if (!lua_getmetatable(L, obj))  /* no metatable? */
     return LUA_TNIL;

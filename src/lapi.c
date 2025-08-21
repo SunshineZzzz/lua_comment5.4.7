@@ -809,6 +809,7 @@ static Table *gettable (lua_State *L, int idx) {
 
 
 // 从idx表中获取一个值，栈顶的值作为key，但不会触发元表的__index元方法
+// 获取的值在栈顶
 LUA_API int lua_rawget (lua_State *L, int idx) {
   Table *t;
   const TValue *val;

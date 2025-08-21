@@ -98,6 +98,21 @@ bool luacallc()
 	return true;
 }
 
+bool metatable() 
+{
+	lua_State* lua = luaL_newstate();
+	luaL_openlibs(lua);
+
+	if (luaL_dofile(lua, "metatable.lua") != LUA_OK) {
+		fprintf(stderr, "Error: %s\n", lua_tostring(lua, -1));
+		lua_close(lua);
+		return false;
+	}
+
+	lua_close(lua);
+	return true;
+}
+
 int main() 
 {
 	if (!overview()) 
@@ -111,6 +126,11 @@ int main()
 	}
 
 	if (!luacallc())
+	{
+		return -1;
+	}
+
+	if (!metatable())
 	{
 		return -1;
 	}
