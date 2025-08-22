@@ -113,12 +113,16 @@ void luaD_seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 }
 
 
+// Lua执行过程中抛出异常
 l_noret luaD_throw (lua_State *L, int errcode) {
   if (L->errorJmp) {  /* thread has an error handler? */
+    // 说明当前lua_State前面肯定存在一个安全调用，比如：luaD_rawrunprotected，从而触发了异常
+    // 所以这里用c函数特性跳转回去
     L->errorJmp->status = errcode;  /* set status */
     LUAI_THROW(L, L->errorJmp);  /* jump to it */
   }
   else {  /* thread has no error handler */
+    // 说明当前lua_State前面没有安全调用
     global_State *g = G(L);
     errcode = luaE_resetthread(L, errcode);  /* close all upvalues */
     if (g->mainthread->errorJmp) {  /* main thread has a handler? */
@@ -139,6 +143,7 @@ l_noret luaD_throw (lua_State *L, int errcode) {
 // 保护性调用f
 int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
   l_uint32 oldnCcalls = L->nCcalls;
+  // 当前的栈信息保存在了jmp_buf变量lj中
   struct lua_longjmp lj;
   // 状态设置
   lj.status = LUA_OK;
@@ -146,6 +151,9 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
   lj.previous = L->errorJmp;  /* chain new error handler */
   // 执行前f把当前堆栈保存起来，出现异常以后可以恢复
   L->errorJmp = &lj;
+  // #define LUAI_TRY(L,c,a)		if (setjmp((c)->b) == 0) { a }
+  // #define LUAI_THROW(L,c)		longjmp((c)->b, 1)
+  // 当发生LUAI_THROW，还是走到这里，但是不会反复执行要保护的函数
   LUAI_TRY(L, &lj,
     (*f)(L, ud);
   );
@@ -835,11 +843,13 @@ static void resume (lua_State *L, void *ud) {
   StkId firstArg = L->top.p - n;  /* first argument */
   CallInfo *ci = L->ci;
   if (L->status == LUA_OK)  /* starting a coroutine? */
-    // 执行协程的主体函数
+    // 启动协程
+    // 执行协程的主体函数，执行LClosure中的指令，没有yield就执行完，有yield就throw
     ccall(L, firstArg - 1, LUA_MULTRET, 0);  /* just call its body */
   else {  /* resuming from previous yield */
 	// 恢复
     lua_assert(L->status == LUA_YIELD);
+    // 恢复中断的协程，设置LUA_OK
     L->status = LUA_OK;  /* mark that it is running (again) */
     if (isLua(ci)) {  /* yielded inside a hook? */
       /* undo increment made by 'luaG_traceexec': instruction was not
@@ -858,6 +868,7 @@ static void resume (lua_State *L, void *ud) {
       }
       luaD_poscall(L, ci, n);  /* finish 'luaD_call' */
     }
+    // 我理解就是继续执行上次LClosure的指令结束或者再次遇到yield
     unroll(L, NULL);  /* run continuation */
   }
 }
@@ -871,7 +882,6 @@ static void resume (lua_State *L, void *ud) {
 ** (status == LUA_YIELD), or an unprotected error ('findpcall' doesn't
 ** find a recover point).
 */
-// 
 static int precover (lua_State *L, int status) {
   CallInfo *ci;
   while (errorstatus(status) && (ci = findpcall(L)) != NULL) {
@@ -883,17 +893,8 @@ static int precover (lua_State *L, int status) {
 }
 
 
-// 开始或重启给定的Lua线程所指的协程L。（本质上是一回事）
-// 如需启动一个协程，你必须将主函数和其所有参数都压入到这个Lua线程的空栈中。
-// 然后你再调用lua_resume，其参数 nargs 为主函数的参数数量。
-// 此调用会在协程执行完成或者被挂起时返回。
-// 当它返回时，由lua_yield或主函数返回的值会被放到栈顶上，*nresult会变更为这些返回值的数量。
-// 当协程让出时lua_resume会返回LUA_YIELD，如果协程执行完成并未发生任何错误则返回LUA_OK。
-// 在发生错误的情况下，错误对象会被放在协程L的栈顶中（而不是执行这个协程的主体线程）。
-// 如需重启一个协程，你必须把在栈上的*nresults个让出返回值移除，将结果值压入栈中以传递给让出的地方，
-// 然后再调用lua_resume。
-// 参数from表示执行重启的协程L的主体，其也是一个协程。如果不存在这样的协程，此参数可以是NULL。
-// 
+
+// 启动或者恢复一个协程
 // L要执行协程对应的线程
 // from原始线程
 // nargs L栈中的参数个数
@@ -902,15 +903,16 @@ LUA_API int lua_resume (lua_State *L, lua_State *from, int nargs,
                                       int *nresults) {
   int status;
   lua_lock(L);
-  // 这里我们可以看出来不在suspended（挂起）或者dead（死亡）状态的协程不能resume，
-  // 即不能被切换到running（运行）状态，否则会报错误
   if (L->status == LUA_OK) {  /* may be starting a coroutine */
     if (L->ci != &L->base_ci)  /* not in base level? */
+      // 这里说明打算启动一个新的协程，但是调用栈不是base level，说明里面有其他调用栈存在，这是不允许的
       return resume_error(L, "cannot resume non-suspended coroutine", nargs);
     else if (L->top.p - (L->ci->func.p + 1) == nargs)  /* no function? */
+      // 这种说明协程已经执行完了，还想着恢复呢？当然是dead了
       return resume_error(L, "cannot resume dead coroutine", nargs);
   }
   else if (L->status != LUA_YIELD)  /* ended with errors? */
+    // 说明出错了
     return resume_error(L, "cannot resume dead coroutine", nargs);
   // 协程的调用是有深度限制的，比如我们resume A协程的时候，
   // A协程内部又去resume B协程，然后B协程内部在自身被resume的过程中又去resume C协程，
@@ -921,11 +923,12 @@ LUA_API int lua_resume (lua_State *L, lua_State *from, int nargs,
   L->nCcalls++;
   luai_userstateresume(L, nargs);
   api_checknelems(L, (L->status == LUA_OK) ? nargs + 1 : nargs);
-  // 协程的执行是通过luaD_rawrunprotected函数的，这个函数的功能是使用保护模式执行参数中协程的代码，
-  // 若中途代码发生异常，则会通过下一行的precover函数进行恢复
+  // L上保护模式下执行resume，nargs参数个数
   status = luaD_rawrunprotected(L, resume, &nargs);
    /* continue running after recoverable errors */
-  // 是否需要恢复
+  // 上面保护模式运行，有可能真的出现了异常，更常见的就是yield，并且这个时候
+  // L->status = LUA_YIELD;
+  // 如果是正常挂起，这个函数肯定啥也没做，还是返回LUA_YIELD
   status = precover(L, status);
   if (l_likely(!errorstatus(status)))
     lua_assert(status == L->status);  /* normal end or yield */
@@ -983,6 +986,7 @@ LUA_API int lua_yieldk (lua_State *L, int nresults, lua_KContext ctx,
   else {
     if ((ci->u.c.k = k) != NULL)  /* is there a continuation? */
       ci->u.c.ctx = ctx;  /* save context */
+    // 挂起
     luaD_throw(L, LUA_YIELD);
   }
   lua_assert(ci->callstatus & CIST_HOOKED);  /* must be inside a hook */

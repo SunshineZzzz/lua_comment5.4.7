@@ -17,6 +17,8 @@ bool overview()
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
 // c调用lua
 bool ccalllua()
 {
@@ -56,6 +58,9 @@ bool ccalllua()
 	lua_close(L);
 	return true;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////
 
 // lua调用c
 // 暴露给lua的函数必须满足如下声明，int表示返回值个数
@@ -98,6 +103,9 @@ bool luacallc()
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+// 元表
 bool metatable() 
 {
 	lua_State* L = luaL_newstate();
@@ -113,6 +121,9 @@ bool metatable()
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+// userdata
 struct people
 {
 	char name[128];
@@ -157,7 +168,7 @@ static luaL_Reg people_mods[] =
 	{ "new", newPeople},
 	{ NULL, NULL }
 };
-int userdata()
+bool userdata()
 {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
@@ -179,6 +190,24 @@ int userdata()
 	lua_pop(L, 1);
 
 	if (luaL_dofile(L, "userdata.lua") != LUA_OK) 
+	{
+		fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
+		lua_close(L);
+		return false;
+	}
+
+	lua_close(L);
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+bool coroutine()
+{
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+
+	if (luaL_dofile(L, "coroutine.lua") != LUA_OK)
 	{
 		fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
 		lua_close(L);
@@ -212,6 +241,11 @@ int main()
 	}
 
 	if (!userdata()) 
+	{
+		return -1;
+	}
+
+	if (!coroutine())
 	{
 		return -1;
 	}
