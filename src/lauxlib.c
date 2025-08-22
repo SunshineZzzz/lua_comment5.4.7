@@ -311,7 +311,7 @@ LUALIB_API int luaL_execresult (lua_State *L, int stat) {
 ** =======================================================
 */
 
-// 创建元表，这个元表存储在注册表中, 并以tname为key，将该元表置于栈顶
+// 创建元表，这个元表存储在全局注册表中, 并以tname为key，将该元表置于栈顶
 LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
   if (luaL_getmetatable(L, tname) != LUA_TNIL)  /* name already in use? */
     return 0;  /* leave previous value on top, but return 0 */
