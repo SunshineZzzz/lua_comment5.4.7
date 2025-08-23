@@ -94,7 +94,11 @@ local bRet, val = coroutine.resume(co, 1)
    
 ![alt text](../img/coroutine10.png)
 
-6. 如何实现 C 调用中的 Continuation, 来自云风的BLOG(https://blog.codingnow.com/2012/06/continuation_in_lua_52.html)
+6. lua协程执行流程
+  
+![alt text](../img/coroutine11.png)
+
+7. 如何实现 C 调用中的 Continuation, 来自云风的BLOG(https://blog.codingnow.com/2012/06/continuation_in_lua_52.html)
 > Lua 5.2 最重大的改进，莫过于 "yieldable pcall and metamethods" 。这需要克服一个难题：如何在 C 函数调用中，正确的 yield 回 resume 调用的位置。
 resume 的发起总是通过一次 lua_resume 的调用，在 Lua 5.1 以前，yield 的调用必定结束于一次 lua_yield 调用，而调用它的 C 函数必须立刻返回。中间不能有任何 C 函数执行到中途的状态。这样，Lua VM 才能正常工作。
 
