@@ -2,7 +2,9 @@
 ```C
 lua_State* lua = luaL_newstate();
 
+// 指向主线程
 g->l_registry->array[0] = L
+// 全局变量
 g->l_registry->array[1] = _G = {}
 ```
 
@@ -18,6 +20,8 @@ g->l_registry->array[1] = _G = {
     ...
     print = func,
     assert = func,
+    ...
+    "full user data 的 tname" = 原表{__name=tname}
     ...
 }
 
