@@ -703,6 +703,7 @@ static void luaH_newkey (lua_State *L, Table *t, const TValue *key,
       luaG_runerror(L, "table index is NaN");
   }
   if (ttisnil(value))
+    // 不允许插入value是nil
     return;  /* do not insert nil values */
   // 计算出下标
   mp = mainpositionTV(t, key);
