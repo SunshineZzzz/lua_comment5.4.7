@@ -500,6 +500,7 @@ struct lua_State {
 ** of the union is visible."
 */
 // 模拟父类向子类转换的中间态，主要是目的就是转换
+// 这里都是能被GC回收的对象
 union GCUnion {
   GCObject gc;  /* common header */
   // lua string

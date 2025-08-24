@@ -71,7 +71,7 @@ typedef struct lua_State lua_State;
 #define LUA_TBOOLEAN		1
 #define LUA_TLIGHTUSERDATA	2
 #define LUA_TNUMBER		3
-// 这个下面应该都是需要GC
+// 这个下面都是需要GC
 #define LUA_TSTRING		4
 #define LUA_TTABLE		5
 #define LUA_TFUNCTION		6

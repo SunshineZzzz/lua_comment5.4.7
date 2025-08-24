@@ -49,7 +49,7 @@
 */
 // lua boolean 在类型字段中定义
 typedef union Value {
-  // 只想需要GC的对象，比如：
+  // 指向需要GC的对象
   struct GCObject *gc;    /* collectable objects */
   // light userdata
   void *p;         /* light userdata */
