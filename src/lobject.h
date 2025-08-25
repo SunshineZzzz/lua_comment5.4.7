@@ -116,6 +116,7 @@ typedef union Value {
 *   其他定义
 * }
 */
+// Lua虚拟机中用于表示所有数据类型
 typedef struct TValue {
   TValuefields;
 } TValue;

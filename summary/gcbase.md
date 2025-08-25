@@ -106,6 +106,7 @@ typedef union Value {
 // bit     6: 这里1个位，2的1次方即可以代表2个数值，用于存储该变量是否可以垃圾回收
 #define TValuefields	Value value_; lu_byte tt_
 
+// Lua虚拟机中用于表示所有数据类型
 typedef struct TValue {
   TValuefields;
 } TValue;
@@ -129,4 +130,53 @@ GCObject *luaC_newobjdt (lua_State *L, int tt, size_t sz, size_t offset) {
 }
 ```
 
-3. 
+3. 早期lua5.0，双色标记清楚算法，缺点就是需要STW(stop the world)
+
+![双色标记清楚算法](../img/Naive_Mark_and_Sweep_Garbage_Collector_Algorithm.gif)
+
+4. lua5.1以后，三色标记清除算法，不再要求GC一次性扫描完所有的对象，这个GC过程可以是增量的，可以被中断再恢复并继续进行
+   
+![三色标记清除算法](../img/Animation_of_tri-color_garbage_collection.gif)
+
+5. 三色标记清除算法缺点，引用自(https://zhuanlan.zhihu.com/p/601609031)：
+  - >总任务量变大：算法是增量式的，每执行一部分任务量就可以先自行中断等待下次GC触发时继续执行剩余的部分，若中断后当前已经被处理过的对象状态发生了改变，会影响到颜色标记，导致下一次继续执行的时候又需要再次处理该对象。所以会存在一些频繁改变的对象被重复处理好几次的问题，使得GC的整体任务量增大了。
+  - >及时性不足：增量式算法中所有对象是同等处理的，无论是刚创建的对象，还是在系统中存活了很多年的对象；算法流程也是线性往前的，由标记阶段，原子阶段，清除阶段这样按顺序由前往后依次执行。
+  - >算法性能无法收敛：商业化的应用往往要求程序能持久地运行，在程序运行了较长时间之后，系统往往会趋向于一个稳定的状态，需要执行逻辑的内存对象基本已经全部分配好了（暂不考虑完全不使用内存池或缓存技术的框架），不需要再为内存分配而消耗性能，此时Lua中累积分配的内存对象可能会很多，但其中大多数又是有用的。
+
+6. lua5.4以后，在三色标记清除算法基础上增加分代GC，准确的说又加回来，5.2就加了，5.3又删除了，下面图文引用自(http://manistein.club/post/program/garbage-collection/%E5%88%86%E4%BB%A3gc%E6%B5%85%E6%9E%90/)
+   
+![alt text](../img/clr-eden-gc.drawio.png)
+
+![alt text](../img/clr-midgen-gc.drawio.png)
+
+![alt text](../img/allgen.drawio.png)
+
+> 与增进式GC不同的是，分代GC几乎每次GC都有机会及时清除掉不可达的GC object，因此既不需要像简单标记清除算法那样进行全量GC，又不需要像增进式GC那样，在graylist清空之前不能清除不可达对象，从而导致内存峰值不好控制的问题。
+
+1. 三色标记清楚算法一些补充，三色标记清除算法存在对象丢失，需要额外的机制保证，这些机制一般称作屏障，下面图文引用自(https://www.cnblogs.com/cxy2020/p/16321884.html)
+  
+	![alt text](../img/tri-color-gc-drop1.png)
+
+	![alt text](../img/tri-color-gc-drop2.png)
+
+	![alt text](../img/tri-color-gc-drop3.png)
+
+	![alt text](../img/tri-color-gc-drop4.png)
+
+> 在三色标记法的过程中对象丢失，需要同时满足下面两个条件：
+> 
+> 条件一：白色对象被黑色对象引用
+> 
+> 条件二：灰色对象与白色对象之间的可达关系遭到破坏
+> 
+> 只要把上面两个条件破坏掉一个，就可以保证对象不丢失，golang团队就提出了两种破坏条件的方式：强三色不变式和弱三色不变式。
+>
+> 强三色不变式
+>
+> 规则：不允许黑色对象引用白色对象，破坏了条件一： 白色对象被黑色对象引用
+>
+> 弱三色不变式
+> 
+> 规则：黑色对象可以引用白色对象，但是白色对象的上游必须存在灰色对象，破坏了条件二：灰色对象与白色对象之间的可达关系遭到破坏
+>
+> 
