@@ -11,3 +11,5 @@ lua5.4.7 comment
 [用户数据](./summary/userdata.md)
 
 [协程](./summary/coroutine.md)
+
+[GC基础](./summary/gcbase.md)
