@@ -153,7 +153,7 @@ GCObject *luaC_newobjdt (lua_State *L, int tt, size_t sz, size_t offset) {
 
 > 与增进式GC不同的是，分代GC几乎每次GC都有机会及时清除掉不可达的GC object，因此既不需要像简单标记清除算法那样进行全量GC，又不需要像增进式GC那样，在graylist清空之前不能清除不可达对象，从而导致内存峰值不好控制的问题。
 
-1. 三色标记清楚算法一些补充，三色标记清除算法存在对象丢失，需要额外的机制保证，这些机制一般称作屏障，下面图文引用自(https://www.cnblogs.com/cxy2020/p/16321884.html)
+7. 三色标记清楚算法一些补充，三色标记清除算法存在对象丢失，需要额外的机制保证，这些机制一般称作屏障，下面图文引用自(https://www.cnblogs.com/cxy2020/p/16321884.html)
   
 	![alt text](../img/tri-color-gc-drop1.png)
 
@@ -178,5 +178,56 @@ GCObject *luaC_newobjdt (lua_State *L, int tt, size_t sz, size_t offset) {
 > 弱三色不变式
 > 
 > 规则：黑色对象可以引用白色对象，但是白色对象的上游必须存在灰色对象，破坏了条件二：灰色对象与白色对象之间的可达关系遭到破坏
->
-> 
+
+8. lua GC颜色相关
+```C
+/*
+** Layout for bit use in 'marked' field. First three bits are
+** used for object "age" in generational mode. Last bit is used
+** by tests.
+*/
+// 8bit,从第三位开始使用，第7位没用到，后面三位给了分代使用了
+// 三色标记清除颜色定义
+// 白0，bitmask(3)，00001000
+#define WHITE0BIT	3  /* object is white (type 0) */
+// 白1，bitmask(4)，00010000
+#define WHITE1BIT	4  /* object is white (type 1) */
+// 黑色，bitmask(5)，00100000
+#define BLACKBIT	5  /* object is black */
+// 析构标记，定义了析构器的对象拥有这个析构标记，代表释放之前需要先调用__GC元方法，bitmask(6)，01000000
+#define FINALIZEDBIT	6  /* object has been marked for finalization */
+
+#define TESTBIT		7
+
+
+// 白色 bitmask(3)|bitmask(4) 00011000
+#define WHITEBITS	bit2mask(WHITE0BIT, WHITE1BIT)
+
+
+// 是否是白色
+#define iswhite(x)      testbits((x)->marked, WHITEBITS)
+// 是否是黑色
+#define isblack(x)      testbit((x)->marked, BLACKBIT)
+// 是否是灰色，3，4，5对应的bit位都不是0，自然就是灰色
+#define isgray(x)  /* neither white nor black */  \
+	(!testbits((x)->marked, WHITEBITS | bitmask(BLACKBIT)))
+
+// 是否具有__GC原方法的表/full user data
+#define tofinalize(x)	testbit((x)->marked, FINALIZEDBIT)
+
+// 获取非当前白色
+#define otherwhite(g)	((g)->currentwhite ^ WHITEBITS)
+#define isdeadm(ow,m)	((m) & (ow))
+// 当前白，本次GC不会回收
+// 其他白，本次GC需要回收
+#define isdead(g,v)	isdeadm(otherwhite(g), (v)->marked)
+
+// 修改当前白色为非当前白
+#define changewhite(x)	((x)->marked ^= WHITEBITS)
+// 标记为黑色
+#define nw2black(x)  \
+	check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
+
+// 是否为白色
+#define luaC_white(g)	cast_byte((g)->currentwhite & WHITEBITS)
+```

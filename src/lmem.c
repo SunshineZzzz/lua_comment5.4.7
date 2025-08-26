@@ -153,7 +153,7 @@ void luaM_free_ (lua_State *L, void *block, size_t osize) {
   global_State *g = G(L);
   lua_assert((osize == 0) == (block == NULL));
   callfrealloc(g, block, osize, 0);
-  // 堆内存对象的释放则会减少对应内存字节数的债务
+  // 减少债务
   g->GCdebt -= osize;
 }
 
@@ -215,7 +215,7 @@ void *luaM_malloc_ (lua_State *L, size_t size, int tag) {
       if (newblock == NULL)
         luaM_error(L);
     }
-    // 债务就是每次产生GCObject或者更精确地说是每次申请堆内存空间的时候产生
+    // 增加债务
     g->GCdebt += size;
     return newblock;
   }

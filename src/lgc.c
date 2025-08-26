@@ -1843,7 +1843,7 @@ static int sweepstep (lua_State *L, global_State *g,
 }
 
 
-// GC算法入口
+// 增量GC算法入口
 static lu_mem singlestep (lua_State *L) {
   global_State *g = G(L);
   lu_mem work;

@@ -307,7 +307,7 @@ typedef struct global_State {
   // GC触发后会继续处理那些未被处理完毕的消费订单，GC结束后则会再次预充值一笔金额并等待下次GC的重新开始
   // 个人总消费，数值等于真实消费（allocated已分配的总内存）+ 预充值到系统的金额（用于后续抵消债务）。
   l_mem totalbytes;  /* number of bytes currently allocated - GCdebt */
-  // 债务，负数的话其绝对值代表预充值多少金额到系统；正数代表需要偿还多少债务。
+  // 债务(需要回收的内存数量)，负数代表预充值多少金额到系统，正数代表需要偿还多少债务
   l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
   // 非垃圾对象内存占用。在GC中已经处理完毕，被视为合法非垃圾对象的内存占用，
   // 在债务算法中可理解为消费后已经确认的订单消费金额
@@ -351,34 +351,23 @@ typedef struct global_State {
   lu_byte gcstepmul;  /* GC "speed" */
   // 在下一个GC步骤之前这次GC回收内存对应的Tvalue量
   lu_byte gcstepsize;  /* (log2 of) GC granularity */
-  // GCObject对象指针链表
-  // [allgc, survival)区间对象：是在上轮GC结束后，本轮GC开始前，新创建的对象，属于年轻一代对象中最年轻的一批，年龄对应为G_NEW，
-  // 若在本轮GC中未被标记则会被清除。
+  // 所有GC对象创建之后都会放入该链表中
   GCObject *allgc;  /* list of all collectable objects */
-  // 指向GCObject*的指针，指向当前正在被清除的GCObject链表中的某个元素，它就像是容器遍历的迭代器，
-  // 记录了当前遍历到的是哪个容器的哪个元素，通过该迭代器元素的next字段，可以让迭代器继续往后遍历容器的下一个元素
+  // 三色标记清除：回收链表，因为回收阶段可以分步进行，所以需要保存当前回收的位置,下一次从这个位置开始继续回收操作
   GCObject **sweepgc;  /* current position of sweep in list */
-  // 当对象拥有此标记FINALIZEDBIT时，代码它拥有未执行的析构器，
-  // 而这些对象它们在创建时也将会从g->allgc通用GCObject链表移除，
-  // 并放在g->finobj链表中进行管理。
-  // [allgc, finobjsur)区间对象：G_NEW
+  // 三色标记清除：具有__gc元方法的GC对象链表
   GCObject *finobj;  /* list of collectable objects with finalizers */
-  // 通常染色函数会把对象设置为黑色，但若该对象还引用了其它GCObject对象，
-  // 则先设置当前对象为灰色，并把该对象链接到global_State的gray链表中，
-  // 后续当开始处理它引用的子对象的时候再把它自身设置为黑色
+  // 三色标记清楚：灰色链表
   GCObject *gray;  /* list of gray objects */
-  // 在标记过程中，当有Table/UserData发生对象改变，会使用后退屏障保证一致性原则
-  // 为了避免gray链表因为每轮新增对象多于每轮能处理的对象，导致永远处理不完，
-  // 处理方式是不把使用后退屏障的对象插入到gray链表，而是把对象插入到grayagain灰色链表中
+  // 
   GCObject *grayagain;  /* list of objects to be traversed atomically */
-  // Value_WeakTable会存储于g->weak链表中
+  // 
   GCObject *weak;  /* list of tables with weak values */
-  // 在原子阶段中Key_WeakTable会存储在g->ephemeron链表
+  // 
   GCObject *ephemeron;  /* list of ephemeron tables (weak keys) */
-  // KeyValue_WeakTable会存储于g->allweak链表中
+  // 
   GCObject *allweak;  /* list of all-weak tables */
-  // 在本轮GC中，将要被清除的带__gc元方法析构器的对象，会由finobj链表移出，并移入到tobefnz链表中进行存储管理，
-  // 在清除阶段结束后tobefnz链表中对象的析构器方法会被统一执行；
+  // 
   GCObject *tobefnz;  /* list of userdata to be GC */
   // 避免被GC
   GCObject *fixedgc;  /* list of objects not to be collected */

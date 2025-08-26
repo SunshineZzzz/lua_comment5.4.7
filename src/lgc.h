@@ -115,87 +115,61 @@
 ** used for object "age" in generational mode. Last bit is used
 ** by tests.
 */
-// 灰色代表自身已被遍历但有子对象仍未标记
-// 代表未标记
-// 如何避免在清除阶段中产生的新白色对象不会被视作未标记的垃圾对象而被清除？
-// 为了解决这个问题，Lua采用了两种白色：WHITE0和WHITE1
-// 在原子阶段的最后，会把current_white与other_white互换
+// 8bit,从第三位开始使用，第7位没用到，后面三位给了分代使用了
+// 三色标记清除颜色定义
+// 白0，bitmask(3)，00001000
 #define WHITE0BIT	3  /* object is white (type 0) */
+// 白1，bitmask(4)，00010000
 #define WHITE1BIT	4  /* object is white (type 1) */
-// 代表自身及子对象已标记
+// 黑色，bitmask(5)，00100000
 #define BLACKBIT	5  /* object is black */
-// 1) 析构器标记，当对象拥有此标记时，代码它拥有未执行的析构器，
-// 而这些对象它们在创建时也将会从g->allgc通用GCObject链表移除，并放在g->finobj链表中进行管理。
-// 
-// 在对象析构器中可以执行任意开发者编写的代码，这些代码执行后可能导致GC中的对象引用关系发生改变。
-// 为了在析构器执行后，不会打乱本次GC已经标记的对象，和保证后续对象清除操作的有效性，
-// Lua会把析构器对象的清除流程放在GC流程的最后进行，并在实现中把它的逻辑拆分到两轮完整GC中去
-// 
-// 2）在每一轮的GC完整流程中，当发现有带FINALIZEDBIT标记的对象未被标记需要被释放时，会先把它们从g->finobj移除，
-// 并存储到g->tobefnz链表中，等待后续它们析构器的执行。
-// 3）因为析构器是在GC流程的最后执行，当然也在清除阶段的后面，接下来一步就是对g->tobefnz链表中的所有对象进行标记染色，
-// 因为未标记的对象会在清除阶段被清除，所以对它们做标记能保证这些对象它们在执行析构器之前不被清除。
-// 4）在本轮GC清除阶段结束后，统一执行g->tobefnz链表中对象的析构器函数。执行完毕后，把对象的FINALIZEDBIT标记清除，
-// 并把它从g->tobefnz链表移回g->allgc链表。
-// 5）在下一轮的完整GC流程中，因为该对象中的FINALIZEDBIT标记已经被清除了，它现在跟其它无析构器对象一样，若在本轮GC中没有被标记，
-// 则会正常在清除阶段被清除，而不再会像之前一样需要去执行析构器代码。
+// 析构标记，定义了析构器的对象拥有这个析构标记，代表释放之前需要先调用__GC元方法，bitmask(6)，01000000
 #define FINALIZEDBIT	6  /* object has been marked for finalization */
 
 #define TESTBIT		7
 
 
-
+// 白色 bitmask(3)|bitmask(4) 00011000
 #define WHITEBITS	bit2mask(WHITE0BIT, WHITE1BIT)
 
 
+// 是否是白色
 #define iswhite(x)      testbits((x)->marked, WHITEBITS)
+// 是否是黑色
 #define isblack(x)      testbit((x)->marked, BLACKBIT)
+// 是否是灰色，3，4，5对应的bit位都不是0，自然就是灰色
 #define isgray(x)  /* neither white nor black */  \
 	(!testbits((x)->marked, WHITEBITS | bitmask(BLACKBIT)))
 
+// 是否具有__GC原方法的表/full user data
 #define tofinalize(x)	testbit((x)->marked, FINALIZEDBIT)
 
+// 获取非当前白色
 #define otherwhite(g)	((g)->currentwhite ^ WHITEBITS)
 #define isdeadm(ow,m)	((m) & (ow))
+// 当前白，本次GC不会回收
+// 其他白，本次GC需要回收
 #define isdead(g,v)	isdeadm(otherwhite(g), (v)->marked)
 
+// 修改当前白色为非当前白
 #define changewhite(x)	((x)->marked ^= WHITEBITS)
+// 标记为黑色
 #define nw2black(x)  \
 	check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
 
+// 是否为白色
 #define luaC_white(g)	cast_byte((g)->currentwhite & WHITEBITS)
 
 
 /* object age in generational mode */
 // 分代GC年龄定义
-// 上一轮GC后，本轮GC开始前，创建的新对象，年轻一代；
 #define G_NEW		0	/* created in current cycle */
-// 上一轮GC开始前创建的对象，之前是G_NEW，在上一轮GC中没有被清除，则会成长为G_SURVIVAL，年轻一代；
 #define G_SURVIVAL	1	/* created in previous cycle */
-// 老一代对象，若存活2轮GC后会成长为G_OLD最老对象。这里给了足足两轮GC的时间，
-// 是为了尽量不让可能还会被改变的对象这么容易成为最老一代对象。
-// 常用于在前向屏障时修改对象的年龄，会同时立即对子结点进行标记
 #define G_OLD0		2	/* marked old by frw. barrier in this cycle */
-// 老一代对象，由G_OLD0成长而来，若再存活1轮GC后就会成长为G_OLD对象；
 #define G_OLD1		3	/* first full cycle as old */
-// 最老一代对象，不参与标记和清除，引用的子结点也不再包含未处理的年轻一代对象；
 #define G_OLD		4	/* really old object (not to be visited) */
-// 与G_OLD0对应，也在存活2轮GC后会成长为G_OLD最老对象，不同的是，它常用于在后向屏障时修改对象的年龄，不立刻标记子结点，
-// 而是会把该对象重新插入灰色链表等待下次标记传播时处理。
 #define G_TOUCHED1	5	/* old object touched this cycle */
-// 与G_OLD1对应，由G_TOUCHED1成长而来
 #define G_TOUCHED2	6	/* old object touched in previous cycle */
-/*
-*							   G_OLD1(老一代)<—————前向屏障————
-*											|				|
-*										    |               |
-*										    V               V
-* G_NEW(极年轻一代)->G_SURVIVAL(年轻一代)->G_OLD1(老一代)->G_OLD(极老一代)<------------这里是实线---------
-*														|										   |
-*														|										   |		
-*														—————后向屏障—————>G_TOUCHED1(老一代)->G_TOUCHED2(老一代)
-*/
-
 
 #define AGEBITS		7  /* all age bits (111) */
 
@@ -252,14 +226,13 @@
 ** 'condchangemem' is used only for heavy tests (forcing a full
 ** GC cycle on every opportunity)
 */
-// 当每次有债务新增的时候，系统就会检测当前累积的总债务是否已经大于0，
-// 大于0表示预充值的金额耗尽了，正式进入真正的负债，系统就会要求你还清债务
+// 债务大于0就需要进行GC操作
 #define luaC_condGC(L,pre,pos) \
 	{ if (G(L)->GCdebt > 0) { pre; luaC_step(L); pos;}; \
 	  condchangemem(L,pre,pos); }
 
 /* more often than not, 'pre'/'pos' are empty */
-// 调用时机是在各种申请了堆内存的对象创建的时候
+// 调用时机基本上是在创建GC对象的时候，具体可以查代码
 #define luaC_checkGC(L)		luaC_condGC(L,(void)0,(void)0)
 
 
