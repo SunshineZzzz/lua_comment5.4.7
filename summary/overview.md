@@ -101,6 +101,25 @@ typedef struct Upvaldesc {
 ```
 ![alt text](../img/upvalue1.png)
 
+- ```Open Upvalue```和```Closed Upvalue```: UpVal类型有两种状态：分别是open打开和close关闭状态。一个UpVal当它所属的那个函数返回之后（调用了return），或者Lua运行堆栈发生改变，函数已经不处于合理堆栈下标的时候，该函数所包含的UpVal即会切换到close状态。
+  
+脚本完成编译时的状态:
+
+![alt text](../img/upvalue2.png)
+
+执行函数aaa():
+
+**函数bbb和函数ccc的第2个（var2 upvalue）UpVal\* 指针指向了同一个UpVal\* 实例。下图中所示的，包含的值，指向LuaStack中的两个Upvalue，此时是Open Upvalue。**
+
+![alt text](../img/upvalue3.png)
+
+执行到调用第一个bbb函数的时候:
+
+**在aaa函数执行完毕时，他们的UpVal*实例，会进行close操作，此时是Close Upvalue。**
+
+![alt text](../img/upvalue4.png)
+
+
 - ```CallInfo```: lua闭包与lua运行栈的中间桥梁，其中StkIdRel func函数地址指针，指向CallInfo对应的Lua闭包在运行栈中的位置。CallInfo初始化的时候赋值，运行时不变。其中StkIdRel	top指向插入数据后会到达的最高的Lua运行栈的位置，CallInfo初始化的时候赋值，运行时不变。其中struct CallInfo *previous, *next调用链。其中const Instruction *savedpc用于记录当前虚拟机执行器执行到当前函数的哪条指令。
 
 - 指令介绍:

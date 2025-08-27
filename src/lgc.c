@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lgc.c $
 ** Garbage Collector
 ** See Copyright Notice in lua.h
@@ -50,10 +50,10 @@
 ** The equivalent, in bytes, of one unit of "work" (visiting a slot,
 ** sweeping an object, etc.)
 */
-// ÕâÀïWORK2MEMÃ»ÓĞÊ¹ÓÃGCObjectµÄ´óĞ¡£¬¶øÊÇÈ¡ÁËTValueµÄ´óĞ¡
-// ÒòÎª±ê¼ÇÇå³ıËã·¨¹¤×÷µÄ¹ı³ÌÖ÷ÒªÊÇÒÔTValue¶ÔÏóÎªµ¥Î»£¬×ö±éÀú£¬±ê¼Ç£¬Çå³ıµÈ²Ù×÷£¬ÕâĞ©²Ù×÷¾ÍÊÇÓÃÀ´ºâÁ¿¹¤×÷Á¿£¬
-// ¶øÇÒÓĞ¿ÉÄÜ¶à¸öTValueÔÚÊı¾İÉÏ¶ÔÓ¦×ÅÍ¬Ò»¸öGCObject£¬ÁíÍâ¹¤×÷Á¿Ò²¸ú¹¤×÷¹ı³ÌÖĞÊÇ·ñÓĞÊÍ·ÅGCObject¶ÔÏóÄÚ´æÎŞ¹Ø£¬
-// ÊÇ·ñ¼õÉÙÈ«¾ÖÕæÊµÕ®Îñg->GCdebtÎŞ¹Ø£¬ËùÒÔÊ¹ÓÃTValueÎªµ¥Î»¡£
+// è¿™é‡ŒWORK2MEMæ²¡æœ‰ä½¿ç”¨GCObjectçš„å¤§å°ï¼Œè€Œæ˜¯å–äº†TValueçš„å¤§å°
+// å› ä¸ºæ ‡è®°æ¸…é™¤ç®—æ³•å·¥ä½œçš„è¿‡ç¨‹ä¸»è¦æ˜¯ä»¥TValueå¯¹è±¡ä¸ºå•ä½ï¼Œåšéå†ï¼Œæ ‡è®°ï¼Œæ¸…é™¤ç­‰æ“ä½œï¼Œè¿™äº›æ“ä½œå°±æ˜¯ç”¨æ¥è¡¡é‡å·¥ä½œé‡ï¼Œ
+// è€Œä¸”æœ‰å¯èƒ½å¤šä¸ªTValueåœ¨æ•°æ®ä¸Šå¯¹åº”ç€åŒä¸€ä¸ªGCObjectï¼Œå¦å¤–å·¥ä½œé‡ä¹Ÿè·Ÿå·¥ä½œè¿‡ç¨‹ä¸­æ˜¯å¦æœ‰é‡Šæ”¾GCObjectå¯¹è±¡å†…å­˜æ— å…³ï¼Œ
+// æ˜¯å¦å‡å°‘å…¨å±€çœŸå®å€ºåŠ¡g->GCdebtæ— å…³ï¼Œæ‰€ä»¥ä½¿ç”¨TValueä¸ºå•ä½ã€‚
 #define WORK2MEM	sizeof(TValue)
 
 
@@ -76,12 +76,12 @@
   (x->marked = cast_byte((x->marked & ~maskcolors) | luaC_white(g)))
 
 /* make an object gray (neither white nor black) */
-// ÉèÖÃÎª»ÒÉ«
+// è®¾ç½®ä¸ºç°è‰²
 #define set2gray(x)	resetbits(x->marked, maskcolors)
 
 
 /* make an object black (coming from any color) */
-// ÉèÖÃÎªºÚÉ«
+// è®¾ç½®ä¸ºé»‘è‰²
 #define set2black(x)  \
   (x->marked = cast_byte((x->marked & ~WHITEBITS) | bitmask(BLACKBIT)))
 
@@ -211,13 +211,13 @@ static int iscleared (global_State *g, const GCObject *o) {
 ** be done is generational mode, as its sweep does not distinguish
 ** whites from deads.)
 */
-// Ç°ÏòÆÁÕÏ
-// LuaÔÚ´ó²¿·ÖÇé¿öÏÂ¶¼ÊÇÊ¹ÓÃÇ°ÏòÆÁÕÏ£¬¼´Á¢¿Ì°Ñ¸Ã°×É«¶ÔÏó½øĞĞ±ê¼Ç£¬Ö»ÓĞÔÚ´¦ÀíTableºÍUserDataÊ±Ê¹ÓÃºóÍËÆÁÕÏ
+// å‰å‘å±éšœ
+// Luaåœ¨å¤§éƒ¨åˆ†æƒ…å†µä¸‹éƒ½æ˜¯ä½¿ç”¨å‰å‘å±éšœï¼Œå³ç«‹åˆ»æŠŠè¯¥ç™½è‰²å¯¹è±¡è¿›è¡Œæ ‡è®°ï¼Œåªæœ‰åœ¨å¤„ç†Tableå’ŒUserDataæ—¶ä½¿ç”¨åé€€å±éšœ
 void luaC_barrier_ (lua_State *L, GCObject *o, GCObject *v) {
   global_State *g = G(L);
   lua_assert(isblack(o) && iswhite(v) && !isdead(g, v) && !isdead(g, o));
   if (keepinvariant(g)) {  /* must keep invariant? */
-    // ±ê¼Ç½×¶Î£¬»á¶Ô¸Ã±»ºÚÉ«¶ÔÏóÒıÓÃµÄ°×É«¶ÔÏóÁ¢¿Ì½øĞĞ±ê¼Ç£¬ĞŞ¸ÄËüµÄÑÕÉ«Îª»ÒÉ«»òºÚÉ«
+    // æ ‡è®°é˜¶æ®µï¼Œä¼šå¯¹è¯¥è¢«é»‘è‰²å¯¹è±¡å¼•ç”¨çš„ç™½è‰²å¯¹è±¡ç«‹åˆ»è¿›è¡Œæ ‡è®°ï¼Œä¿®æ”¹å®ƒçš„é¢œè‰²ä¸ºç°è‰²æˆ–é»‘è‰²
     reallymarkobject(g, v);  /* restore invariant */
     if (isold(o)) {
       lua_assert(!isold(v));  /* white object could not be old */
@@ -236,12 +236,12 @@ void luaC_barrier_ (lua_State *L, GCObject *o, GCObject *v) {
 ** barrier that moves collector backward, that is, mark the black object
 ** pointing to a white object as gray again.
 */
-// ºóÏòÆÁÕÏ
+// åå‘å±éšœ
 void luaC_barrierback_ (lua_State *L, GCObject *o) {
   global_State *g = G(L);
   lua_assert(isblack(o) && !isdead(g, o));
   lua_assert((g->gckind == KGC_GEN) == (isold(o) && getage(o) != G_TOUCHED1));
-  // °Ñ±ê¼Ç½×¶ÎÍùºó»ØÍËÁËÒ»²½£¬ÖØĞÂ°ÑÒıÓÃ¸Ã°×É«¶ÔÏóµÄºÚÉ«¶ÔÏóĞŞ¸Ä»Ø»ÒÉ«
+  // æŠŠæ ‡è®°é˜¶æ®µå¾€åå›é€€äº†ä¸€æ­¥ï¼Œé‡æ–°æŠŠå¼•ç”¨è¯¥ç™½è‰²å¯¹è±¡çš„é»‘è‰²å¯¹è±¡ä¿®æ”¹å›ç°è‰²
   if (getage(o) == G_TOUCHED2)  /* already in gray list? */
     set2gray(o);  /* make it gray to become touched1 */
   else  /* link it in 'grayagain' and paint it gray */
@@ -251,9 +251,9 @@ void luaC_barrierback_ (lua_State *L, GCObject *o) {
 }
 
 
-// °ÑĞèÒª³¤×¤ÓÚÄÚ´æµÄÖĞGCObject¶ÔÏó´ÓallgcÁ´±íÖĞÒÆ³ö£¬
-// ²¢ÒÆÈëµ½Í¬ÑùÉùÃ÷ÔÚglobal_StateÖĞµÄfixedgcÁ´±íÖĞ½øĞĞÌØÊâ¹ÜÀí£¬
-// ÕâÑùÔÚÇå³ı½×¶Î¾Í²»»á±»±éÀúµ½ÁË£¬¾Í²»»áÓĞÒ»Ğ©¶àÓàµÄÇå³ıÅĞ¶ÏÁË
+// æŠŠéœ€è¦é•¿é©»äºå†…å­˜çš„ä¸­GCObjectå¯¹è±¡ä»allgcé“¾è¡¨ä¸­ç§»å‡ºï¼Œ
+// å¹¶ç§»å…¥åˆ°åŒæ ·å£°æ˜åœ¨global_Stateä¸­çš„fixedgcé“¾è¡¨ä¸­è¿›è¡Œç‰¹æ®Šç®¡ç†ï¼Œ
+// è¿™æ ·åœ¨æ¸…é™¤é˜¶æ®µå°±ä¸ä¼šè¢«éå†åˆ°äº†ï¼Œå°±ä¸ä¼šæœ‰ä¸€äº›å¤šä½™çš„æ¸…é™¤åˆ¤æ–­äº†
 void luaC_fix (lua_State *L, GCObject *o) {
   global_State *g = G(L);
   lua_assert(g->allgc == o);  /* object must be 1st in 'allgc' list! */
@@ -308,15 +308,17 @@ GCObject *luaC_newobj (lua_State *L, int tt, size_t sz) {
 ** for at most two levels: An upvalue cannot refer to another upvalue
 ** (only closures can), and a userdata's metatable must be a table.
 */
-// È¾É«º¯Êı
+// æŸ“è‰²å‡½æ•°
 static void reallymarkobject (global_State *g, GCObject *o) {
   switch (o->tt) {
     case LUA_VSHRSTR:
     case LUA_VLNGSTR: {
+      // é•¿çŸ­å­—ç¬¦ä¸²ç›´æ¥æŸ“é»‘
       set2black(o);  /* nothing to visit */
       break;
     }
     case LUA_VUPVAL: {
+      // ä¸Šå€¼
       UpVal *uv = gco2upv(o);
       if (upisopen(uv))
         set2gray(uv);  /* open upvalues are kept gray */
@@ -326,9 +328,13 @@ static void reallymarkobject (global_State *g, GCObject *o) {
       break;
     }
     case LUA_VUSERDATA: {
+      // full user data
       Udata *u = gco2u(o);
       if (u->nuvalue == 0) {  /* no user values? */
+        // æ²¡æœ‰ç”¨æˆ·è‡ªå®šä¹‰å€¼
+        // æ ‡è®°å…ƒè¡¨
         markobjectN(g, u->metatable);  /* mark its metatable */
+        // æŸ“é»‘
         set2black(u);  /* nothing else to mark */
         break;
       }
@@ -336,6 +342,7 @@ static void reallymarkobject (global_State *g, GCObject *o) {
     }  /* FALLTHROUGH */
     case LUA_VLCL: case LUA_VCCL: case LUA_VTABLE:
     case LUA_VTHREAD: case LUA_VPROTO: {
+      // æ”¾å…¥ç°è‰²é“¾è¡¨
       linkobjgclist(o, g->gray);  /* to be visited later */
       break;
     }
@@ -347,6 +354,7 @@ static void reallymarkobject (global_State *g, GCObject *o) {
 /*
 ** mark metamethods for basic types
 */
+// æ ‡è®°åŸºç¡€ç±»å‹å¯¹åº”çš„å…¨å±€å…ƒè¡¨ä¸ºç°è‰²
 static void markmt (global_State *g) {
   int i;
   for (i=0; i < LUA_NUMTAGS; i++)
@@ -357,6 +365,7 @@ static void markmt (global_State *g) {
 /*
 ** mark all objects in list of being-finalized
 */
+// å¯¹ä¸Šä¸€è½®g->tobefnzé“¾è¡¨è¿˜æœªæ‰§è¡Œ__gcå…ƒæ–¹æ³•å­˜ç•™ä¸‹çš„å¯¹è±¡ï¼Œæ ‡è®°ä¸ºç°è‰²
 static lu_mem markbeingfnz (global_State *g) {
   GCObject *o;
   lu_mem count = 0;
@@ -406,6 +415,7 @@ static int remarkupvals (global_State *g) {
 }
 
 
+// æ¸…ç©ºç°è‰²é“¾è¡¨å’Œå¼±è¡¨ç›¸å…³
 static void cleargraylists (global_State *g) {
   g->gray = g->grayagain = NULL;
   g->weak = g->allweak = g->ephemeron = NULL;
@@ -415,12 +425,17 @@ static void cleargraylists (global_State *g) {
 /*
 ** mark root set and reset all gray lists, to start a new collection
 */
-// ±ê¼Ç½×¶ÎµÄµÚÒ»²½
+// æ ‡è®°
 static void restartcollection (global_State *g) {
+  // æ¸…ç©ºç°è‰²é“¾è¡¨å’Œå¼±è¡¨ç›¸å…³
   cleargraylists(g);
+  // æ ‡è®°ä¸»çŠ¶æ€æœºä¸ºç°è‰²
   markobject(g, g->mainthread);
+  // æ ‡è®°å…¨å±€æ³¨å†Œè¡¨ä¸ºç°è‰²
   markvalue(g, &g->l_registry);
+  // æ ‡è®°åŸºç¡€ç±»å‹å¯¹åº”çš„å…¨å±€å…ƒè¡¨ä¸ºç°è‰²
   markmt(g);
+  // å¯¹ä¸Šä¸€è½®g->tobefnzé“¾è¡¨è¿˜æœªæ‰§è¡Œ__gcå…ƒæ–¹æ³•å­˜ç•™ä¸‹çš„å¯¹è±¡ï¼Œæ ‡è®°ä¸ºç°è‰²
   markbeingfnz(g);  /* mark any finalizing object left from previous cycle */
 }
 
@@ -459,19 +474,19 @@ static void genlink (global_State *g, GCObject *o) {
 ** atomic phase. In the atomic phase, if table has any white value,
 ** put it in 'weak' list, to be cleared.
 */
-// Öµ²ÉÓÃÈõÒıÓÃ£¬¶ø¼ü»¹ÊÇÇ¿ÒıÓÃ£¬ËùÒÔÖ»ĞèÒª±ê¼Ç¼ü£¬¶ø²»ĞèÒª±ê¼ÇÖµ
+// å€¼é‡‡ç”¨å¼±å¼•ç”¨ï¼Œè€Œé”®è¿˜æ˜¯å¼ºå¼•ç”¨ï¼Œæ‰€ä»¥åªéœ€è¦æ ‡è®°é”®ï¼Œè€Œä¸éœ€è¦æ ‡è®°å€¼
 static void traverseweakvalue (global_State *g, Table *h) {
   Node *n, *limit = gnodelast(h);
   /* if there is array part, assume it may have white values (it is not
      worth traversing it now just to check) */
   int hasclears = (h->alimit > 0);
   for (n = gnode(h, 0); n < limit; n++) {  /* traverse hash part */
-    // µ±Öµ±»Çå¿Õºó£¬¶ÔÓ¦µÄ¼üÎŞÂÛÊÇ·ñ±»±ê¼Ç£¬¶¼»á±»Çå³ş
+    // å½“å€¼è¢«æ¸…ç©ºåï¼Œå¯¹åº”çš„é”®æ— è®ºæ˜¯å¦è¢«æ ‡è®°ï¼Œéƒ½ä¼šè¢«æ¸…æ¥š
     if (isempty(gval(n)))  /* entry is empty? */
       clearkey(n);  /* clear its key */
     else {
       lua_assert(!keyisnil(n));
-      // Ö»ĞèÒª±ê¼Ç¼ü£¬²»ĞèÒª±ê¼ÇÖµ
+      // åªéœ€è¦æ ‡è®°é”®ï¼Œä¸éœ€è¦æ ‡è®°å€¼
       markkey(g, n);
       if (!hasclears && iscleared(g, gcvalueN(gval(n))))  /* a white value? */
         hasclears = 1;  /* table will have to be cleared */
@@ -496,7 +511,7 @@ static void traverseweakvalue (global_State *g, Table *h) {
 ** must be kept in some gray list for post-processing; this is done
 ** by 'genlink'.
 */
-// ´ú±í¼ü²ÉÓÃÈõÒıÓÃ£¬¶øÖµ»¹ÊÇÇ¿ÒıÓÃ£¬ËùÒÔÖ»ĞèÒª±ê¼ÇÖµ£¬¶ø²»ĞèÒª±ê¼Ç¼ü
+// ä»£è¡¨é”®é‡‡ç”¨å¼±å¼•ç”¨ï¼Œè€Œå€¼è¿˜æ˜¯å¼ºå¼•ç”¨ï¼Œæ‰€ä»¥åªéœ€è¦æ ‡è®°å€¼ï¼Œè€Œä¸éœ€è¦æ ‡è®°é”®
 static int traverseephemeron (global_State *g, Table *h, int inv) {
   int marked = 0;  /* true if an object is marked in this traversal */
   int hasclears = 0;  /* true if table has white keys */
@@ -540,7 +555,7 @@ static int traverseephemeron (global_State *g, Table *h, int inv) {
 }
 
 
-// ±éÀútable£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†tableï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static void traversestrongtable (global_State *g, Table *h) {
   Node *n, *limit = gnodelast(h);
   unsigned int i;
@@ -560,15 +575,15 @@ static void traversestrongtable (global_State *g, Table *h) {
 }
 
 
-// ±éÀútable£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†tableï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static lu_mem traversetable (global_State *g, Table *h) {
   const char *weakkey, *weakvalue;
   const TValue *mode = gfasttm(g, h->metatable, TM_MODE);
   TString *smode;
   markobjectN(g, h->metatable);
-  // 1)"k": ÉùÃ÷¼üÎªÈõÒıÓÃ£¬µ±¼ü±»ÖÃ¿ÕÊ±£¬table»áÇå³ıÕâ¸ö½áµã
-  // 2)"v": ÉùÃ÷ÖµÎªÈõÒıÓÃ£¬µ±Öµ±»ÖÃ¿ÕÊ±£¬table»áÇå³ıÕâ¸ö½áµã
-  // 3)"kv": ÉùÃ÷¼üºÍÖµ¶¼ÎªÈõÒıÓÃ£¬µ±ÆäÖĞÒ»¸ö±»ÖÃ¿ÕÊ±£¬table»áÇå³ıÕâ¸ö½áµã
+  // 1)"k": å£°æ˜é”®ä¸ºå¼±å¼•ç”¨ï¼Œå½“é”®è¢«ç½®ç©ºæ—¶ï¼Œtableä¼šæ¸…é™¤è¿™ä¸ªç»“ç‚¹
+  // 2)"v": å£°æ˜å€¼ä¸ºå¼±å¼•ç”¨ï¼Œå½“å€¼è¢«ç½®ç©ºæ—¶ï¼Œtableä¼šæ¸…é™¤è¿™ä¸ªç»“ç‚¹
+  // 3)"kv": å£°æ˜é”®å’Œå€¼éƒ½ä¸ºå¼±å¼•ç”¨ï¼Œå½“å…¶ä¸­ä¸€ä¸ªè¢«ç½®ç©ºæ—¶ï¼Œtableä¼šæ¸…é™¤è¿™ä¸ªç»“ç‚¹
   if (mode && ttisshrstring(mode) &&  /* is there a weak mode? */
       (cast_void(smode = tsvalue(mode)),
        cast_void(weakkey = strchr(getshrstr(smode), 'k')),
@@ -579,17 +594,17 @@ static lu_mem traversetable (global_State *g, Table *h) {
     else if (!weakvalue)  /* strong values? */
       traverseephemeron(g, h, 0);
     else  /* all weak */
-      // ´ú±í¼üÓëÖµ¶¼ÎªÈõÒıÓÃ£¬Ö±½Ó°Ñµ±Ç°Õâ¸ötableÁ´½Óµ½´ıgcÀ¬»ø»ØÊÕµÄÁ´±íÖĞ£¬ºóÃæÈôÃ»ÓĞÆäËü¶ÔÏó±ê¼ÇÕâ¸ö±íÄÚµÄÔªËØ£¬Ôò½«±»È«²¿Çå³ı
+      // ä»£è¡¨é”®ä¸å€¼éƒ½ä¸ºå¼±å¼•ç”¨ï¼Œç›´æ¥æŠŠå½“å‰è¿™ä¸ªtableé“¾æ¥åˆ°å¾…gcåƒåœ¾å›æ”¶çš„é“¾è¡¨ä¸­ï¼Œåé¢è‹¥æ²¡æœ‰å…¶å®ƒå¯¹è±¡æ ‡è®°è¿™ä¸ªè¡¨å†…çš„å…ƒç´ ï¼Œåˆ™å°†è¢«å…¨éƒ¨æ¸…é™¤
       linkgclist(h, g->allweak);  /* nothing to traverse now */
   }
   else  /* not weak */
-    // ËµÃ÷Ã»ÉèÖÃ__mode£¬¶¼ÊÇÇ¿ÒıÓÃ
+    // è¯´æ˜æ²¡è®¾ç½®__modeï¼Œéƒ½æ˜¯å¼ºå¼•ç”¨
     traversestrongtable(g, h);
   return 1 + h->alimit + 2 * allocsizenode(h);
 }
 
 
-// ±éÀúfull user data£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†full user dataï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static int traverseudata (global_State *g, Udata *u) {
   int i;
   markobjectN(g, u->metatable);  /* mark its metatable */
@@ -605,7 +620,7 @@ static int traverseudata (global_State *g, Udata *u) {
 ** arrays can be larger than needed; the extra slots are filled with
 ** NULL, so the use of 'markobjectN')
 */
-// ±éÀúº¯ÊıÀàĞÍ£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†å‡½æ•°ç±»å‹ï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static int traverseproto (global_State *g, Proto *f) {
   int i;
   markobjectN(g, f->source);
@@ -621,7 +636,7 @@ static int traverseproto (global_State *g, Proto *f) {
 }
 
 
-// ±éÀúC±Õ°ü£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†Cé—­åŒ…ï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static int traverseCclosure (global_State *g, CClosure *cl) {
   int i;
   for (i = 0; i < cl->nupvalues; i++)  /* mark its upvalues */
@@ -633,7 +648,7 @@ static int traverseCclosure (global_State *g, CClosure *cl) {
 ** Traverse a Lua closure, marking its prototype and its upvalues.
 ** (Both can be NULL while closure is being created.)
 */
-// ±éÀúlua±Õ°ü£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†luaé—­åŒ…ï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static int traverseLclosure (global_State *g, LClosure *cl) {
   int i;
   markobjectN(g, cl->p);  /* mark its prototype */
@@ -657,7 +672,7 @@ static int traverseLclosure (global_State *g, LClosure *cl) {
 ** (which can only happen in generational mode) or if the traverse is in
 ** the propagate phase (which can only happen in incremental mode).
 */
-// ±éÀúÏß³Ì£¨Ğ­³Ì£©£¬±ê¼ÇËùÓĞ¿É´ïµÄ½áµã
+// éå†çº¿ç¨‹ï¼ˆåç¨‹ï¼‰ï¼Œæ ‡è®°æ‰€æœ‰å¯è¾¾çš„ç»“ç‚¹
 static int traversethread (global_State *g, lua_State *th) {
   UpVal *uv;
   StkId o = th->stack.p;
@@ -689,7 +704,7 @@ static int traversethread (global_State *g, lua_State *th) {
 /*
 ** traverse one gray object, turning it to black.
 */
-// ÑÕÉ«´«²¥
+// é¢œè‰²ä¼ æ’­
 static lu_mem propagatemark (global_State *g) {
   GCObject *o = g->gray;
   nw2black(o);
@@ -721,18 +736,18 @@ static lu_mem propagateall (global_State *g) {
 ** convergence on chains in the same table.
 **
 */
-// ¼¯ÖĞ´¦Àí¼üÈõÒıÓÃ±í
-// ÔÚÔ­×Ó½×¶Î±¾²¿·Ö¿ªÊ¼µÄÊ±ºò£¬ËùÓĞµÄKey_WeakTable¶¼ÒÑ¾­´Ógray»òÕßgrayagainÖĞ±»ÒÆ³ı²¢½øĞĞÒ»Ğ©±ê¼Ç£¬
-// ´¦ÀíÍê±Ïºó»á°ÑËüÃÇ´æ´¢ÓÚg->ephemeron£¨ÒëÎª¶ÌÔİµÄÊÂÎï£©Á´±íÖĞ£¬ÎÒÃÇÕâÀïÔİÊ±³ÆËüÎª¡°EÁ´±í¡±¡£
-// convergeephemeronsº¯ÊıµÄ¹¦ÄÜ¾ÍÊÇ´¦ÀíÕâ¸ö´æ´¢ÁËKey_WeakTableµÄEÁ´±í£¬ËüµÄÂß¼­·ÖÒÔÏÂ¼¸²½£º
-// 1£©È¡³ö£ºwhileÑ­»··ÖÂÖ´Î½øĞĞ´¦Àí£¬Ã¿ÂÖÍâÑ­»·ÏÈ´ÓEÁ´±íÈ¡³öÈ«²¿µÄKey_WeakTable£¬
-// ²¢ÓÃÒ»¸öÁÙÊ±Ö¸ÕëÖ¸ÏòËü±íÊ¾µÈ´ı´¦Àí£¬½Ó×Å¾ÍÇå¿Õg->ephemeronÔ­Á´±íÖ¸Õë£»
-// 2£©±éÀú´¦Àí£ºÄÚÑ­»·°´Ä³ÖÖË³Ğò¶ÔµÈ´ı´¦ÀíµÄÔ­EÁ´±íÖĞµÄKey_WeakTableÒÀ´Î´¦Àí£¬
-// ´¦ÀíÊ±Èô·¢ÏÖÄ³¸öKey_WeakTableÈÔÈ»¾ßÓĞÖÁÉÙÒ»¸öKeyºÍValue¶¼Îª¿ÕµÄ½áµã£¬Ôò°Ñ¸ÃTableÖØĞÂ²åÈëµ½ÏÂÒ»ÂÖµÄEÁ´±íÖĞ£¬
-// ¸ÃÁ´±íÔÚÉÏÒ»²½±»ÖØÖÃ¹ıÒÑ¾­Îª¿ÕÁ´±í¡£
-// 3£©·´ÏòÑ­»·£ºµ±ÕâÒ»ÂÖÄÚÑ­»·Á´±íÖĞËùÓĞKey_WeakTable¶ÔÏóÈ«²¿´¦Àí½áÊøºó£¬ÈôÓĞÈÎÒâ¶ÔÏóÑÕÉ«±ê¼Ç±»ĞŞ¸Ä£¬ÔòÍâÑ­»·whileÖØĞÂ¼ÌĞø¿ªÊ¼ĞÂÒ»ÂÖ£¬
-// ÖØ¸´µÚÒ»²½²Ù×÷¡£ÕâÀï»¹ÓĞ¸ö°Ñdir±éÀú·½ÏòÉèÖÃÎª!dir·´ÏòµÄÓÅ»¯Ï¸½Ú
-// 4£©ÎŞ±ê¼Ç¸Ä±ä£ºµ±Ò»ÂÖÄÚÑ­»·½áÊøºó²»ÔÙÓĞÈÎÒâ¶ÔÏó±ê¼Ç·¢Éú¸Ä±äÊ±£¬convergeephemeronsº¯Êı½áÊø¡£
+// é›†ä¸­å¤„ç†é”®å¼±å¼•ç”¨è¡¨
+// åœ¨åŸå­é˜¶æ®µæœ¬éƒ¨åˆ†å¼€å§‹çš„æ—¶å€™ï¼Œæ‰€æœ‰çš„Key_WeakTableéƒ½å·²ç»ä»grayæˆ–è€…grayagainä¸­è¢«ç§»é™¤å¹¶è¿›è¡Œä¸€äº›æ ‡è®°ï¼Œ
+// å¤„ç†å®Œæ¯•åä¼šæŠŠå®ƒä»¬å­˜å‚¨äºg->ephemeronï¼ˆè¯‘ä¸ºçŸ­æš‚çš„äº‹ç‰©ï¼‰é“¾è¡¨ä¸­ï¼Œæˆ‘ä»¬è¿™é‡Œæš‚æ—¶ç§°å®ƒä¸ºâ€œEé“¾è¡¨â€ã€‚
+// convergeephemeronså‡½æ•°çš„åŠŸèƒ½å°±æ˜¯å¤„ç†è¿™ä¸ªå­˜å‚¨äº†Key_WeakTableçš„Eé“¾è¡¨ï¼Œå®ƒçš„é€»è¾‘åˆ†ä»¥ä¸‹å‡ æ­¥ï¼š
+// 1ï¼‰å–å‡ºï¼šwhileå¾ªç¯åˆ†è½®æ¬¡è¿›è¡Œå¤„ç†ï¼Œæ¯è½®å¤–å¾ªç¯å…ˆä»Eé“¾è¡¨å–å‡ºå…¨éƒ¨çš„Key_WeakTableï¼Œ
+// å¹¶ç”¨ä¸€ä¸ªä¸´æ—¶æŒ‡é’ˆæŒ‡å‘å®ƒè¡¨ç¤ºç­‰å¾…å¤„ç†ï¼Œæ¥ç€å°±æ¸…ç©ºg->ephemeronåŸé“¾è¡¨æŒ‡é’ˆï¼›
+// 2ï¼‰éå†å¤„ç†ï¼šå†…å¾ªç¯æŒ‰æŸç§é¡ºåºå¯¹ç­‰å¾…å¤„ç†çš„åŸEé“¾è¡¨ä¸­çš„Key_WeakTableä¾æ¬¡å¤„ç†ï¼Œ
+// å¤„ç†æ—¶è‹¥å‘ç°æŸä¸ªKey_WeakTableä»ç„¶å…·æœ‰è‡³å°‘ä¸€ä¸ªKeyå’ŒValueéƒ½ä¸ºç©ºçš„ç»“ç‚¹ï¼Œåˆ™æŠŠè¯¥Tableé‡æ–°æ’å…¥åˆ°ä¸‹ä¸€è½®çš„Eé“¾è¡¨ä¸­ï¼Œ
+// è¯¥é“¾è¡¨åœ¨ä¸Šä¸€æ­¥è¢«é‡ç½®è¿‡å·²ç»ä¸ºç©ºé“¾è¡¨ã€‚
+// 3ï¼‰åå‘å¾ªç¯ï¼šå½“è¿™ä¸€è½®å†…å¾ªç¯é“¾è¡¨ä¸­æ‰€æœ‰Key_WeakTableå¯¹è±¡å…¨éƒ¨å¤„ç†ç»“æŸåï¼Œè‹¥æœ‰ä»»æ„å¯¹è±¡é¢œè‰²æ ‡è®°è¢«ä¿®æ”¹ï¼Œåˆ™å¤–å¾ªç¯whileé‡æ–°ç»§ç»­å¼€å§‹æ–°ä¸€è½®ï¼Œ
+// é‡å¤ç¬¬ä¸€æ­¥æ“ä½œã€‚è¿™é‡Œè¿˜æœ‰ä¸ªæŠŠdiréå†æ–¹å‘è®¾ç½®ä¸º!diråå‘çš„ä¼˜åŒ–ç»†èŠ‚
+// 4ï¼‰æ— æ ‡è®°æ”¹å˜ï¼šå½“ä¸€è½®å†…å¾ªç¯ç»“æŸåä¸å†æœ‰ä»»æ„å¯¹è±¡æ ‡è®°å‘ç”Ÿæ”¹å˜æ—¶ï¼Œconvergeephemeronså‡½æ•°ç»“æŸã€‚
 static void convergeephemerons (global_State *g) {
   int changed;
   int dir = 0;
@@ -786,7 +801,7 @@ static void clearbykeys (global_State *g, GCObject *l) {
 ** clear entries with unmarked values from all weaktables in list 'l' up
 ** to element 'f'
 */
-// ÈôTableÖĞÓĞÎ´±»±ê¼ÇµÄvalue£¬Ôò°Ñ¸Ãvalue¶ÔÓ¦µÄkeyÒ²ÉèÖÃÎªÎŞĞ§´ıÇå³ı×´Ì¬£¬¾¡¹ÜÕâ¸ökeyÖµ¿ÉÄÜÔÚ±ê¼Ç½×¶Î±»±ê¼ÇÁË
+// è‹¥Tableä¸­æœ‰æœªè¢«æ ‡è®°çš„valueï¼Œåˆ™æŠŠè¯¥valueå¯¹åº”çš„keyä¹Ÿè®¾ç½®ä¸ºæ— æ•ˆå¾…æ¸…é™¤çŠ¶æ€ï¼Œå°½ç®¡è¿™ä¸ªkeyå€¼å¯èƒ½åœ¨æ ‡è®°é˜¶æ®µè¢«æ ‡è®°äº†
 static void clearbyvalues (global_State *g, GCObject *l, GCObject *f) {
   for (; l != f; l = gco2t(l)->gclist) {
     Table *h = gco2t(l);
@@ -815,7 +830,7 @@ static void freeupval (lua_State *L, UpVal *uv) {
 }
 
 
-// ¸ù¾İ¶ÔÏóµÄÀàĞÍµ÷ÓÃ²»Í¬µÄÊÍ·Åº¯Êı
+// æ ¹æ®å¯¹è±¡çš„ç±»å‹è°ƒç”¨ä¸åŒçš„é‡Šæ”¾å‡½æ•°
 static void freeobj (lua_State *L, GCObject *o) {
   switch (o->tt) {
     case LUA_VPROTO:
@@ -868,27 +883,27 @@ static void freeobj (lua_State *L, GCObject *o) {
 ** collection cycle. Return where to continue the traversal or NULL if
 ** list is finished. ('*countout' gets the number of elements traversed.)
 */
-// º¯Êı»á¶ÔÍ¨¹ı²ÎÊı´«½øÀ´µÄÁ´±í°´Ë³Ğò½øĞĞ±éÀú£¬²¢ÔÚ±éÀúÃ¿Ò»¸öÔªËØµÄÊ±ºò×öÈçÏÂ²Ù×÷£º
-// 1£©Èôµ±Ç°±éÀúµÄÁ´±íÔªËØÎ´±ê¼Ç£¬¼´ÑÕÉ«Îªother_white£¬´ú±í¸Ã¶ÔÏóÊÇÀ¬»ø¶ÔÏó£¬ĞèÒª±»Çå³ı£¬
-// ÓÚÊÇ»áµ÷ÓÃfreeobjº¯ÊıÊÍ·Å¸Ã¶ÔÏóµÄÄÚ´æ£¬²¢ÈÃÁ´±íÖ¸ÕëÍùÇ°½ø¡£
-// freeobjº¯Êı»á¸ù¾İ¶ÔÏóµÄÀàĞÍµ÷ÓÃ²»Í¬µÄÊÍ·Åº¯Êı£¬
-// ±£Ö¤Ã¿ÖÖ¶ÔÏó¶¼ÄÜÕıÈ·µØ´¦Àí²¢ÊÍ·Å×ÔÉíÒıÓÃµÄÆäËü×Ó¶ÔÏó£¬
-// 2£©Èôµ±Ç°ÔªËØÒÑ¾­±»±ê¼ÇÁË£¬´ËÊ±ËüµÄÑÕÉ«¿ÉÄÜÊÇcurrent_whiteµ±Ç°°×£¨Ô­×Ó½×¶Îºó´´½¨µÄ¶ÔÏó£©
-// »òÕßºÚÉ«£¨±ê¼Ç½×¶Î±»´¦ÀíÍê³É£©£¬ÔòÔªËØÎªºÏ·¨¶ÔÏó£¬ÔªËØ»á¼ÌĞø±£Áô£¬
-// ²¢°ÑËüµÄÑÕÉ«±ê¼ÇÖØÖÃÎªcurrent_whiteµ±Ç°°×£¬´¦ÀíÍê³Éºó£¬Á´±íÍ·²¿Ö¸Õë²»±ä£¬
-// Ñ­»·µü´úÆ÷Ö¸Õë¼ÌĞøÍùÇ°±éÀúÖ¸ÏòÏÂÒ»¸ö¶ÔÏó¡£¡¢
+// å‡½æ•°ä¼šå¯¹é€šè¿‡å‚æ•°ä¼ è¿›æ¥çš„é“¾è¡¨æŒ‰é¡ºåºè¿›è¡Œéå†ï¼Œå¹¶åœ¨éå†æ¯ä¸€ä¸ªå…ƒç´ çš„æ—¶å€™åšå¦‚ä¸‹æ“ä½œï¼š
+// 1ï¼‰è‹¥å½“å‰éå†çš„é“¾è¡¨å…ƒç´ æœªæ ‡è®°ï¼Œå³é¢œè‰²ä¸ºother_whiteï¼Œä»£è¡¨è¯¥å¯¹è±¡æ˜¯åƒåœ¾å¯¹è±¡ï¼Œéœ€è¦è¢«æ¸…é™¤ï¼Œ
+// äºæ˜¯ä¼šè°ƒç”¨freeobjå‡½æ•°é‡Šæ”¾è¯¥å¯¹è±¡çš„å†…å­˜ï¼Œå¹¶è®©é“¾è¡¨æŒ‡é’ˆå¾€å‰è¿›ã€‚
+// freeobjå‡½æ•°ä¼šæ ¹æ®å¯¹è±¡çš„ç±»å‹è°ƒç”¨ä¸åŒçš„é‡Šæ”¾å‡½æ•°ï¼Œ
+// ä¿è¯æ¯ç§å¯¹è±¡éƒ½èƒ½æ­£ç¡®åœ°å¤„ç†å¹¶é‡Šæ”¾è‡ªèº«å¼•ç”¨çš„å…¶å®ƒå­å¯¹è±¡ï¼Œ
+// 2ï¼‰è‹¥å½“å‰å…ƒç´ å·²ç»è¢«æ ‡è®°äº†ï¼Œæ­¤æ—¶å®ƒçš„é¢œè‰²å¯èƒ½æ˜¯current_whiteå½“å‰ç™½ï¼ˆåŸå­é˜¶æ®µååˆ›å»ºçš„å¯¹è±¡ï¼‰
+// æˆ–è€…é»‘è‰²ï¼ˆæ ‡è®°é˜¶æ®µè¢«å¤„ç†å®Œæˆï¼‰ï¼Œåˆ™å…ƒç´ ä¸ºåˆæ³•å¯¹è±¡ï¼Œå…ƒç´ ä¼šç»§ç»­ä¿ç•™ï¼Œ
+// å¹¶æŠŠå®ƒçš„é¢œè‰²æ ‡è®°é‡ç½®ä¸ºcurrent_whiteå½“å‰ç™½ï¼Œå¤„ç†å®Œæˆåï¼Œé“¾è¡¨å¤´éƒ¨æŒ‡é’ˆä¸å˜ï¼Œ
+// å¾ªç¯è¿­ä»£å™¨æŒ‡é’ˆç»§ç»­å¾€å‰éå†æŒ‡å‘ä¸‹ä¸€ä¸ªå¯¹è±¡ã€‚ã€
 // 
-// ²ÎÊı£º
-// 1£©lua_State * L£º´ú±íµ±Ç°ÔËĞĞ¸Ãº¯ÊıµÄÏß³Ì¡£¼¸ºõÃ¿¸öº¯ÊıµÚÒ»¸ö²ÎÊı¶¼ÊÇËü£¬
-// ÒòÎªºÜ¶àº¯ÊıÔËĞĞËùĞèÒªµÄ×´Ì¬¶¼ÊÇ´æ´¢ÓÚÏß³Ì»òÕßglobal_StateÖĞ¡£
-// 2£©GCObject **p£ºÖ¸ÏòGCObject * µÄÖ¸Õë£¬ÕâÀï¿ÉÒÔÀí½âÎª´«ÈëÁËÒ»¸öÁ´±í£¬
-// Á´±íÖĞµÄÔªËØ¿ÉÒÔÍ¨¹ınextÖ¸Õë×Ö¶ÎÖ¸ÏòÏÂÒ»¸öÔªËØ¡£
-// 3£©int countin£º´ú±í¸Ãº¯ÊıÔÊĞí´¦ÀíµÄ×î´ó¶ÔÏó¸öÊı¡£º¯ÊıÖĞ»áÖğÒ»±éÀúÁ´±íµÄÔªËØ£¬
-// Ã¿µ±±éÀúÁ´±íÖĞÒ»¸ö¶ÔÏóµÄÊ±ºò£¬¼ÆÊı¼Ó1£¬µ±¼ÆÊı´ïµ½countinÊ±£¬Ñ­»·½áÊø£¬
-// º¯ÊıµÄ·µ»ØÖµÎªÏÂÒ»¸öÒª´¦ÀíµÄ¶ÔÏóµÄÖ¸Õë¡£
-// 4£©int countout£º´ú±í¸Ãº¯ÊıÖ´ĞĞÍê±ÏºóÊµ¼Ê´¦ÀíÁËµÄ¶ÔÏó¸öÊı¡£ÈôÁ´±í¶ÔÏóÊıÁ¿×ã¹»¶à£¬
-// ÔòcountoutÓëcountinÏàµÈ£¬·ñÔòÈô±éÀúÔÚÎ´´ïµ½countinÊıÁ¿µÄÊ±ºò¾Íµ½´ïÁËÁ´±íÄ©¶Ë£¬
-// ´ËÊ±countout»áĞ¡ÓÚcountin¡£
+// å‚æ•°ï¼š
+// 1ï¼‰lua_State * Lï¼šä»£è¡¨å½“å‰è¿è¡Œè¯¥å‡½æ•°çš„çº¿ç¨‹ã€‚å‡ ä¹æ¯ä¸ªå‡½æ•°ç¬¬ä¸€ä¸ªå‚æ•°éƒ½æ˜¯å®ƒï¼Œ
+// å› ä¸ºå¾ˆå¤šå‡½æ•°è¿è¡Œæ‰€éœ€è¦çš„çŠ¶æ€éƒ½æ˜¯å­˜å‚¨äºçº¿ç¨‹æˆ–è€…global_Stateä¸­ã€‚
+// 2ï¼‰GCObject **pï¼šæŒ‡å‘GCObject * çš„æŒ‡é’ˆï¼Œè¿™é‡Œå¯ä»¥ç†è§£ä¸ºä¼ å…¥äº†ä¸€ä¸ªé“¾è¡¨ï¼Œ
+// é“¾è¡¨ä¸­çš„å…ƒç´ å¯ä»¥é€šè¿‡nextæŒ‡é’ˆå­—æ®µæŒ‡å‘ä¸‹ä¸€ä¸ªå…ƒç´ ã€‚
+// 3ï¼‰int countinï¼šä»£è¡¨è¯¥å‡½æ•°å…è®¸å¤„ç†çš„æœ€å¤§å¯¹è±¡ä¸ªæ•°ã€‚å‡½æ•°ä¸­ä¼šé€ä¸€éå†é“¾è¡¨çš„å…ƒç´ ï¼Œ
+// æ¯å½“éå†é“¾è¡¨ä¸­ä¸€ä¸ªå¯¹è±¡çš„æ—¶å€™ï¼Œè®¡æ•°åŠ 1ï¼Œå½“è®¡æ•°è¾¾åˆ°countinæ—¶ï¼Œå¾ªç¯ç»“æŸï¼Œ
+// å‡½æ•°çš„è¿”å›å€¼ä¸ºä¸‹ä¸€ä¸ªè¦å¤„ç†çš„å¯¹è±¡çš„æŒ‡é’ˆã€‚
+// 4ï¼‰int countoutï¼šä»£è¡¨è¯¥å‡½æ•°æ‰§è¡Œå®Œæ¯•åå®é™…å¤„ç†äº†çš„å¯¹è±¡ä¸ªæ•°ã€‚è‹¥é“¾è¡¨å¯¹è±¡æ•°é‡è¶³å¤Ÿå¤šï¼Œ
+// åˆ™countoutä¸countinç›¸ç­‰ï¼Œå¦åˆ™è‹¥éå†åœ¨æœªè¾¾åˆ°countinæ•°é‡çš„æ—¶å€™å°±åˆ°è¾¾äº†é“¾è¡¨æœ«ç«¯ï¼Œ
+// æ­¤æ—¶countoutä¼šå°äºcountinã€‚
 static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
                              int *countout) {
   global_State *g = G(L);
@@ -916,17 +931,17 @@ static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
 /*
 ** sweep a list until a live object (or end of list)
 */
-// sweeptoliveº¯ÊıÍêÕûÂß¼­ÈçÏÂ£º
-// 1£©ÔÚÃ¿ÂÖwhileÑ­»·µ÷ÓÃÖĞ£¬sweeplist»á±»µ÷ÓÃÒ»´Î£¬µ÷ÓÃÊ±Èô·¢ÏÖµ±Ç°Á´±íµÚÒ»¸ö¶ÔÏóÎ´±»±ê¼Ç£¬
-// Ôò»á¶ÔËü½øĞĞÇå³ı£¬²¢ÈÃg->allgcÁ´±íÖ¸ÕëÓë±éÀúµü´úÆ÷Ö¸ÕëÍ¬Ê±ÍùºóÒÆ¶¯£¬
-// µü´ú³õÊ¼µÄÊ±ºòµü´úÆ÷Ö¸ÕëÊÇÖ¸Ïòg->allgcÁ´±íÍ·²¿£¬È»ºóÒòÎªÕâÀïÊÇÍ¬Ê±ÒÆ¶¯£¬ËùÒÔËüÃÇÈÔÈ»±£³ÖÖ¸Ïò×ÅÍ¬Ò»¸ö¶ÔÏó¡£
-// ±¾ÂÖsweeplist½áÊøºósweeptoliveµÄwhileÑ­»·Ìõ¼ş£¨p == old£©ÒÀ¾ÉÂú×ã£¬»á¼ÌĞøÏÂÒ»ÂÖÑ­»·µÄ´¦Àí¡£
-// 2£©Èôµ±Ç°Á´±íµÚÒ»¸ö¶ÔÏóÎªÒÑ±ê¼Ç¶ÔÏó£¬Ôò²»Ö´ĞĞÇå³ı£¬g->allgcÁ´±íÖ¸ÕëÎ¬³Ö²»±ä£¬ÈÔÖ¸ÏòÔ­À´µÄ¶ÔÏó£¬
-// ²»¹ı±éÀúµü´úÆ÷Ö¸Õë»á¼ÌĞøÍùÇ°½ø£¬Ëü»áÖ¸Ïòg->allgcÁ´±íµÄÏÂÒ»¸ö¶ÔÏó£¬ËùÒÔ´ËÊ±sweeplistº¯Êı·µ»Øºó£¬
-// whileÑ­»·Ìõ¼ş£¨p == old£©Ìõ¼ş²»Âú×ã£¬ÒòÎªÒ»¸öÖ¸ÕëÈÔÈ»Ö¸Ïòg->allgcÁ´±íÍ·²¿£¬
-// Ò»¸öÖ¸ÕëÖ¸ÏòµÄÊÇÍ·²¿µÄÏÂÒ»¸ö¶ÔÏó£¬Ñ­»·½áÊø¡£
-// ×îÖÕ£¬sweeptoliveº¯ÊıÖ´ĞĞÍê±Ï·µ»Øºó£¬´ËÊ±µÄ×´Ì¬ÊÇ£ºg->sweepgcÖ¸Õë»áÖ¸Ïòg->allgcÁ´±íÖĞÏÂÒ»¸öĞèÒª´¦ÀíµÄ¶ÔÏó£»
-// ¶øg->allgcÁ´±í±íÍ·µÚÒ»¸ö¶ÔÏóÎªÒ»¸öÒÑ±ê¼ÇµÄºÏ·¨¶ÔÏó¡£
+// sweeptoliveå‡½æ•°å®Œæ•´é€»è¾‘å¦‚ä¸‹ï¼š
+// 1ï¼‰åœ¨æ¯è½®whileå¾ªç¯è°ƒç”¨ä¸­ï¼Œsweeplistä¼šè¢«è°ƒç”¨ä¸€æ¬¡ï¼Œè°ƒç”¨æ—¶è‹¥å‘ç°å½“å‰é“¾è¡¨ç¬¬ä¸€ä¸ªå¯¹è±¡æœªè¢«æ ‡è®°ï¼Œ
+// åˆ™ä¼šå¯¹å®ƒè¿›è¡Œæ¸…é™¤ï¼Œå¹¶è®©g->allgcé“¾è¡¨æŒ‡é’ˆä¸éå†è¿­ä»£å™¨æŒ‡é’ˆåŒæ—¶å¾€åç§»åŠ¨ï¼Œ
+// è¿­ä»£åˆå§‹çš„æ—¶å€™è¿­ä»£å™¨æŒ‡é’ˆæ˜¯æŒ‡å‘g->allgcé“¾è¡¨å¤´éƒ¨ï¼Œç„¶åå› ä¸ºè¿™é‡Œæ˜¯åŒæ—¶ç§»åŠ¨ï¼Œæ‰€ä»¥å®ƒä»¬ä»ç„¶ä¿æŒæŒ‡å‘ç€åŒä¸€ä¸ªå¯¹è±¡ã€‚
+// æœ¬è½®sweeplistç»“æŸåsweeptoliveçš„whileå¾ªç¯æ¡ä»¶ï¼ˆp == oldï¼‰ä¾æ—§æ»¡è¶³ï¼Œä¼šç»§ç»­ä¸‹ä¸€è½®å¾ªç¯çš„å¤„ç†ã€‚
+// 2ï¼‰è‹¥å½“å‰é“¾è¡¨ç¬¬ä¸€ä¸ªå¯¹è±¡ä¸ºå·²æ ‡è®°å¯¹è±¡ï¼Œåˆ™ä¸æ‰§è¡Œæ¸…é™¤ï¼Œg->allgcé“¾è¡¨æŒ‡é’ˆç»´æŒä¸å˜ï¼Œä»æŒ‡å‘åŸæ¥çš„å¯¹è±¡ï¼Œ
+// ä¸è¿‡éå†è¿­ä»£å™¨æŒ‡é’ˆä¼šç»§ç»­å¾€å‰è¿›ï¼Œå®ƒä¼šæŒ‡å‘g->allgcé“¾è¡¨çš„ä¸‹ä¸€ä¸ªå¯¹è±¡ï¼Œæ‰€ä»¥æ­¤æ—¶sweeplistå‡½æ•°è¿”å›åï¼Œ
+// whileå¾ªç¯æ¡ä»¶ï¼ˆp == oldï¼‰æ¡ä»¶ä¸æ»¡è¶³ï¼Œå› ä¸ºä¸€ä¸ªæŒ‡é’ˆä»ç„¶æŒ‡å‘g->allgcé“¾è¡¨å¤´éƒ¨ï¼Œ
+// ä¸€ä¸ªæŒ‡é’ˆæŒ‡å‘çš„æ˜¯å¤´éƒ¨çš„ä¸‹ä¸€ä¸ªå¯¹è±¡ï¼Œå¾ªç¯ç»“æŸã€‚
+// æœ€ç»ˆï¼Œsweeptoliveå‡½æ•°æ‰§è¡Œå®Œæ¯•è¿”å›åï¼Œæ­¤æ—¶çš„çŠ¶æ€æ˜¯ï¼šg->sweepgcæŒ‡é’ˆä¼šæŒ‡å‘g->allgcé“¾è¡¨ä¸­ä¸‹ä¸€ä¸ªéœ€è¦å¤„ç†çš„å¯¹è±¡ï¼›
+// è€Œg->allgcé“¾è¡¨è¡¨å¤´ç¬¬ä¸€ä¸ªå¯¹è±¡ä¸ºä¸€ä¸ªå·²æ ‡è®°çš„åˆæ³•å¯¹è±¡ã€‚
 static GCObject **sweeptolive (lua_State *L, GCObject **p) {
   GCObject **old = p;
   do {
@@ -947,11 +962,11 @@ static GCObject **sweeptolive (lua_State *L, GCObject **p) {
 /*
 ** If possible, shrink string table.
 */
-// Èç¹û¿ÉÄÜ£¬ÊÕËõ×Ö·û´®±í
-// µ±Ò»¸ö¶Ì×Ö·û´®Ã»ÓĞ±»ÈÎÒâ¶ÔÏóÒıÓÃÊ±£¬»áÔÚÇå³ı½×¶Î±»Çå³ı£¬Í¬Ê±ËüÔÚstrtÖĞµÄÖ¸ÕëÒ²½«±»ÖÃÎª¿ÕÖ¸Õë£¬
-// Ã¿ÒÆ³ı1¸ö¶Ì×Ö·û´®¶ÔÏó£¬strtµÄ¾Ínuse»á¼õ1£¬µ«´ËÊ±strtÒÑ¾­·ÖÅäºÃµÄÄÚ´æ¿Õ¼äÆäÊµÊÇ²»»áÄÇÃ´Áé»îÁ¢¿Ì×Ô¶¯¸ú×Å¼õĞ¡µÄ¡£
-// checkSizesº¯ÊıµÄ×÷ÓÃ£¬¾ÍÊÇ¼ì²ânuseµÄ´óĞ¡£¬ÈôËüÒÑ¾­¼õĞ¡µ½²»×ã¹şÏ£±íÈİÁ¿sizeµÄ4·ÖÖ®1ÁË£¬´ú±í´ËÊ±¹şÏ£±íÀûÓÃÂÊ½ÏµÍ£¬
-// ´óÁ¿¿Õ¼äÃ»ÓĞ±»ÓÃµ½£¬Ôò»á¶Ô¹şÏ£±íÄÚ´æ½øĞĞÖØĞÂ·ÖÅäÓëµ÷Õû£¬Ã¿´Î»á°ÑÈİÁ¿½µµ½Ô­À´µÄ2·ÖÖ®1£¬ÕâÑù¾Í¿ÉÒÔ½ÚÊ¡³öÔ­À´Ò»°ëµÄÄÚ´æ¿Õ¼ä¡£
+// å¦‚æœå¯èƒ½ï¼Œæ”¶ç¼©å­—ç¬¦ä¸²è¡¨
+// å½“ä¸€ä¸ªçŸ­å­—ç¬¦ä¸²æ²¡æœ‰è¢«ä»»æ„å¯¹è±¡å¼•ç”¨æ—¶ï¼Œä¼šåœ¨æ¸…é™¤é˜¶æ®µè¢«æ¸…é™¤ï¼ŒåŒæ—¶å®ƒåœ¨strtä¸­çš„æŒ‡é’ˆä¹Ÿå°†è¢«ç½®ä¸ºç©ºæŒ‡é’ˆï¼Œ
+// æ¯ç§»é™¤1ä¸ªçŸ­å­—ç¬¦ä¸²å¯¹è±¡ï¼Œstrtçš„å°±nuseä¼šå‡1ï¼Œä½†æ­¤æ—¶strtå·²ç»åˆ†é…å¥½çš„å†…å­˜ç©ºé—´å…¶å®æ˜¯ä¸ä¼šé‚£ä¹ˆçµæ´»ç«‹åˆ»è‡ªåŠ¨è·Ÿç€å‡å°çš„ã€‚
+// checkSizeså‡½æ•°çš„ä½œç”¨ï¼Œå°±æ˜¯æ£€æµ‹nuseçš„å¤§å°ï¼Œè‹¥å®ƒå·²ç»å‡å°åˆ°ä¸è¶³å“ˆå¸Œè¡¨å®¹é‡sizeçš„4åˆ†ä¹‹1äº†ï¼Œä»£è¡¨æ­¤æ—¶å“ˆå¸Œè¡¨åˆ©ç”¨ç‡è¾ƒä½ï¼Œ
+// å¤§é‡ç©ºé—´æ²¡æœ‰è¢«ç”¨åˆ°ï¼Œåˆ™ä¼šå¯¹å“ˆå¸Œè¡¨å†…å­˜è¿›è¡Œé‡æ–°åˆ†é…ä¸è°ƒæ•´ï¼Œæ¯æ¬¡ä¼šæŠŠå®¹é‡é™åˆ°åŸæ¥çš„2åˆ†ä¹‹1ï¼Œè¿™æ ·å°±å¯ä»¥èŠ‚çœå‡ºåŸæ¥ä¸€åŠçš„å†…å­˜ç©ºé—´ã€‚
 static void checkSizes (lua_State *L, global_State *g) {
   if (!g->gcemergency) {
     if (g->strt.nuse < g->strt.size / 4) {  /* string table too big? */
@@ -988,8 +1003,8 @@ static void dothecall (lua_State *L, void *ud) {
 }
 
 
-// __gcÔª·½·¨
-// ÔÚ¶ÔÏóÒª±»Ïú»ÙµÄÊ±ºòµ÷ÓÃ£¬Ò»°ã¿ÉÓÃÓÚ¿ØÖÆÒ»Ğ©×ÊÔ´µÄÊÍ·Å
+// __gcå…ƒæ–¹æ³•
+// åœ¨å¯¹è±¡è¦è¢«é”€æ¯çš„æ—¶å€™è°ƒç”¨ï¼Œä¸€èˆ¬å¯ç”¨äºæ§åˆ¶ä¸€äº›èµ„æºçš„é‡Šæ”¾
 static void GCTM (lua_State *L) {
   global_State *g = G(L);
   const TValue *tm;
@@ -1021,8 +1036,8 @@ static void GCTM (lua_State *L) {
 /*
 ** Call a few finalizers
 */
-// ÒÀ´ÎÖ´ĞĞÒ»¶¨¸öÊıµÄg->tobefnzÁ´±íÖĞµÄÔªËØµÄÎö¹¹Æ÷£¬ÆäÖĞµ÷ÓÃµ½GCTMº¯Êı£¬
-// ¼´ÎªÖ´ĞĞ__gcÔª·½·¨
+// ä¾æ¬¡æ‰§è¡Œä¸€å®šä¸ªæ•°çš„g->tobefnzé“¾è¡¨ä¸­çš„å…ƒç´ çš„ææ„å™¨ï¼Œå…¶ä¸­è°ƒç”¨åˆ°GCTMå‡½æ•°ï¼Œ
+// å³ä¸ºæ‰§è¡Œ__gcå…ƒæ–¹æ³•
 static int runafewfinalizers (lua_State *L, int n) {
   global_State *g = G(L);
   int i;
@@ -1144,9 +1159,9 @@ void luaC_checkfinalizer (lua_State *L, GCObject *o, Table *mt) {
 ** PAUSEADJ). (Division by 'estimate' should be OK: it cannot be zero,
 ** because Lua cannot even start with less than PAUSEADJ bytes).
 */
-// Ô¤³äÖµ½ğ¶î = 2 * ¹Ì¶¨Ïû·Ñ - ÕæÊµÏû·Ñ
-// ÎÒÃÇÁîµ±Ç°µÄ¹Ì¶¨Ïû·ÑÎª100£¨ĞÂÔöÏû·Ñ¼ì²âÖµÄ¬ÈÏÓëËüÏàµÈ£¬ËùÒÔÒ²Îª100£©£¬GCÍê±ÏºóÕæÊµÏû·ÑÊ£ÓàÎª160¡£
-// ËùÒÔ´ËÊ±ĞèÒªÔ¤³äÖµµÄ½ğ¶î = 2 * 100 - 160 = 40¡£
+// é¢„å……å€¼é‡‘é¢ = 2 * å›ºå®šæ¶ˆè´¹ - çœŸå®æ¶ˆè´¹
+// æˆ‘ä»¬ä»¤å½“å‰çš„å›ºå®šæ¶ˆè´¹ä¸º100ï¼ˆæ–°å¢æ¶ˆè´¹æ£€æµ‹å€¼é»˜è®¤ä¸å®ƒç›¸ç­‰ï¼Œæ‰€ä»¥ä¹Ÿä¸º100ï¼‰ï¼ŒGCå®Œæ¯•åçœŸå®æ¶ˆè´¹å‰©ä½™ä¸º160ã€‚
+// æ‰€ä»¥æ­¤æ—¶éœ€è¦é¢„å……å€¼çš„é‡‘é¢ = 2 * 100 - 160 = 40ã€‚
 static void setpause (global_State *g) {
   l_mem threshold, debt;
   int pause = getgcparam(g->gcpause);
@@ -1167,7 +1182,7 @@ static void setpause (global_State *g) {
 ** are now old---must be in a gray list. Everything else is not in a
 ** gray list. Open upvalues are also kept gray.
 */
-// ±éÀú²ÎÊıÖĞµÄÁ´±í£¬Çå³ıÆäÖĞÎ´±ê¼ÇµÄ¶ÔÏó£¬ÒÑ±ê¼ÇµÄ¶ÔÏóÔò°ÑËüÃÇµÄÄêÁä±ê¼ÇÎªG_OLDÀÏ¶ÔÏó
+// éå†å‚æ•°ä¸­çš„é“¾è¡¨ï¼Œæ¸…é™¤å…¶ä¸­æœªæ ‡è®°çš„å¯¹è±¡ï¼Œå·²æ ‡è®°çš„å¯¹è±¡åˆ™æŠŠå®ƒä»¬çš„å¹´é¾„æ ‡è®°ä¸ºG_OLDè€å¯¹è±¡
 static void sweep2old (lua_State *L, GCObject **p) {
   GCObject *curr;
   global_State *g = G(L);
@@ -1204,13 +1219,13 @@ static void sweep2old (lua_State *L, GCObject **p) {
 ** here.  They will all be advanced in 'correctgraylist'. That function
 ** will also remove objects turned white here from any gray list.
 */
-// ±éÀúÁ´±íÄ³¸öÇø¼äÄÚµÄ¶ÔÏó£¬²»»áÈ¥ĞŞ¸Ä¶ÔÏóµÄÑÕÉ«£¬Ö´ĞĞÒÔÏÂ²Ù×÷£º
-// 3.1£©Çå³ıÎ´±ê¼ÇµÄ¶ÔÏó£»
-// 3.2£©ÒÑ±ê¼ÇµÄ¶ÔÏóÔò½øĞĞÄêÁäµÄ³É³¤£»
+// éå†é“¾è¡¨æŸä¸ªåŒºé—´å†…çš„å¯¹è±¡ï¼Œä¸ä¼šå»ä¿®æ”¹å¯¹è±¡çš„é¢œè‰²ï¼Œæ‰§è¡Œä»¥ä¸‹æ“ä½œï¼š
+// 3.1ï¼‰æ¸…é™¤æœªæ ‡è®°çš„å¯¹è±¡ï¼›
+// 3.2ï¼‰å·²æ ‡è®°çš„å¯¹è±¡åˆ™è¿›è¡Œå¹´é¾„çš„æˆé•¿ï¼›
 static GCObject **sweepgen (lua_State *L, global_State *g, GCObject **p,
                             GCObject *limit, GCObject **pfirstold1) {
-  // ³É³¤¹ØÏµ
-  // ×ó±ßÄ¿±êÄêÁä£¬ÓÒ±ßÔ­Ê¼ÄêÁä
+  // æˆé•¿å…³ç³»
+  // å·¦è¾¹ç›®æ ‡å¹´é¾„ï¼Œå³è¾¹åŸå§‹å¹´é¾„
   static const lu_byte nextage[] = {
     G_SURVIVAL,  /* from G_NEW */
     G_OLD1,      /* from G_SURVIVAL */
@@ -1220,14 +1235,14 @@ static GCObject **sweepgen (lua_State *L, global_State *g, GCObject **p,
     G_TOUCHED1,  /* from G_TOUCHED1 (do not change) */
     G_TOUCHED2   /* from G_TOUCHED2 (do not change) */
   };
-  // 1£©G_NEW->G_SURVIVAL£»
-  // 2£©G_SURVIVAL, G_OLD0->G_OLD1£»
-  // 3£©G_OLD1->G_OLD£»
-  // 4£©G_TOUCHED1, G_TOUCHED2£ºÓëG_OLD0ÓëG_OLD1¶Ô£¬Çø±ğÔÚÓÚËûÃÇÊÇÔÚ±ê¼Ç½×¶Î»òÔ­×Ó½×¶Î±éÀúµÄÊ±ºò½øĞĞÄêÁä³É³¤£¬
-  // ²»ÔÚsweepgenº¯ÊıÖĞ³É³¤£¬²»»áËæ×ÅÃ¿ÂÖGCµÄÖ´ĞĞ×Ô¶¯³É³¤ÎªÀÏ¶ÔÏó£¬³£ÓÃÓÚÔÚÆÁÕÏÖĞÉèÖÃÎª¶ÔÏóµÄÄêÁä£»
-  // 5£©G_OLD£º×îÀÏÒ»´úÁË£¬ÄêÁä²»ĞèÒªÔÙ³É³¤£»
-  // ÁíÍâ£¬Í¨¹ı¸Ãº¯Êı×îºóÒ»¸ö²ÎÊı * *pfirstold1ÎÒÃÇÒ²¿ÉÒÔÖªµÀ£¬sweepgenº¯Êı³ıÁËÍê³ÉÇå³ıÓëÄêÁä³É³¤ÒÔÍâ£¬
-  // »¹¸ºÔğÕÒµ½µÚÒ»¸öG_OLD1ÄêÁäµÄÔªËØ£¬¸³Öµ¸øËü
+  // 1ï¼‰G_NEW->G_SURVIVALï¼›
+  // 2ï¼‰G_SURVIVAL, G_OLD0->G_OLD1ï¼›
+  // 3ï¼‰G_OLD1->G_OLDï¼›
+  // 4ï¼‰G_TOUCHED1, G_TOUCHED2ï¼šä¸G_OLD0ä¸G_OLD1å¯¹ï¼ŒåŒºåˆ«åœ¨äºä»–ä»¬æ˜¯åœ¨æ ‡è®°é˜¶æ®µæˆ–åŸå­é˜¶æ®µéå†çš„æ—¶å€™è¿›è¡Œå¹´é¾„æˆé•¿ï¼Œ
+  // ä¸åœ¨sweepgenå‡½æ•°ä¸­æˆé•¿ï¼Œä¸ä¼šéšç€æ¯è½®GCçš„æ‰§è¡Œè‡ªåŠ¨æˆé•¿ä¸ºè€å¯¹è±¡ï¼Œå¸¸ç”¨äºåœ¨å±éšœä¸­è®¾ç½®ä¸ºå¯¹è±¡çš„å¹´é¾„ï¼›
+  // 5ï¼‰G_OLDï¼šæœ€è€ä¸€ä»£äº†ï¼Œå¹´é¾„ä¸éœ€è¦å†æˆé•¿ï¼›
+  // å¦å¤–ï¼Œé€šè¿‡è¯¥å‡½æ•°æœ€åä¸€ä¸ªå‚æ•° * *pfirstold1æˆ‘ä»¬ä¹Ÿå¯ä»¥çŸ¥é“ï¼Œsweepgenå‡½æ•°é™¤äº†å®Œæˆæ¸…é™¤ä¸å¹´é¾„æˆé•¿ä»¥å¤–ï¼Œ
+  // è¿˜è´Ÿè´£æ‰¾åˆ°ç¬¬ä¸€ä¸ªG_OLD1å¹´é¾„çš„å…ƒç´ ï¼Œèµ‹å€¼ç»™å®ƒ
   int white = luaC_white(g);
   GCObject *curr;
   while ((curr = *p) != limit) {
@@ -1307,7 +1322,7 @@ static GCObject **correctgraylist (GCObject **p) {
 /*
 ** Correct all gray lists, coalescing them into 'grayagain'.
 */
-// ¸Ãº¯ÊıÓÃÀ´Çå¿ÕºÍÖØÖÃÒ»Ğ©·Ö´úÊ½Ëã·¨ÖĞÓÃµ½µÄÊı¾İ½á¹¹
+// è¯¥å‡½æ•°ç”¨æ¥æ¸…ç©ºå’Œé‡ç½®ä¸€äº›åˆ†ä»£å¼ç®—æ³•ä¸­ç”¨åˆ°çš„æ•°æ®ç»“æ„
 static void correctgraylists (global_State *g) {
   GCObject **list = correctgraylist(&g->grayagain);
   *list = g->weak; g->weak = NULL;
@@ -1324,7 +1339,7 @@ static void correctgraylists (global_State *g) {
 ** Gray objects are already in some gray list, and so will be visited
 ** in the atomic step.
 */
-// ´Ófromµ½to£¬Èç¹û½ÚµãÎªG_OLD1²¢ÇÒÎªºÚÉ«£¬Ôò½øĞĞmark£¬²»ÊÇºÚÉ«±íÃ÷£¬¸Ã½ÚµãÒÑ¾­±»mark£¬ËùÒÔ²»ÓÃÔÚmark
+// ä»fromåˆ°toï¼Œå¦‚æœèŠ‚ç‚¹ä¸ºG_OLD1å¹¶ä¸”ä¸ºé»‘è‰²ï¼Œåˆ™è¿›è¡Œmarkï¼Œä¸æ˜¯é»‘è‰²è¡¨æ˜ï¼Œè¯¥èŠ‚ç‚¹å·²ç»è¢«markï¼Œæ‰€ä»¥ä¸ç”¨åœ¨mark
 static void markold (global_State *g, GCObject *from, GCObject *to) {
   GCObject *p;
   for (p = from; p != to; p = p->next) {
@@ -1341,20 +1356,20 @@ static void markold (global_State *g, GCObject *from, GCObject *to) {
 /*
 ** Finish a young-generation collection.
 */
-// ÔÚÃ¿´Î·Ö´úÊ½Ëã·¨²¿·ÖÖ´ĞĞÄ£Ê½Ö´ĞĞ½áÊøºóµ÷ÓÃ
-// 1£©µ÷ÓÃcleargraylistº¯ÊıÇå¿ÕÖØÖÃÒ»Ğ©GC×´Ì¬Êı¾İ£»
-// 2£©µ÷ÓÃcheckSizesº¯ÊıÊÇÅĞ¶Ï¶Ì×Ö·û´®»º´æstringtableÊÇ·ñĞèÒªÊÍ·Å£»
-// 3£©Ö´ĞĞµ±ÂÖ±»Çå³ıµÄ¶ÔÏóµÄÎö¹¹Æ÷£»
+// åœ¨æ¯æ¬¡åˆ†ä»£å¼ç®—æ³•éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼æ‰§è¡Œç»“æŸåè°ƒç”¨
+// 1ï¼‰è°ƒç”¨cleargraylistå‡½æ•°æ¸…ç©ºé‡ç½®ä¸€äº›GCçŠ¶æ€æ•°æ®ï¼›
+// 2ï¼‰è°ƒç”¨checkSizeså‡½æ•°æ˜¯åˆ¤æ–­çŸ­å­—ç¬¦ä¸²ç¼“å­˜stringtableæ˜¯å¦éœ€è¦é‡Šæ”¾ï¼›
+// 3ï¼‰æ‰§è¡Œå½“è½®è¢«æ¸…é™¤çš„å¯¹è±¡çš„ææ„å™¨ï¼›
 static void finishgencycle (lua_State *L, global_State *g) {
-  // ¸Ãº¯ÊıÓÃÀ´Çå¿ÕºÍÖØÖÃÒ»Ğ©·Ö´úÊ½Ëã·¨ÖĞÓÃµ½µÄÊı¾İ½á¹¹
+  // è¯¥å‡½æ•°ç”¨æ¥æ¸…ç©ºå’Œé‡ç½®ä¸€äº›åˆ†ä»£å¼ç®—æ³•ä¸­ç”¨åˆ°çš„æ•°æ®ç»“æ„
   correctgraylists(g);
-  // ¼ì²âµ±Ç°µÄ¶Ì×Ö·û´®»º´æstringtableÈôÊ¹ÓÃÂÊ²»¼°4·ÖÖ®1£¬ÔòËõĞ¡²¢ÊÍ·ÅÒ»°ëËüµÄÈİÁ¿
+  // æ£€æµ‹å½“å‰çš„çŸ­å­—ç¬¦ä¸²ç¼“å­˜stringtableè‹¥ä½¿ç”¨ç‡ä¸åŠ4åˆ†ä¹‹1ï¼Œåˆ™ç¼©å°å¹¶é‡Šæ”¾ä¸€åŠå®ƒçš„å®¹é‡
   checkSizes(L, g);
-  // ÉèÖÃµ±Ç°gc½×¶ÎÎªGCSpropagate£ºÕâÀïÃ»ÓĞÖØÖÃ½×¶ÎÎªµÄµÚÒ»¸öGC½×¶ÎGCSpause£¬
-  // ¶øÊÇÌø¹ıÁËËüÖ±½ÓÉèÖÃÎªGCSpauseµÄÏÂÒ»¸ö½×¶ÎGCSpropagate£¬ÕâÊÇÒòÎªÎÒÃÇÖªµÀGCSpauseÔÚ½øÈëGCSpropagate½×¶ÎÇ°ĞèÒª×öµÄÈÎÎñÊÇ£º
-  // ¶Ôglobal_State¸ù½áµã½øĞĞ±ê¼Ç£¬È»ºó°Ñ±ê¼Ç½øĞĞ´«²¥¡£
-  // ¶ø·Ö´úÊ½Ëã·¨µÄ²¿·ÖÖ´ĞĞÄ£Ê½ÔÚ±ê¼Ç½×¶ÎÃ¿ÂÖÖ»ĞèÒª°ÑG_OLD1ÀÏÒ»´ú¶ÔÏóµÄ±ê¼ÇÍ¨¹ıÒıÓÃ¹ØÏµ´«²¥¸øËûÃÇÒıÓÃµÄÄêÇáÒ»´ú¶ÔÏó£¬
-  // ÕâĞ©ÀÏÒ»´ú¶ÔÏó¾ÍÊÇÓÃÓÚ×÷Îª±ê¼Ç´«²¥µÄÆğÊ¼µãÁË£¬ËùÒÔ¿ÉÒÔÌø¹ıglobal_StateÏà¹ØµÄ¸ù½áµã±ê¼ÇÁ÷³Ì£¬²»ÔÙĞèÒªÊ¹ÓÃÁíÍâµÄ¸ù½áµãÁË¡£
+  // è®¾ç½®å½“å‰gcé˜¶æ®µä¸ºGCSpropagateï¼šè¿™é‡Œæ²¡æœ‰é‡ç½®é˜¶æ®µä¸ºçš„ç¬¬ä¸€ä¸ªGCé˜¶æ®µGCSpauseï¼Œ
+  // è€Œæ˜¯è·³è¿‡äº†å®ƒç›´æ¥è®¾ç½®ä¸ºGCSpauseçš„ä¸‹ä¸€ä¸ªé˜¶æ®µGCSpropagateï¼Œè¿™æ˜¯å› ä¸ºæˆ‘ä»¬çŸ¥é“GCSpauseåœ¨è¿›å…¥GCSpropagateé˜¶æ®µå‰éœ€è¦åšçš„ä»»åŠ¡æ˜¯ï¼š
+  // å¯¹global_Stateæ ¹ç»“ç‚¹è¿›è¡Œæ ‡è®°ï¼Œç„¶åæŠŠæ ‡è®°è¿›è¡Œä¼ æ’­ã€‚
+  // è€Œåˆ†ä»£å¼ç®—æ³•çš„éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼åœ¨æ ‡è®°é˜¶æ®µæ¯è½®åªéœ€è¦æŠŠG_OLD1è€ä¸€ä»£å¯¹è±¡çš„æ ‡è®°é€šè¿‡å¼•ç”¨å…³ç³»ä¼ æ’­ç»™ä»–ä»¬å¼•ç”¨çš„å¹´è½»ä¸€ä»£å¯¹è±¡ï¼Œ
+  // è¿™äº›è€ä¸€ä»£å¯¹è±¡å°±æ˜¯ç”¨äºä½œä¸ºæ ‡è®°ä¼ æ’­çš„èµ·å§‹ç‚¹äº†ï¼Œæ‰€ä»¥å¯ä»¥è·³è¿‡global_Stateç›¸å…³çš„æ ¹ç»“ç‚¹æ ‡è®°æµç¨‹ï¼Œä¸å†éœ€è¦ä½¿ç”¨å¦å¤–çš„æ ¹ç»“ç‚¹äº†ã€‚
   g->gcstate = GCSpropagate;  /* skip restart */
   if (!g->gcemergency)
     callallpendingfinalizers(L);
@@ -1366,57 +1381,57 @@ static void finishgencycle (lua_State *L, global_State *g) {
 ** atomic step. Then, sweep all lists and advance pointers. Finally,
 ** finish the collection.
 */
-// ·Ö´úGC²¿·ÖÖ´ĞĞ
-// ÊÕ¼¯ÄêÇáÒ»´ú£¬µ±·Ö´úÊ½GC´¥·¢Ê±ÄÚ´æÔö³¤Á¿²»³¬¹ı»ù×¼ÖµÊ±£¨Ä¬ÈÏÎª100% £©£¬¸ÃÂÖGC¾Í»áÊ¹ÓÃ²¿·ÖÖ´ĞĞÄ£Ê½
-// Ê¹ÓÃ·Ö´úÊ½Ëã·¨µÄÊ±ºòÓ¦¸Ã¾¡Á¿±£³Ö³ÌĞòÊ¹ÓÃ²¿·ÖÖ´ĞĞÄ£Ê½£¬ÒòÎªÖ»ÓĞÔÚ¸ÃÄ£Ê½ÏÂ£¬²Å²»ĞèÒª´¦ÀíÈ«²¿µÄ¶ÔÏó£¬
-// ±ÈÆğÔöÁ¿Ê½±ê¼ÇÇå³ıËã·¨²Å¾ßÓĞÓÅÊÆ¡£
+// åˆ†ä»£GCéƒ¨åˆ†æ‰§è¡Œ
+// æ”¶é›†å¹´è½»ä¸€ä»£ï¼Œå½“åˆ†ä»£å¼GCè§¦å‘æ—¶å†…å­˜å¢é•¿é‡ä¸è¶…è¿‡åŸºå‡†å€¼æ—¶ï¼ˆé»˜è®¤ä¸º100% ï¼‰ï¼Œè¯¥è½®GCå°±ä¼šä½¿ç”¨éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼
+// ä½¿ç”¨åˆ†ä»£å¼ç®—æ³•çš„æ—¶å€™åº”è¯¥å°½é‡ä¿æŒç¨‹åºä½¿ç”¨éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼ï¼Œå› ä¸ºåªæœ‰åœ¨è¯¥æ¨¡å¼ä¸‹ï¼Œæ‰ä¸éœ€è¦å¤„ç†å…¨éƒ¨çš„å¯¹è±¡ï¼Œ
+// æ¯”èµ·å¢é‡å¼æ ‡è®°æ¸…é™¤ç®—æ³•æ‰å…·æœ‰ä¼˜åŠ¿ã€‚
 static void youngcollection (lua_State *L, global_State *g) {
-  // ²¿·ÖÖ´ĞĞÄ£Ê½Ò²·Ö±ê¼ÇÓëÇå³ıÁ½¸ö²¿·Ö£¬¸Ã¶Î´úÂë¾ÍÊÇ±ê¼Ç½×¶Î£¬±ê¼Ç½×¶ÎµÄºËĞÄº¯Êı¾ÍÊÇmarkoldº¯Êı£¬
-  // ¸Ãº¯ÊıµÄ×÷ÓÃÊÇ±éÀúÒ»¶ÎÁ´±íÇø¼äµÄ¶ÔÏó£¬°ÑÆäÖĞÄêÁäÎªG_OLD1µÄ¶ÔÏó³É³¤ÎªG_OLD¶ÔÏó£¬²¢±ê¼Ç¸Ã¶ÔÏóµÄ×Ó½áµã¡£
-  // G_OLD1ÄêÁäµÄ¶ÔÏóÊôÓÚÀÏÒ»´ú¶ÔÏó£¬ËûÃÇÔÚGCËã·¨ÖĞÊôÓÚ¸ù½áµã¿É´ïµÄÓĞĞ§¶ÔÏó£¬µ«ËûÃÇµ±Ç°¿ÉÄÜ»¹»áÒıÓÃÆäËüÄêÇáÒ»´ú°×É«¶ÔÏó£¬
-  // ²»¹ıÔÚ±¾ÂÖGC½áÊø£¬µÈ´ıÕâĞ©ÄêÇá×Ó½áµãÔÚÕâÒ»ÂÖ±»´¦Àí±ê¼ÇÍê±Ïºó£¬ËûÃÇ¾Í¿ÉÒÔ³É³¤Îª×îÀÏÒ»´úG_OLDÄêÁä¶ÔÏó£¬¼´ÕæÕıµÄ×îÀÏÒ»´ú¶ÔÏó£¬
-  // ²»ÔÙÒıÓÃÆäËüÎ´±ê¼ÇµÄÄêÇá¶ÔÏó£¬Ò²²»ÔÙĞèÒª²ÎÓëÈÎºÎ±ê¼ÇÓëÇå³ıµÄ¹¤×÷¡£
-  //  ±ê¼Ç½×¶Î²»ĞèÒª´¦ÀíËùÓĞµÄ¶ÔÏó£¬Ö»ĞèÒª´¦ÀíG_OLD1¶ÔÏó²¢±ê¼ÇËüÃÇµÄ×Ó½áµã£¬Ò²ÕıÒòÎª²»ĞèÒª´¦ÀíÈ«²¿¶ÔÏó£¬
-  // ËùÒÔ·Ö´úÊ½Ëã·¨²¿·ÖÖ´ĞĞÄ£Ê½µÄĞÔÄÜ½Ï¸ß£¬
+  // éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼ä¹Ÿåˆ†æ ‡è®°ä¸æ¸…é™¤ä¸¤ä¸ªéƒ¨åˆ†ï¼Œè¯¥æ®µä»£ç å°±æ˜¯æ ‡è®°é˜¶æ®µï¼Œæ ‡è®°é˜¶æ®µçš„æ ¸å¿ƒå‡½æ•°å°±æ˜¯markoldå‡½æ•°ï¼Œ
+  // è¯¥å‡½æ•°çš„ä½œç”¨æ˜¯éå†ä¸€æ®µé“¾è¡¨åŒºé—´çš„å¯¹è±¡ï¼ŒæŠŠå…¶ä¸­å¹´é¾„ä¸ºG_OLD1çš„å¯¹è±¡æˆé•¿ä¸ºG_OLDå¯¹è±¡ï¼Œå¹¶æ ‡è®°è¯¥å¯¹è±¡çš„å­ç»“ç‚¹ã€‚
+  // G_OLD1å¹´é¾„çš„å¯¹è±¡å±äºè€ä¸€ä»£å¯¹è±¡ï¼Œä»–ä»¬åœ¨GCç®—æ³•ä¸­å±äºæ ¹ç»“ç‚¹å¯è¾¾çš„æœ‰æ•ˆå¯¹è±¡ï¼Œä½†ä»–ä»¬å½“å‰å¯èƒ½è¿˜ä¼šå¼•ç”¨å…¶å®ƒå¹´è½»ä¸€ä»£ç™½è‰²å¯¹è±¡ï¼Œ
+  // ä¸è¿‡åœ¨æœ¬è½®GCç»“æŸï¼Œç­‰å¾…è¿™äº›å¹´è½»å­ç»“ç‚¹åœ¨è¿™ä¸€è½®è¢«å¤„ç†æ ‡è®°å®Œæ¯•åï¼Œä»–ä»¬å°±å¯ä»¥æˆé•¿ä¸ºæœ€è€ä¸€ä»£G_OLDå¹´é¾„å¯¹è±¡ï¼Œå³çœŸæ­£çš„æœ€è€ä¸€ä»£å¯¹è±¡ï¼Œ
+  // ä¸å†å¼•ç”¨å…¶å®ƒæœªæ ‡è®°çš„å¹´è½»å¯¹è±¡ï¼Œä¹Ÿä¸å†éœ€è¦å‚ä¸ä»»ä½•æ ‡è®°ä¸æ¸…é™¤çš„å·¥ä½œã€‚
+  //  æ ‡è®°é˜¶æ®µä¸éœ€è¦å¤„ç†æ‰€æœ‰çš„å¯¹è±¡ï¼Œåªéœ€è¦å¤„ç†G_OLD1å¯¹è±¡å¹¶æ ‡è®°å®ƒä»¬çš„å­ç»“ç‚¹ï¼Œä¹Ÿæ­£å› ä¸ºä¸éœ€è¦å¤„ç†å…¨éƒ¨å¯¹è±¡ï¼Œ
+  // æ‰€ä»¥åˆ†ä»£å¼ç®—æ³•éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼çš„æ€§èƒ½è¾ƒé«˜ï¼Œ
   GCObject **psurvival;  /* to point to first non-dead survival object */
   GCObject *dummy;  /* dummy out parameter to 'sweepgen' */
   lua_assert(g->gcstate == GCSpropagate);
   if (g->firstold1) {  /* are there regular OLD1 objects? */
-    // allgcÁ´±í£º[firstold1, reallyold)Çø¼ä¡£
-    // reallyoldÖ¸ÕëºóÃæµÄ¶ÔÏó¶¼Îª×îÀÏÒ»´ú¶ÔÏó£¬ÄêÁä¾ùÎªG_OLD£¬
-    // ¶øfirstold1Ö¸Õë£¬ÔòÊÇÔÚÉÏÒ»ÂÖGC´¦ÀíÍê³Éºó»º´æµÄÖ¸ÏòallgcÁ´±íÖĞµÄµÚÒ»¸öG_OLD1ÄêÁä¶ÔÏóµÄÖ¸Õë¡£
+    // allgcé“¾è¡¨ï¼š[firstold1, reallyold)åŒºé—´ã€‚
+    // reallyoldæŒ‡é’ˆåé¢çš„å¯¹è±¡éƒ½ä¸ºæœ€è€ä¸€ä»£å¯¹è±¡ï¼Œå¹´é¾„å‡ä¸ºG_OLDï¼Œ
+    // è€Œfirstold1æŒ‡é’ˆï¼Œåˆ™æ˜¯åœ¨ä¸Šä¸€è½®GCå¤„ç†å®Œæˆåç¼“å­˜çš„æŒ‡å‘allgcé“¾è¡¨ä¸­çš„ç¬¬ä¸€ä¸ªG_OLD1å¹´é¾„å¯¹è±¡çš„æŒ‡é’ˆã€‚
     markold(g, g->firstold1, g->reallyold);  /* mark them */
     g->firstold1 = NULL;  /* no more OLD1 objects (for now) */
   }
-  // finobjÁ´±í£º[finobj, finobjrold]¡£´øÎö¹¹Æ÷µÄ¶ÔÏóÔªËØÊıÁ¿ÓĞÏŞ£¬ÕâÀïÃ»ÓĞ²ÉÓÃÀàËÆµÄĞÂÔöfirstold1Ö¸ÕëĞÎÊ½£¬
-  // ½ÚÔ¼Ò»¸öÖ¸Õë£¬Ö±½Ó±éÀú´¦ÀíÁËfinobjÁ´±íÍ·µ½×îÀÏÒ»´úfinobjrold¿ªÊ¼Î»ÖÃÕâÇø¼äµÄËùÓĞ¶ÔÏó¡£
+  // finobjé“¾è¡¨ï¼š[finobj, finobjrold]ã€‚å¸¦ææ„å™¨çš„å¯¹è±¡å…ƒç´ æ•°é‡æœ‰é™ï¼Œè¿™é‡Œæ²¡æœ‰é‡‡ç”¨ç±»ä¼¼çš„æ–°å¢firstold1æŒ‡é’ˆå½¢å¼ï¼Œ
+  // èŠ‚çº¦ä¸€ä¸ªæŒ‡é’ˆï¼Œç›´æ¥éå†å¤„ç†äº†finobjé“¾è¡¨å¤´åˆ°æœ€è€ä¸€ä»£finobjroldå¼€å§‹ä½ç½®è¿™åŒºé—´çš„æ‰€æœ‰å¯¹è±¡ã€‚
   markold(g, g->finobj, g->finobjrold);
-  // tobefnzÁ´±í£ºÕû¸öÁ´±í¡£±¾ÂÖGC´ıµ÷ÓÃÎö¹¹Æ÷ºó²¢ÊÍ·ÅµÄ¶ÔÏó£¬´ÓfinobjÁ´±íÖĞÒÆÈëµÄ¶ÔÏó£¬ÓëfinobjÁ´±í±ê¼Ç´¦ÀíÂß¼­Í¬Àí¡£
+  // tobefnzé“¾è¡¨ï¼šæ•´ä¸ªé“¾è¡¨ã€‚æœ¬è½®GCå¾…è°ƒç”¨ææ„å™¨åå¹¶é‡Šæ”¾çš„å¯¹è±¡ï¼Œä»finobjé“¾è¡¨ä¸­ç§»å…¥çš„å¯¹è±¡ï¼Œä¸finobjé“¾è¡¨æ ‡è®°å¤„ç†é€»è¾‘åŒç†ã€‚
   markold(g, g->tobefnz, NULL);
-  // ¸Ã²¿·ÖÎª·Ö´úÊ½Ëã·¨µÄÔ­×Ó±ê¼Ç½×¶Î¡£
-  // ¸Ãº¯Êı»áÊ¹ÓÃÉî¶ÈÓÅÏÈËã·¨´¦ÀíÌí¼Óµ½gray»ÒÉ«Á´±íÖĞµÄ¶ÔÏó£¬¶ÔËüÃÇÒıÓÃµÄ×Ó½áµãÒ²½øĞĞ±ê¼Ç£»Ô­×Ó½×¶ÎÍ¬Ê±Ò²´¦ÀíÆÁÕÏºÍÈõÒıÓÃ¹ØÏµ±íµÄÎÊÌâ¡£
-  // atomicº¯Êıµ÷ÓÃÍê±Ïºó£¬ËùÓĞÍ¨¹ıG_OLD1ÀÏ¶ÔÏóÒıÓÃµÄÄêÇá¶ÔÏó¶¼µİ¹éµØÍê³ÉÁË±ê¼Ç¡£
-  // ½ÓÏÂÀ´¾ÍÊÇÉèÖÃg->gcstate½×¶ÎÎªÇå³ı½×¶ÎGCSswpallgc£¬×¼±¸¿ªÊ¼GCµÄ¶ÔÏóÇå³ı¹¤×÷¡£
+  // è¯¥éƒ¨åˆ†ä¸ºåˆ†ä»£å¼ç®—æ³•çš„åŸå­æ ‡è®°é˜¶æ®µã€‚
+  // è¯¥å‡½æ•°ä¼šä½¿ç”¨æ·±åº¦ä¼˜å…ˆç®—æ³•å¤„ç†æ·»åŠ åˆ°grayç°è‰²é“¾è¡¨ä¸­çš„å¯¹è±¡ï¼Œå¯¹å®ƒä»¬å¼•ç”¨çš„å­ç»“ç‚¹ä¹Ÿè¿›è¡Œæ ‡è®°ï¼›åŸå­é˜¶æ®µåŒæ—¶ä¹Ÿå¤„ç†å±éšœå’Œå¼±å¼•ç”¨å…³ç³»è¡¨çš„é—®é¢˜ã€‚
+  // atomicå‡½æ•°è°ƒç”¨å®Œæ¯•åï¼Œæ‰€æœ‰é€šè¿‡G_OLD1è€å¯¹è±¡å¼•ç”¨çš„å¹´è½»å¯¹è±¡éƒ½é€’å½’åœ°å®Œæˆäº†æ ‡è®°ã€‚
+  // æ¥ä¸‹æ¥å°±æ˜¯è®¾ç½®g->gcstateé˜¶æ®µä¸ºæ¸…é™¤é˜¶æ®µGCSswpallgcï¼Œå‡†å¤‡å¼€å§‹GCçš„å¯¹è±¡æ¸…é™¤å·¥ä½œã€‚
   atomic(L);
 
   /* sweep nursery and get a pointer to its last live element */
   g->gcstate = GCSswpallgc;
-  // ¸Ã²¿·Ö´úÂë¶à´¦µ÷ÓÃÁËsweepgenº¯Êı£¬¸Ãº¯ÊıµÄ×÷ÓÃÊÇ£¬±éÀúÁ´±íÄ³¸öÇø¼äÄÚµÄ¶ÔÏó£¬Ö´ĞĞÒÔÏÂ²Ù×÷£º
-  // 3.1£©Çå³ıÎ´±ê¼ÇµÄ¶ÔÏó£»
-  // 3.2£©ÒÑ±ê¼ÇµÄ¶ÔÏóÔò½øĞĞÄêÁäµÄ³É³¤£»
-  // ÁíÍâĞèÒª×¢ÒâµÄÊÇ£¬sweepgenº¯Êı²»»áÈ¥ĞŞ¸Ä¶ÔÏóµÄÑÕÉ«
+  // è¯¥éƒ¨åˆ†ä»£ç å¤šå¤„è°ƒç”¨äº†sweepgenå‡½æ•°ï¼Œè¯¥å‡½æ•°çš„ä½œç”¨æ˜¯ï¼Œéå†é“¾è¡¨æŸä¸ªåŒºé—´å†…çš„å¯¹è±¡ï¼Œæ‰§è¡Œä»¥ä¸‹æ“ä½œï¼š
+  // 3.1ï¼‰æ¸…é™¤æœªæ ‡è®°çš„å¯¹è±¡ï¼›
+  // 3.2ï¼‰å·²æ ‡è®°çš„å¯¹è±¡åˆ™è¿›è¡Œå¹´é¾„çš„æˆé•¿ï¼›
+  // å¦å¤–éœ€è¦æ³¨æ„çš„æ˜¯ï¼Œsweepgenå‡½æ•°ä¸ä¼šå»ä¿®æ”¹å¯¹è±¡çš„é¢œè‰²
   psurvival = sweepgen(L, g, &g->allgc, g->survival, &g->firstold1);
   /* sweep 'survival' */
   sweepgen(L, g, psurvival, g->old1, &g->firstold1);
-  // ÉÏÃæÖ´ĞĞÍê±Ïºó£¬allgcÁ´±íµÄÔªËØ±»sweepgenº¯Êı´¦ÀíÍê±ÏÁË£¬¶ÔÏóµÄÄêÁäÒ²³É³¤ÁË£¬
-  // »î×ÅµÄ¶ÔÏóÓÖ³É¹¦Éú´æÁËÒ»ÂÖGC£¬½ÓÏÂÀ´¾ÍÍ¨¹ıÒÔÏÂ´úÂëÈÃÖ¸ÕëÖØĞÂ¸³Öµ£¬ÈÃallgcÄÚ¸÷Çø¼äÕûÌåÍùÇ°ÒÆ£¬ÈÃÄêÁäÓëËùÔÚÁ´±íÎ»ÖÃÖØĞÂ¶ÔÓ¦£¬
-  // ÒòÎªÇø¼ä¶ÔÏóµÄÄêÁä¶¼³É³¤ÎªÁËÏÂÒ»½×¶ÎµÄÄêÁä¸üÀÏµÄ¶ÔÏóÁË£º
+  // ä¸Šé¢æ‰§è¡Œå®Œæ¯•åï¼Œallgcé“¾è¡¨çš„å…ƒç´ è¢«sweepgenå‡½æ•°å¤„ç†å®Œæ¯•äº†ï¼Œå¯¹è±¡çš„å¹´é¾„ä¹Ÿæˆé•¿äº†ï¼Œ
+  // æ´»ç€çš„å¯¹è±¡åˆæˆåŠŸç”Ÿå­˜äº†ä¸€è½®GCï¼Œæ¥ä¸‹æ¥å°±é€šè¿‡ä»¥ä¸‹ä»£ç è®©æŒ‡é’ˆé‡æ–°èµ‹å€¼ï¼Œè®©allgcå†…å„åŒºé—´æ•´ä½“å¾€å‰ç§»ï¼Œè®©å¹´é¾„ä¸æ‰€åœ¨é“¾è¡¨ä½ç½®é‡æ–°å¯¹åº”ï¼Œ
+  // å› ä¸ºåŒºé—´å¯¹è±¡çš„å¹´é¾„éƒ½æˆé•¿ä¸ºäº†ä¸‹ä¸€é˜¶æ®µçš„å¹´é¾„æ›´è€çš„å¯¹è±¡äº†ï¼š
   g->reallyold = g->old1;
   g->old1 = *psurvival;  /* 'survival' survivals are old now */
   g->survival = g->allgc;  /* all news are survivals */
 
   /* repeat for 'finobj' lists */
-  // Îö¹¹Æ÷¶ÔÏóµÄÇå³ı½×¶Î¡£Í¬Àí£¬´¦Àífinobj´øÎö¹¹Æ÷¶ÔÏóÁ´±í£¬ÓëallgcÁ´±í´¦ÀíÒ»ÖÂ£¬Ò²ÊÇÇå³ıÎ´±ê¼Ç¶ÔÏó£¬³É³¤ÒÑ±ê¼Ç¶ÔÏó£¬²¢¶ÔÁ´±íÄÚµÄÇø¼äÍùÇ°ÒÆ
+  // ææ„å™¨å¯¹è±¡çš„æ¸…é™¤é˜¶æ®µã€‚åŒç†ï¼Œå¤„ç†finobjå¸¦ææ„å™¨å¯¹è±¡é“¾è¡¨ï¼Œä¸allgcé“¾è¡¨å¤„ç†ä¸€è‡´ï¼Œä¹Ÿæ˜¯æ¸…é™¤æœªæ ‡è®°å¯¹è±¡ï¼Œæˆé•¿å·²æ ‡è®°å¯¹è±¡ï¼Œå¹¶å¯¹é“¾è¡¨å†…çš„åŒºé—´å¾€å‰ç§»
   dummy = NULL;  /* no 'firstold1' optimization for 'finobj' lists */
   psurvival = sweepgen(L, g, &g->finobj, g->finobjsur, &dummy);
   /* sweep 'survival' */
@@ -1425,9 +1440,9 @@ static void youngcollection (lua_State *L, global_State *g) {
   g->finobjold1 = *psurvival;  /* 'survival' survivals are old now */
   g->finobjsur = g->finobj;  /* all news are survivals */
 
-  // Í¬Àí£¬Çå³ı²¢³É³¤tobefnzÁ´±í
+  // åŒç†ï¼Œæ¸…é™¤å¹¶æˆé•¿tobefnzé“¾è¡¨
   sweepgen(L, g, &g->tobefnz, NULL, &dummy);
-  // ÔÚÃ¿´Î·Ö´úÊ½Ëã·¨²¿·ÖÖ´ĞĞÄ£Ê½Ö´ĞĞ½áÊøºóµ÷ÓÃ
+  // åœ¨æ¯æ¬¡åˆ†ä»£å¼ç®—æ³•éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼æ‰§è¡Œç»“æŸåè°ƒç”¨
   finishgencycle(L, g);
 }
 
@@ -1438,34 +1453,34 @@ static void youngcollection (lua_State *L, global_State *g) {
 ** surviving objects to old. Threads go back to 'grayagain'; everything
 ** else is turned black (not in any gray list).
 */
-// ·Ö´úÊ½Ëã·¨ÖĞÇĞ»»½øÈë¸ÃÄ£Ê½ÒÔ¼°È«²¿Ö´ĞĞÄ£Ê½ÏÂ¶¼»áÓÃµ½
+// åˆ†ä»£å¼ç®—æ³•ä¸­åˆ‡æ¢è¿›å…¥è¯¥æ¨¡å¼ä»¥åŠå…¨éƒ¨æ‰§è¡Œæ¨¡å¼ä¸‹éƒ½ä¼šç”¨åˆ°
 static void atomic2gen (lua_State *L, global_State *g) {
-  // cleargraylistº¯ÊıÓÃÓÚ³õÊ¼»¯Ò»Ğ©×´Ì¬£¬ÖØÖÃÒ»Ğ©±äÁ¿£¬ÕâÀï°Ñ»ÒÉ«Á´±í£¬ÈõÒıÓÃ±íÏà¹ØÖ¸ÕëÖØÖÃ¡£
-  // ½ÓÏÂÀ´°Ñµ±Ç°GC½×¶ÎÉèÖÃÎªÇå³ıµÚÒ»¸ö½×¶ÎGCSswpallgc½×¶Î£¬¾­ÀúÁËÇ°ÃæµÄ±ê¼Ç½×¶Îºó£¬¿É´ï¶ÔÏó¶¼ÒÑ¾­³É¹¦±ê¼ÇÎªºÚÉ«ÁË£¬
-  // ÕâÀï±íÊ¾Òª¿ªÊ¼½øÈëÇå³ı½×¶ÎÁË¡£
+  // cleargraylistå‡½æ•°ç”¨äºåˆå§‹åŒ–ä¸€äº›çŠ¶æ€ï¼Œé‡ç½®ä¸€äº›å˜é‡ï¼Œè¿™é‡ŒæŠŠç°è‰²é“¾è¡¨ï¼Œå¼±å¼•ç”¨è¡¨ç›¸å…³æŒ‡é’ˆé‡ç½®ã€‚
+  // æ¥ä¸‹æ¥æŠŠå½“å‰GCé˜¶æ®µè®¾ç½®ä¸ºæ¸…é™¤ç¬¬ä¸€ä¸ªé˜¶æ®µGCSswpallgcé˜¶æ®µï¼Œç»å†äº†å‰é¢çš„æ ‡è®°é˜¶æ®µåï¼Œå¯è¾¾å¯¹è±¡éƒ½å·²ç»æˆåŠŸæ ‡è®°ä¸ºé»‘è‰²äº†ï¼Œ
+  // è¿™é‡Œè¡¨ç¤ºè¦å¼€å§‹è¿›å…¥æ¸…é™¤é˜¶æ®µäº†ã€‚
   cleargraylists(g);
   /* sweep all elements making them old */
   g->gcstate = GCSswpallgc;
-  // Ê×ÏÈµ÷ÓÃÁËsweep2oldº¯Êı£¬¸Ãº¯ÊıµÄ×÷ÓÃÊÇ±éÀú²ÎÊıÖĞµÄÁ´±í£¬Çå³ıÆäÖĞÎ´±ê¼ÇµÄ¶ÔÏó£¬ÒÑ±ê¼ÇµÄ¶ÔÏóÔò°ÑËüÃÇµÄÄêÁä±ê¼ÇÎªG_OLDÀÏ¶ÔÏó
+  // é¦–å…ˆè°ƒç”¨äº†sweep2oldå‡½æ•°ï¼Œè¯¥å‡½æ•°çš„ä½œç”¨æ˜¯éå†å‚æ•°ä¸­çš„é“¾è¡¨ï¼Œæ¸…é™¤å…¶ä¸­æœªæ ‡è®°çš„å¯¹è±¡ï¼Œå·²æ ‡è®°çš„å¯¹è±¡åˆ™æŠŠå®ƒä»¬çš„å¹´é¾„æ ‡è®°ä¸ºG_OLDè€å¯¹è±¡
   sweep2old(L, &g->allgc);
   /* everything alive now is old */
-  // °Ñreallyold£¬old1£¬survivalÖ¸Õë¶¼Ö¸ÏòallgcÁ´±íÍ·²¿
+  // æŠŠreallyoldï¼Œold1ï¼ŒsurvivalæŒ‡é’ˆéƒ½æŒ‡å‘allgcé“¾è¡¨å¤´éƒ¨
   g->reallyold = g->old1 = g->survival = g->allgc;
   g->firstold1 = NULL;  /* there are no OLD1 objects anywhere */
 
   /* repeat for 'finobj' lists */
-  // ÓëÉÏÃæ´óÖÂÏàÍ¬£¬²»Í¬Ö®´¦ÊÇÕâÀï´¦ÀíµÄÊÇËùÓĞ´øÎö¹¹Æ÷µÄ¶ÔÏó£¬Ò²ÊÇ¶ÔÆäÖĞÎ´±ê¼ÇµÄ¶ÔÏó½øĞĞÇå³ı£¬¶ÔÒÑ±ê¼ÇµÄ¶ÔÏóÔò°ÑËüµÄÄêÁä±ê¼ÇÎªG_OLDÀÏ¶ÔÏó¡£
+  // ä¸ä¸Šé¢å¤§è‡´ç›¸åŒï¼Œä¸åŒä¹‹å¤„æ˜¯è¿™é‡Œå¤„ç†çš„æ˜¯æ‰€æœ‰å¸¦ææ„å™¨çš„å¯¹è±¡ï¼Œä¹Ÿæ˜¯å¯¹å…¶ä¸­æœªæ ‡è®°çš„å¯¹è±¡è¿›è¡Œæ¸…é™¤ï¼Œå¯¹å·²æ ‡è®°çš„å¯¹è±¡åˆ™æŠŠå®ƒçš„å¹´é¾„æ ‡è®°ä¸ºG_OLDè€å¯¹è±¡ã€‚
   sweep2old(L, &g->finobj);
   g->finobjrold = g->finobjold1 = g->finobjsur = g->finobj;
 
   sweep2old(L, &g->tobefnz);
 
-  // ÕıÊ½ĞŞ¸ÄGCËã·¨ÀàĞÍgckindÎª·Ö´úÊ½Ëã·¨¡£È»ºóÖØµã²Ù×÷À´ÁË£º°Ñµ±Ç°Êµ¼ÊÄÚ´æ·ÖÅäÉèÖÃÎªÄÚ´æ»ù×¼Öµg->GCestimate¡£
-  // GC´¥·¢Ê±£¬»áÊ¹ÓÃ¸ÃÖµÓëµ±Ç°ÄÚ´æÊ¹ÓÃÁ¿½øĞĞ±È½Ï£¬²¢¾ö¶¨ÊÇÊ¹ÓÃ²¿·ÖÖ´ĞĞÄ£Ê½»¹ÊÇÈ«²¿Ö´ĞĞÄ£Ê½¡£
+  // æ­£å¼ä¿®æ”¹GCç®—æ³•ç±»å‹gckindä¸ºåˆ†ä»£å¼ç®—æ³•ã€‚ç„¶åé‡ç‚¹æ“ä½œæ¥äº†ï¼šæŠŠå½“å‰å®é™…å†…å­˜åˆ†é…è®¾ç½®ä¸ºå†…å­˜åŸºå‡†å€¼g->GCestimateã€‚
+  // GCè§¦å‘æ—¶ï¼Œä¼šä½¿ç”¨è¯¥å€¼ä¸å½“å‰å†…å­˜ä½¿ç”¨é‡è¿›è¡Œæ¯”è¾ƒï¼Œå¹¶å†³å®šæ˜¯ä½¿ç”¨éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼è¿˜æ˜¯å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ã€‚
   g->gckind = KGC_GEN;
   g->lastatomic = 0;
   g->GCestimate = gettotalbytes(g);  /* base for memory control */
-  // ÔÚÃ¿´Î·Ö´úÊ½Ëã·¨²¿·ÖÖ´ĞĞÄ£Ê½Ö´ĞĞ½áÊøºóµ÷ÓÃ
+  // åœ¨æ¯æ¬¡åˆ†ä»£å¼ç®—æ³•éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼æ‰§è¡Œç»“æŸåè°ƒç”¨
   finishgencycle(L, g);
 }
 
@@ -1474,7 +1489,7 @@ static void atomic2gen (lua_State *L, global_State *g) {
 ** Set debt for the next minor collection, which will happen when
 ** memory grows 'genminormul'%.
 */
-// ÉèÖÃÏÂÒ»´ÎÄêÇ¿´úGCµÄÊ±»ú
+// è®¾ç½®ä¸‹ä¸€æ¬¡å¹´å¼ºä»£GCçš„æ—¶æœº
 static void setminordebt (global_State *g) {
   luaE_setdebt(g, -(cast(l_mem, (gettotalbytes(g) / 100)) * g->genminormul));
 }
@@ -1486,25 +1501,25 @@ static void setminordebt (global_State *g) {
 ** are cleared. Then, turn all objects into old and finishes the
 ** collection.
 */
-// Ò»´ÎĞÔÖ´ĞĞÒ»±éÔöÁ¿Ê½±ê¼ÇÇå³ıËã·¨£¬Ö´ĞĞÍê³ÉºóÉèÖÃºÃ¶ÔÏóµÄÄêÁäÓëÄÚ´æ»ù×¼Öµ
+// ä¸€æ¬¡æ€§æ‰§è¡Œä¸€éå¢é‡å¼æ ‡è®°æ¸…é™¤ç®—æ³•ï¼Œæ‰§è¡Œå®Œæˆåè®¾ç½®å¥½å¯¹è±¡çš„å¹´é¾„ä¸å†…å­˜åŸºå‡†å€¼
 static lu_mem entergen (lua_State *L, global_State *g) {
   lu_mem numobjs;
-  // ÔÚµ÷ÓÃÇĞ»»·Ö´úÊ½º¯ÊıµÄ´Ë¿Ì£¬µ±Ç°GCËã·¨ÀàĞÍ±ØÈ»»¹ÎªÁíÒ»ÖÖËã·¨ÀàĞÍ¼´ÔöÁ¿Ê½Ëã·¨¡£
-  // luaC_runtilstateº¯ÊıÓÃÓÚÇıÊ¹GCËã·¨°´½×¶ÎË³Ğò¡¢²»´ò¶ÏµØÖ´ĞĞGCÁ÷³Ìµ½Ä³¸ö½×¶ÎÎªÖ¹£¬´Ë´¦²ÎÊıÎª½×¶ÎÃ¶¾ÙÖµGCSpause£¬
-  // ÎÒÃÇÖªµÀËüÊÇGCÁ÷³ÌµÄ×îºóÒ»¸ö½×¶Î£¬Ò²¿ÉÒÔÀí½âÎªÏÂÒ»ÂÖ¿ªÊ¼µÄµÚÒ»¸ö½×¶Î¡£ËùÒÔÕâÀï±íÊ¾¼ÌĞøÔËĞĞGCËã·¨Ò»Ö±µ½µ±Ç°ÂÖµÄ×îºó½×¶ÎGCSpause½×¶Î²Å½áÊø¡£
+  // åœ¨è°ƒç”¨åˆ‡æ¢åˆ†ä»£å¼å‡½æ•°çš„æ­¤åˆ»ï¼Œå½“å‰GCç®—æ³•ç±»å‹å¿…ç„¶è¿˜ä¸ºå¦ä¸€ç§ç®—æ³•ç±»å‹å³å¢é‡å¼ç®—æ³•ã€‚
+  // luaC_runtilstateå‡½æ•°ç”¨äºé©±ä½¿GCç®—æ³•æŒ‰é˜¶æ®µé¡ºåºã€ä¸æ‰“æ–­åœ°æ‰§è¡ŒGCæµç¨‹åˆ°æŸä¸ªé˜¶æ®µä¸ºæ­¢ï¼Œæ­¤å¤„å‚æ•°ä¸ºé˜¶æ®µæšä¸¾å€¼GCSpauseï¼Œ
+  // æˆ‘ä»¬çŸ¥é“å®ƒæ˜¯GCæµç¨‹çš„æœ€åä¸€ä¸ªé˜¶æ®µï¼Œä¹Ÿå¯ä»¥ç†è§£ä¸ºä¸‹ä¸€è½®å¼€å§‹çš„ç¬¬ä¸€ä¸ªé˜¶æ®µã€‚æ‰€ä»¥è¿™é‡Œè¡¨ç¤ºç»§ç»­è¿è¡ŒGCç®—æ³•ä¸€ç›´åˆ°å½“å‰è½®çš„æœ€åé˜¶æ®µGCSpauseé˜¶æ®µæ‰ç»“æŸã€‚
   // 
-  // ·Ö´úÊ½Ëã·¨»áÔÚ¸Õ½øÈë¡¢ÒÔ¼°È«²¿Ö´ĞĞÄ£Ê½½áÊøºó£¬»á¶Ôµ±Ç°ÄÚ´æÊ¹ÓÃÁ¿½øĞĞÆÀ¹À²¢È·¶¨Ò»¸öÄÚ´æ»ù×¼Öµ£¬
-  // ºóĞø´¥·¢·Ö´úÊ½Ëã·¨Ê±Ôò»á¸ù¾İÕâ¸ö»ù×¼¾ö¶¨¸ÃÂÖGCÖ´ĞĞÊ¹ÓÃ²¿·ÖÖ´ĞĞÄ£Ê½»¹ÊÇÈ«²¿Ö´ĞĞÄ£Ê½¡£
-  // ËùÒÔÎªÁËÈÃºóĞøµÄËã·¨Ö´ĞĞÄ£Ê½Ñ¡Ôñ¸ü¾«È·£¬ÓÚÊÇÑ¡ÔñÁËÍêÕûÖ´ĞĞÍê±¾ÂÖÔöÁ¿Ê½Ëã·¨Ê£ÓàµÄËùÓĞÁ÷³Ì£¬
-  // ÒÔÈÃÄÚ´æÖĞµÄÀ¬»ø¶ÔÏóÈ«²¿ÇåÀí¸É¾»£¬ÈÃÆÀ¹ÀµÄ»ù×¼Öµ¾¡¿ÉÄÜÕıÈ·¡£
+  // åˆ†ä»£å¼ç®—æ³•ä¼šåœ¨åˆšè¿›å…¥ã€ä»¥åŠå…¨éƒ¨æ‰§è¡Œæ¨¡å¼ç»“æŸåï¼Œä¼šå¯¹å½“å‰å†…å­˜ä½¿ç”¨é‡è¿›è¡Œè¯„ä¼°å¹¶ç¡®å®šä¸€ä¸ªå†…å­˜åŸºå‡†å€¼ï¼Œ
+  // åç»­è§¦å‘åˆ†ä»£å¼ç®—æ³•æ—¶åˆ™ä¼šæ ¹æ®è¿™ä¸ªåŸºå‡†å†³å®šè¯¥è½®GCæ‰§è¡Œä½¿ç”¨éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼è¿˜æ˜¯å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ã€‚
+  // æ‰€ä»¥ä¸ºäº†è®©åç»­çš„ç®—æ³•æ‰§è¡Œæ¨¡å¼é€‰æ‹©æ›´ç²¾ç¡®ï¼Œäºæ˜¯é€‰æ‹©äº†å®Œæ•´æ‰§è¡Œå®Œæœ¬è½®å¢é‡å¼ç®—æ³•å‰©ä½™çš„æ‰€æœ‰æµç¨‹ï¼Œ
+  // ä»¥è®©å†…å­˜ä¸­çš„åƒåœ¾å¯¹è±¡å…¨éƒ¨æ¸…ç†å¹²å‡€ï¼Œè®©è¯„ä¼°çš„åŸºå‡†å€¼å°½å¯èƒ½æ­£ç¡®ã€‚
   luaC_runtilstate(L, bitmask(GCSpause));  /* prepare to start a new cycle */
-  // ´ËÊ±Ëã·¨ÀàĞÍÈÔÈ»»¹´¦ÓÚÔöÁ¿Ê½Ëã·¨ÀàĞÍ£¬ÖØĞÂ¿ªÊ¼ĞÂÒ»ÂÖµÄGC½×¶ÎÁ÷³Ì£¬²¢Ö´ĞĞÏÂÁĞÂß¼­£º
-  // ±ê¼Ç½×¶Î±ê¼Ç³õÊ¼¸ù½áµã£¬½øÈëÔ­×Ó½×¶Î£¬´«²¥ËùÓĞ½áµãµÄÑÕÉ«±ê¼Ç£¬²¢´¦ÀíÈõÒıÓÃ¹ØÏµ±íÓëÆÁÕÏ¡£
+  // æ­¤æ—¶ç®—æ³•ç±»å‹ä»ç„¶è¿˜å¤„äºå¢é‡å¼ç®—æ³•ç±»å‹ï¼Œé‡æ–°å¼€å§‹æ–°ä¸€è½®çš„GCé˜¶æ®µæµç¨‹ï¼Œå¹¶æ‰§è¡Œä¸‹åˆ—é€»è¾‘ï¼š
+  // æ ‡è®°é˜¶æ®µæ ‡è®°åˆå§‹æ ¹ç»“ç‚¹ï¼Œè¿›å…¥åŸå­é˜¶æ®µï¼Œä¼ æ’­æ‰€æœ‰ç»“ç‚¹çš„é¢œè‰²æ ‡è®°ï¼Œå¹¶å¤„ç†å¼±å¼•ç”¨å…³ç³»è¡¨ä¸å±éšœã€‚
   luaC_runtilstate(L, bitmask(GCSpropagate));  /* start new cycle */
   numobjs = atomic(L);  /* propagates all and then do the atomic stuff */
-  // ÉÏÃæÖ´ĞĞÍê±Ïºó£¬ËùÓĞÍ¨¹ıÒıÓÃ¹ØÏµ´Ó¸ù½áµã¿É´ïµÄ¶ÔÏó¶¼½«Ë³Àû±»±ê¼ÇÎªºÚÉ«£¬¶ø²»¿É´ïµÄ¶ÔÏóÔò±£³Ö°×É«¡£
-  // Ö´ĞĞÇ°ÃæÁ½²½µÄÊ±ºòËã·¨ÈÔÈ»¶¼´¦ÓÚÔöÁ¿Ê½Ëã·¨Ä£Ê½ÏÂ£¬¶¼ÊÇÔÚ¸´ÓÃÔöÁ¿Ê½Ëã·¨µÄ´úÂëÓëÂß¼­Á÷³Ì¡£
-  // È»ºóµ½ÁËÕâÒ»²½£¬¾ÍÕæÕı×¼±¸Òª°ÑËã·¨ÀàĞÍÇĞ»»µ½·Ö´úÊ½Ëã·¨
+  // ä¸Šé¢æ‰§è¡Œå®Œæ¯•åï¼Œæ‰€æœ‰é€šè¿‡å¼•ç”¨å…³ç³»ä»æ ¹ç»“ç‚¹å¯è¾¾çš„å¯¹è±¡éƒ½å°†é¡ºåˆ©è¢«æ ‡è®°ä¸ºé»‘è‰²ï¼Œè€Œä¸å¯è¾¾çš„å¯¹è±¡åˆ™ä¿æŒç™½è‰²ã€‚
+  // æ‰§è¡Œå‰é¢ä¸¤æ­¥çš„æ—¶å€™ç®—æ³•ä»ç„¶éƒ½å¤„äºå¢é‡å¼ç®—æ³•æ¨¡å¼ä¸‹ï¼Œéƒ½æ˜¯åœ¨å¤ç”¨å¢é‡å¼ç®—æ³•çš„ä»£ç ä¸é€»è¾‘æµç¨‹ã€‚
+  // ç„¶ååˆ°äº†è¿™ä¸€æ­¥ï¼Œå°±çœŸæ­£å‡†å¤‡è¦æŠŠç®—æ³•ç±»å‹åˆ‡æ¢åˆ°åˆ†ä»£å¼ç®—æ³•
   atomic2gen(L, g);
   setminordebt(g);  /* set debt assuming next cycle will be minor */
   return numobjs;
@@ -1516,7 +1531,7 @@ static lu_mem entergen (lua_State *L, global_State *g) {
 ** intermediate lists point to NULL (to avoid invalid pointers),
 ** and go to the pause state.
 */
-// Çå¿ÕÖØÖÃÒ»Ğ©·Ö´úÊ½Ëã·¨Ê¹ÓÃ¹ıµÄÊı¾İ½á¹¹£¬È»ºó°ÑGCËã·¨ÀàĞÍÇĞ»»ÎªÔöÁ¿Ê½±ê¼ÇÇå³ıËã·¨
+// æ¸…ç©ºé‡ç½®ä¸€äº›åˆ†ä»£å¼ç®—æ³•ä½¿ç”¨è¿‡çš„æ•°æ®ç»“æ„ï¼Œç„¶åæŠŠGCç®—æ³•ç±»å‹åˆ‡æ¢ä¸ºå¢é‡å¼æ ‡è®°æ¸…é™¤ç®—æ³•
 static void enterinc (global_State *g) {
   whitelist(g, g->allgc);
   g->reallyold = g->old1 = g->survival = NULL;
@@ -1532,7 +1547,7 @@ static void enterinc (global_State *g) {
 /*
 ** Change collector mode to 'newmode'.
 */
-// GCËã·¨ÇĞ»»
+// GCç®—æ³•åˆ‡æ¢
 void luaC_changemode (lua_State *L, int newmode) {
   global_State *g = G(L);
   if (newmode != g->gckind) {
@@ -1548,12 +1563,12 @@ void luaC_changemode (lua_State *L, int newmode) {
 /*
 ** Does a full collection in generational mode.
 */
-// ·Ö´úGCÈ«²¿Ö´ĞĞÄ£Ê½£¬¼ò¶øÑÔÖ®£¬ÆäÊµ¾ÍÊÇÒ»´ÎĞÔÖ´ĞĞÒ»±éÔöÁ¿Ê½±ê¼ÇÇå³ıËã·¨£¬Ö´ĞĞÍê³ÉºóÉèÖÃºÃ¶ÔÏóµÄÄêÁäÓëÄÚ´æ»ù×¼Öµ
-// µ±ÀÏÒ»´ú¶ÔÏóÃ»ÓĞ±»ÒıÓÃÊ±£¬ËüÒÀ¾É²»Îª°×É«£¬¶øÇÒÍ¬Ê±Ò²¸úÆäËüÀÏÒ»´ú¶ÔÏóÒ»Ñù£¬²»»á²ÎÓëµ½Çå³ı½×¶Î¡£
-// Õâ¾Íµ¼ÖÂÁËÈôÎÒÃÇÉ¾³ıÒ»¸öÀÏÒ»´ú¶ÔÏó£¬¸Ã¶ÔÏóÈôÒıÓÃÁË°×É«µÄÄêÇáÒ»´ú¶ÔÏó£¬ÕâĞ©ÄêÇáÒ»´ú¶ÔÏóÄÜµÃµ½ÕıÈ·µÄ±éÀúÓëÇå³ı£¬
-// ²»¹ı¸ÃÀÏÒ»´ú¶ÔÏó×ÔÉíÊÇÓÀÔ¶²»»á±»Çå³ıµÄ¡£
-// Õâ¾Íµ¼ÖÂÁËËæ×Å³ÌĞòµÄÔËĞĞ£¬ÔÚ²¿·ÖÖ´ĞĞÄ£Ê½ÏÂ£¬ÄÚ´æÖĞ²ĞÁôµÄÎŞĞ§ÀÏÒ»´ú¶ÔÏó»áÔ½À´Ô½¶à¡£ÓÚÊÇÎªÁË±ÜÃâÀÏÒ»´ú¶ÔÏóÉ¾³ıÎÊÌâµ¼ÖÂµÄÄÚ´æÎŞÏŞÉÏÕÇ£¬
-// ·Ö´úÊ½Ëã·¨Ö§³ÖÁËÁíÍâÒ»ÖÖÄ£Ê½£¬¾ÍÊÇÈ«²¿Ö´ĞĞÄ£Ê½¡£
+// åˆ†ä»£GCå…¨éƒ¨æ‰§è¡Œæ¨¡å¼ï¼Œç®€è€Œè¨€ä¹‹ï¼Œå…¶å®å°±æ˜¯ä¸€æ¬¡æ€§æ‰§è¡Œä¸€éå¢é‡å¼æ ‡è®°æ¸…é™¤ç®—æ³•ï¼Œæ‰§è¡Œå®Œæˆåè®¾ç½®å¥½å¯¹è±¡çš„å¹´é¾„ä¸å†…å­˜åŸºå‡†å€¼
+// å½“è€ä¸€ä»£å¯¹è±¡æ²¡æœ‰è¢«å¼•ç”¨æ—¶ï¼Œå®ƒä¾æ—§ä¸ä¸ºç™½è‰²ï¼Œè€Œä¸”åŒæ—¶ä¹Ÿè·Ÿå…¶å®ƒè€ä¸€ä»£å¯¹è±¡ä¸€æ ·ï¼Œä¸ä¼šå‚ä¸åˆ°æ¸…é™¤é˜¶æ®µã€‚
+// è¿™å°±å¯¼è‡´äº†è‹¥æˆ‘ä»¬åˆ é™¤ä¸€ä¸ªè€ä¸€ä»£å¯¹è±¡ï¼Œè¯¥å¯¹è±¡è‹¥å¼•ç”¨äº†ç™½è‰²çš„å¹´è½»ä¸€ä»£å¯¹è±¡ï¼Œè¿™äº›å¹´è½»ä¸€ä»£å¯¹è±¡èƒ½å¾—åˆ°æ­£ç¡®çš„éå†ä¸æ¸…é™¤ï¼Œ
+// ä¸è¿‡è¯¥è€ä¸€ä»£å¯¹è±¡è‡ªèº«æ˜¯æ°¸è¿œä¸ä¼šè¢«æ¸…é™¤çš„ã€‚
+// è¿™å°±å¯¼è‡´äº†éšç€ç¨‹åºçš„è¿è¡Œï¼Œåœ¨éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼ä¸‹ï¼Œå†…å­˜ä¸­æ®‹ç•™çš„æ— æ•ˆè€ä¸€ä»£å¯¹è±¡ä¼šè¶Šæ¥è¶Šå¤šã€‚äºæ˜¯ä¸ºäº†é¿å…è€ä¸€ä»£å¯¹è±¡åˆ é™¤é—®é¢˜å¯¼è‡´çš„å†…å­˜æ— é™ä¸Šæ¶¨ï¼Œ
+// åˆ†ä»£å¼ç®—æ³•æ”¯æŒäº†å¦å¤–ä¸€ç§æ¨¡å¼ï¼Œå°±æ˜¯å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ã€‚
 static lu_mem fullgen (lua_State *L, global_State *g) {
   enterinc(g);
   return entergen(L, g);
@@ -1581,41 +1596,41 @@ static lu_mem fullgen (lua_State *L, global_State *g) {
 ** field 'g->lastatomic' keeps this count from the last collection.
 ** ('g->lastatomic != 0' also means that the last collection was bad.)
 */
-// µ¥²½È«²¿Ö´ĞĞÄ£Ê½
-// È«²¿Ö´ĞĞÄ£Ê½ÄÜÁ¢¿ÌÓĞĞ§µØÇå³ıËùÓĞÎŞĞ§À¬»ø¶ÔÏó£¬µ«ĞèÒª´¦ÀíÈ«²¿¶ÔÏó£¬ËùÒÔĞ§ÂÊºÜµÍ¡£
-// Ã¿µ±Ö´ĞĞÒ»´ÎÈ«Á¿Ö´ĞĞÄ£Ê½ºó£¬·Ö´úÊ½Ëã·¨»á¶Ô³É¹¦ÊÍ·Å³öÀ´µÄÄÚ´æÁ¿½øĞĞÒ»¸öÆÀ¹ÀÒÔ¾ö¶¨ÏÂÒ»´ÎGC´¥·¢Ê±µÄĞĞÎª£º
-// 1£©ÈôÊÍ·ÅµÄÄÚ´æÁ¿³¬¹ıÁË»ù×¼Ôö³¤ÖµµÄÒ»°ë£¬Ôò±íÊ¾¸ÃÂÖÈ«Á¿Ö´ĞĞÄ£Ê½½á¹ûÁ¼ºÃ£¬ÏÂ
-// Ò»´ÎGC´¥·¢Ê±¿ÉÒÔÖØĞÂ¸ù¾İÄÚ´æÊ¹ÓÃÁ¿¾ö¶¨ÊÇ·ñÊ¹ÓÃ»Ø²¿·ÖÖ´ĞĞÄ£Ê½£»
-// 2£©ÈôÊÍ·ÅµÄÄÚ´æÁ¿²»¼°»ù×¼Ôö³¤ÖµµÄÒ»°ë£¬Ôò±íÊ¾Õâ´ÎÈ«²¿Ö´ĞĞÄ£Ê½²»ºÏ¸ñ£¬ÔÚÏÂÒ»´ÎGC´¥·¢ºó£¬
-// ·Ö´úÊ½Ëã·¨¾Í»á²ÉÓÃµ¥²½È«²¿Ö´ĞĞÄ£Ê½£¬¸Ãº¯Êı±ÈÆğfullgenº¯Êı£¬ÓĞºÜ¶à´úÂëÂß¼­ÊÇÒ»ÑùµÄ£¬µ«»á¶àÒ»Ğ©ÅĞ¶ÏÓëÂß¼­
+// å•æ­¥å…¨éƒ¨æ‰§è¡Œæ¨¡å¼
+// å…¨éƒ¨æ‰§è¡Œæ¨¡å¼èƒ½ç«‹åˆ»æœ‰æ•ˆåœ°æ¸…é™¤æ‰€æœ‰æ— æ•ˆåƒåœ¾å¯¹è±¡ï¼Œä½†éœ€è¦å¤„ç†å…¨éƒ¨å¯¹è±¡ï¼Œæ‰€ä»¥æ•ˆç‡å¾ˆä½ã€‚
+// æ¯å½“æ‰§è¡Œä¸€æ¬¡å…¨é‡æ‰§è¡Œæ¨¡å¼åï¼Œåˆ†ä»£å¼ç®—æ³•ä¼šå¯¹æˆåŠŸé‡Šæ”¾å‡ºæ¥çš„å†…å­˜é‡è¿›è¡Œä¸€ä¸ªè¯„ä¼°ä»¥å†³å®šä¸‹ä¸€æ¬¡GCè§¦å‘æ—¶çš„è¡Œä¸ºï¼š
+// 1ï¼‰è‹¥é‡Šæ”¾çš„å†…å­˜é‡è¶…è¿‡äº†åŸºå‡†å¢é•¿å€¼çš„ä¸€åŠï¼Œåˆ™è¡¨ç¤ºè¯¥è½®å…¨é‡æ‰§è¡Œæ¨¡å¼ç»“æœè‰¯å¥½ï¼Œä¸‹
+// ä¸€æ¬¡GCè§¦å‘æ—¶å¯ä»¥é‡æ–°æ ¹æ®å†…å­˜ä½¿ç”¨é‡å†³å®šæ˜¯å¦ä½¿ç”¨å›éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼ï¼›
+// 2ï¼‰è‹¥é‡Šæ”¾çš„å†…å­˜é‡ä¸åŠåŸºå‡†å¢é•¿å€¼çš„ä¸€åŠï¼Œåˆ™è¡¨ç¤ºè¿™æ¬¡å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ä¸åˆæ ¼ï¼Œåœ¨ä¸‹ä¸€æ¬¡GCè§¦å‘åï¼Œ
+// åˆ†ä»£å¼ç®—æ³•å°±ä¼šé‡‡ç”¨å•æ­¥å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ï¼Œè¯¥å‡½æ•°æ¯”èµ·fullgenå‡½æ•°ï¼Œæœ‰å¾ˆå¤šä»£ç é€»è¾‘æ˜¯ä¸€æ ·çš„ï¼Œä½†ä¼šå¤šä¸€äº›åˆ¤æ–­ä¸é€»è¾‘
 static void stepgenfull (lua_State *L, global_State *g) {
   lu_mem newatomic;  /* count of traversed objects */
   lu_mem lastatomic = g->lastatomic;  /* count from last collection */
-  // ¸Ã²¿·ÖÂß¼­¾ÍÊÇ°ÑËã·¨ÀàĞÍÓÖÇĞ»»µ½ÔöÁ¿Ê½Ëã·¨£¬È»ºóÖ´ĞĞÔ­×Ó½×¶ÎÁ÷³Ìatomicº¯Êı¶ÔËùÓĞ¶ÔÏó½øĞĞ±ê¼Ç£¬
-  // atomicµÄ·µ»ØÖµnewatomicÎªÔ­×Ó½×¶ÎÖĞ±»±ê¼ÇµÄ¶ÔÏó¸öÊı¡£×¢Òâ´Ë´¦½ö½öÊÇ±ê¼Ç£¬»¹Î´½øĞĞÇå³ı½×¶ÎÁ÷³Ì¡£
+  // è¯¥éƒ¨åˆ†é€»è¾‘å°±æ˜¯æŠŠç®—æ³•ç±»å‹åˆåˆ‡æ¢åˆ°å¢é‡å¼ç®—æ³•ï¼Œç„¶åæ‰§è¡ŒåŸå­é˜¶æ®µæµç¨‹atomicå‡½æ•°å¯¹æ‰€æœ‰å¯¹è±¡è¿›è¡Œæ ‡è®°ï¼Œ
+  // atomicçš„è¿”å›å€¼newatomicä¸ºåŸå­é˜¶æ®µä¸­è¢«æ ‡è®°çš„å¯¹è±¡ä¸ªæ•°ã€‚æ³¨æ„æ­¤å¤„ä»…ä»…æ˜¯æ ‡è®°ï¼Œè¿˜æœªè¿›è¡Œæ¸…é™¤é˜¶æ®µæµç¨‹ã€‚
   if (g->gckind == KGC_GEN)  /* still in generational mode? */
     enterinc(g);  /* enter incremental mode */
   luaC_runtilstate(L, bitmask(GCSpropagate));  /* start new cycle */
   newatomic = atomic(L);  /* mark everybody */
-  // lastatomicÊÇ·Ö´úÊ½Ëã·¨ÖĞÓÃÓÚ´ú±íÉÏÒ»ÂÖGCÔ­×Ó½×¶ÎÖĞ±»±ê¼ÇµÄ¶ÔÏó¸öÊı¡£
-  // ¸Ã´¦ÅĞ¶ÏÊ¹ÓÃÁËÎ»²Ù×÷ÓÒÒÆ3Î»£¨¼´Ê®½øÖÆ³ıÒÔ8£©£¬ËùÒÔ¸Ã´¦ÅĞ¶ÏµÄÂß¼­ÊÇ£¬
-  // ÈôÕâÒ»ÂÖGC±ê¼ÇµÄ¶ÔÏó¸öÊıÃ»ÓĞ±ÈÉÏÒ»ÂÖGC±ê¼ÇµÄ¶ÔÏó¸öÊı¶à8·ÖÖ®1£¬
-  // ÒâÎ¶×ÅÔÚÉÏÒ»ÂÖÊ¹ÓÃÈ«²¿Ö´ĞĞÄ£Ê½Çå³ıÄÚ´æºó£¬±¾ÂÖGC´¥·¢Ê±ÄÚ´æÃ»ÓĞÃ÷ÏÔ»Øµ¯Ôö³¤£¬
-  // ÀÖ¹ÛµØÈÏÎªÈç¹ûÄÚ´æºóĞø¿ÉÒÔ¼ÌĞø±£³Ö¸Ã½Ú×àÔö³¤£¬ÆğÂë»¹ÓĞºÃ¼¸ÂÖ²Å»áÔÙ´ÎÖØĞÂ´¥·¢È«²¿Ö´ĞĞÄ£Ê½¡£
-  // ´ËÊ±£¬·Ö´úÊ½Ëã·¨ÔÚÖ´ĞĞÍêÕâĞ©ÔöÁ¿Ê½Ëã·¨µÄ²¿·ÖÁ÷³Ìºó£¬¼ÌĞøµ÷ÓÃatomic2genº¯ÊıÇĞ»»»Ø·Ö´úÊ½Ëã·¨¡£
-  // Çå³ıËùÓĞÎ´±ê¼Ç¶ÔÏó£¬ÖØÖÃÄÚ´æ»ù×¼Öµ¡£
-  // ×îºóÒ»ĞĞsetminordebtº¯ÊıÓÃÓÚĞŞÕıÄÚ´æÕ®ÎñÖµ£¬¿ØÖÆÏÂÂÖGC´¥·¢Ê±»ú
+  // lastatomicæ˜¯åˆ†ä»£å¼ç®—æ³•ä¸­ç”¨äºä»£è¡¨ä¸Šä¸€è½®GCåŸå­é˜¶æ®µä¸­è¢«æ ‡è®°çš„å¯¹è±¡ä¸ªæ•°ã€‚
+  // è¯¥å¤„åˆ¤æ–­ä½¿ç”¨äº†ä½æ“ä½œå³ç§»3ä½ï¼ˆå³åè¿›åˆ¶é™¤ä»¥8ï¼‰ï¼Œæ‰€ä»¥è¯¥å¤„åˆ¤æ–­çš„é€»è¾‘æ˜¯ï¼Œ
+  // è‹¥è¿™ä¸€è½®GCæ ‡è®°çš„å¯¹è±¡ä¸ªæ•°æ²¡æœ‰æ¯”ä¸Šä¸€è½®GCæ ‡è®°çš„å¯¹è±¡ä¸ªæ•°å¤š8åˆ†ä¹‹1ï¼Œ
+  // æ„å‘³ç€åœ¨ä¸Šä¸€è½®ä½¿ç”¨å…¨éƒ¨æ‰§è¡Œæ¨¡å¼æ¸…é™¤å†…å­˜åï¼Œæœ¬è½®GCè§¦å‘æ—¶å†…å­˜æ²¡æœ‰æ˜æ˜¾å›å¼¹å¢é•¿ï¼Œ
+  // ä¹è§‚åœ°è®¤ä¸ºå¦‚æœå†…å­˜åç»­å¯ä»¥ç»§ç»­ä¿æŒè¯¥èŠ‚å¥å¢é•¿ï¼Œèµ·ç è¿˜æœ‰å¥½å‡ è½®æ‰ä¼šå†æ¬¡é‡æ–°è§¦å‘å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ã€‚
+  // æ­¤æ—¶ï¼Œåˆ†ä»£å¼ç®—æ³•åœ¨æ‰§è¡Œå®Œè¿™äº›å¢é‡å¼ç®—æ³•çš„éƒ¨åˆ†æµç¨‹åï¼Œç»§ç»­è°ƒç”¨atomic2genå‡½æ•°åˆ‡æ¢å›åˆ†ä»£å¼ç®—æ³•ã€‚
+  // æ¸…é™¤æ‰€æœ‰æœªæ ‡è®°å¯¹è±¡ï¼Œé‡ç½®å†…å­˜åŸºå‡†å€¼ã€‚
+  // æœ€åä¸€è¡Œsetminordebtå‡½æ•°ç”¨äºä¿®æ­£å†…å­˜å€ºåŠ¡å€¼ï¼Œæ§åˆ¶ä¸‹è½®GCè§¦å‘æ—¶æœº
   if (newatomic < lastatomic + (lastatomic >> 3)) {  /* good collection? */
     atomic2gen(L, g);  /* return to generational mode */
     setminordebt(g);
   }
   else {  /* another bad collection; stay in incremental mode */
-    // Èô±¾ÂÖ±ê¼ÇµÄ¶ÔÏóÊıÁ¿±ÈÆğÉÏÒ»ÂÖ¶àÓÚ8·ÖÖ®1£¬Ôò·Ö´úÊ½Ëã·¨±¯¹ÛµØÈÏÎªÔÚÕâÖÖÇé¿öÏÂ£¬
-    // ÏÂ´ÎGC´¥·¢Ê±¶¨½«ºÜ´ó¿ÉÄÜ»áÔÙ´ÎÊ¹ÓÃÈ«²¿Ö´ĞĞÄ£Ê½£¬´ËÊ±Ëã·¨²ÉÓÃµÄ·½°¸ÊÇºóÃæÒ»Ö±±£³ÖÊ¹ÓÃÍêÈ«²»´ò¶ÏµÄÔöÁ¿Ê½Ëã·¨£¬
-    // ÈÃ¶ÔÏóÄêÁä¸ü¿ìËÙµØ½øĞĞ³É³¤£¬ÎŞÒıÓÃµÄ¶ÔÏó¸ü¿ìËÙµØ½øĞĞÇå³ı¡£ËäÈ»Âß¼­ÉÏÒ²ÊÇÍ¬ÑùÊ¹ÓÃÔöÁ¿Ê½Ëã·¨£¬
-    // µ«ÉÏÊö´úÂëÖĞ×îºóÒ»ĞĞ¶Ôg->lastatomicµÄ¸³Öµ£¬ÈÃËü²»Îª0£¬¸ÃÖµ²»Îª0µÄÊ±ºòÔÚÃ¿ÂÖGC»áÒÀ¾É½øÈëµ½·Ö´úÊ½Ëã·¨µÄÂß¼­ÖĞ£¬
-    // È»ºóÏÂÂÖGC×îÖÕ»¹ÊÇ»á»ØÀ´ÉÏÃæÕâ¸östepgenfullº¯Êı£¬ÖØ¸´¸ÃÁ÷³Ì£¬Ö±µ½ĞÂÒ»ÂÖµÄÍêÈ«ÔöÁ¿Ê½Ëã·¨±ê¼ÇµÄÊıÁ¿Ğ¡ÓÚ8·ÖÖ®1£¬
-    // ²Å»áÈÃ·Ö´úÊ½Ëã·¨»Ö¸´»Ø²¿·ÖÖ´ĞĞÄ£Ê½¡£
+    // è‹¥æœ¬è½®æ ‡è®°çš„å¯¹è±¡æ•°é‡æ¯”èµ·ä¸Šä¸€è½®å¤šäº8åˆ†ä¹‹1ï¼Œåˆ™åˆ†ä»£å¼ç®—æ³•æ‚²è§‚åœ°è®¤ä¸ºåœ¨è¿™ç§æƒ…å†µä¸‹ï¼Œ
+    // ä¸‹æ¬¡GCè§¦å‘æ—¶å®šå°†å¾ˆå¤§å¯èƒ½ä¼šå†æ¬¡ä½¿ç”¨å…¨éƒ¨æ‰§è¡Œæ¨¡å¼ï¼Œæ­¤æ—¶ç®—æ³•é‡‡ç”¨çš„æ–¹æ¡ˆæ˜¯åé¢ä¸€ç›´ä¿æŒä½¿ç”¨å®Œå…¨ä¸æ‰“æ–­çš„å¢é‡å¼ç®—æ³•ï¼Œ
+    // è®©å¯¹è±¡å¹´é¾„æ›´å¿«é€Ÿåœ°è¿›è¡Œæˆé•¿ï¼Œæ— å¼•ç”¨çš„å¯¹è±¡æ›´å¿«é€Ÿåœ°è¿›è¡Œæ¸…é™¤ã€‚è™½ç„¶é€»è¾‘ä¸Šä¹Ÿæ˜¯åŒæ ·ä½¿ç”¨å¢é‡å¼ç®—æ³•ï¼Œ
+    // ä½†ä¸Šè¿°ä»£ç ä¸­æœ€åä¸€è¡Œå¯¹g->lastatomicçš„èµ‹å€¼ï¼Œè®©å®ƒä¸ä¸º0ï¼Œè¯¥å€¼ä¸ä¸º0çš„æ—¶å€™åœ¨æ¯è½®GCä¼šä¾æ—§è¿›å…¥åˆ°åˆ†ä»£å¼ç®—æ³•çš„é€»è¾‘ä¸­ï¼Œ
+    // ç„¶åä¸‹è½®GCæœ€ç»ˆè¿˜æ˜¯ä¼šå›æ¥ä¸Šé¢è¿™ä¸ªstepgenfullå‡½æ•°ï¼Œé‡å¤è¯¥æµç¨‹ï¼Œç›´åˆ°æ–°ä¸€è½®çš„å®Œå…¨å¢é‡å¼ç®—æ³•æ ‡è®°çš„æ•°é‡å°äº8åˆ†ä¹‹1ï¼Œ
+    // æ‰ä¼šè®©åˆ†ä»£å¼ç®—æ³•æ¢å¤å›éƒ¨åˆ†æ‰§è¡Œæ¨¡å¼ã€‚
     g->GCestimate = gettotalbytes(g);  /* first estimate */
     entersweep(L);
     luaC_runtilstate(L, bitmask(GCSpause));  /* finish collection */
@@ -1648,32 +1663,32 @@ static void genstep (lua_State *L, global_State *g) {
   if (g->lastatomic != 0)  /* last collection was a bad one? */
     stepgenfull(L, g);  /* do a full step */
   else {
-    // ¹Ì¶¨Ïû·ÑÖ§³ö
+    // å›ºå®šæ¶ˆè´¹æ”¯å‡º
     lu_mem majorbase = g->GCestimate;  /* memory after last major collection */
-    // ĞÂÔöÏû·Ñ¼ì²âÖµ
+    // æ–°å¢æ¶ˆè´¹æ£€æµ‹å€¼
     lu_mem majorinc = (majorbase / 100) * getgcparam(g->genmajormul);
-    // ÕæÊµÏû·Ñ > ¹Ì¶¨Ïû·Ñ + ĞÂÔöÏû·Ñ¼ì²âÖµ£¬½øĞĞÈ«´úGC
+    // çœŸå®æ¶ˆè´¹ > å›ºå®šæ¶ˆè´¹ + æ–°å¢æ¶ˆè´¹æ£€æµ‹å€¼ï¼Œè¿›è¡Œå…¨ä»£GC
     if (g->GCdebt > 0 && gettotalbytes(g) > majorbase + majorinc) {
-      // È«´úGC
+      // å…¨ä»£GC
       lu_mem numobjs = fullgen(L, g);  /* do a major collection */
       if (gettotalbytes(g) < majorbase + (majorinc / 2)) {
         /* collected at least half of memory growth since last major
            collection; keep doing minor collections. */
-        // ÈôGCÇåÀíµÄÄÚ´æ²»Ğ¡ÓÚ¹Ì¶¨Ïû·ÑµÄÒ»°ë£¬ÔòÈÔÈ»ÊÇÏñÉÏÊö·½°¸1ÖĞÔ¤³äÖµ½ÏĞ¡µÄÖµ£¬ÈÔÈ»Ê¹ÓÃÕæÊµÏû·Ñ½ğ¶îµÄ5·ÖÖ®1×÷ÎªÔ¤³äÖµ½ğ¶î£»
-        // ÉÏÃæfullgenÒÑ¾­ÉèÖÃ¹ıÏÂÒ»´ÎÄêÇá´úGCµÄÊ±»ú£¬ÕâÀï²»ĞèÒªÔÙÉèÖÃ
+        // è‹¥GCæ¸…ç†çš„å†…å­˜ä¸å°äºå›ºå®šæ¶ˆè´¹çš„ä¸€åŠï¼Œåˆ™ä»ç„¶æ˜¯åƒä¸Šè¿°æ–¹æ¡ˆ1ä¸­é¢„å……å€¼è¾ƒå°çš„å€¼ï¼Œä»ç„¶ä½¿ç”¨çœŸå®æ¶ˆè´¹é‡‘é¢çš„5åˆ†ä¹‹1ä½œä¸ºé¢„å……å€¼é‡‘é¢ï¼›
+        // ä¸Šé¢fullgenå·²ç»è®¾ç½®è¿‡ä¸‹ä¸€æ¬¡å¹´è½»ä»£GCçš„æ—¶æœºï¼Œè¿™é‡Œä¸éœ€è¦å†è®¾ç½®
         lua_assert(g->lastatomic == 0);
       }
       else {  /* bad collection */
-        // ÈôGCÇåÀíµÄÄÚ´æĞ¡ÓÚ¹Ì¶¨Ïû·ÑµÄÒ»°ë£¬ËµÃ÷±¾´ÎGCĞ§¹û²»¼Ñ£¬Ôò»áÔ¤³äÖµ¸ü¶àµÄ½ğ¶î£¬
-        // ÈÃÏÂÂÖGC¸üÍíµØµ½À´£¬±ÜÃâ¶ÌÊ±¼äÄÚÔÙÈ¥×öÒ»Ğ©ÎŞĞ§µÄÀ¬»ø»ØÊÕ
+        // è‹¥GCæ¸…ç†çš„å†…å­˜å°äºå›ºå®šæ¶ˆè´¹çš„ä¸€åŠï¼Œè¯´æ˜æœ¬æ¬¡GCæ•ˆæœä¸ä½³ï¼Œåˆ™ä¼šé¢„å……å€¼æ›´å¤šçš„é‡‘é¢ï¼Œ
+        // è®©ä¸‹è½®GCæ›´æ™šåœ°åˆ°æ¥ï¼Œé¿å…çŸ­æ—¶é—´å†…å†å»åšä¸€äº›æ— æ•ˆçš„åƒåœ¾å›æ”¶
         g->lastatomic = numobjs;  /* signal that last collection was bad */
         setpause(g);  /* do a long wait for next (major) collection */
       }
     }
     else {  /* regular case; do a minor collection */
-      // ÄêÇá´úGC
+      // å¹´è½»ä»£GC
       youngcollection(L, g);
-      // ÉèÖÃÏÂÒ»´ÎÄêÇá´úGCµÄÊ±»ú
+      // è®¾ç½®ä¸‹ä¸€æ¬¡å¹´è½»ä»£GCçš„æ—¶æœº
       setminordebt(g);
       g->GCestimate = majorbase;  /* preserve base value */
     }
@@ -1698,9 +1713,9 @@ static void genstep (lua_State *L, global_State *g) {
 ** not need to skip objects created between "now" and the start of the
 ** real sweep.
 */
-// °ÑGC½×¶Î×´Ì¬ÖµÓÉGCSenteratomicÇĞ»»µ½ÏÂÒ»¸ö½×¶ÎGCSwpallgcÒÔÍâ£¬
-// »¹Í¨¹ısweeptoliveº¯ÊıµÄ·µ»ØÖµÀ´³õÊ¼»¯ÎÒÃÇÉÏÊöµÄÕâ¸ög->sweepgcµü´úÆ÷Ö¸Õë£¬
-// ±íÊ¾ºóÃæÇå³ı»á´Óg->sweepgcÖ¸ÕëÖ¸ÏòµÄÕâ¸öÎ»ÖÃ¿ªÊ¼
+// æŠŠGCé˜¶æ®µçŠ¶æ€å€¼ç”±GCSenteratomicåˆ‡æ¢åˆ°ä¸‹ä¸€ä¸ªé˜¶æ®µGCSwpallgcä»¥å¤–ï¼Œ
+// è¿˜é€šè¿‡sweeptoliveå‡½æ•°çš„è¿”å›å€¼æ¥åˆå§‹åŒ–æˆ‘ä»¬ä¸Šè¿°çš„è¿™ä¸ªg->sweepgcè¿­ä»£å™¨æŒ‡é’ˆï¼Œ
+// è¡¨ç¤ºåé¢æ¸…é™¤ä¼šä»g->sweepgcæŒ‡é’ˆæŒ‡å‘çš„è¿™ä¸ªä½ç½®å¼€å§‹
 static void entersweep (lua_State *L) {
   global_State *g = G(L);
   g->gcstate = GCSswpallgc;
@@ -1740,17 +1755,17 @@ void luaC_freeallobjects (lua_State *L) {
 }
 
 
-// Ô­×Ó½×¶Î
-// Õâ¸ö½×¶ÎÄÜ½â¾öµÄÔöÁ¿Ê½Ëã·¨´øÀ´µÄÁ½¸öÎÊÌâ£º
-// 1£©ÌØÊâ»ÒÉ«Á´±íĞèÇó£ºTable/UserDataÔÚÊ¹ÓÃºóÍËÆÁÕÏ±£Ö¤±ê¼Ç½×¶ÎÒ»ÖÂĞÔÔ­ÔòÊ±£¬Èô´æÔÚÆµ·±´óÁ¿Êı¾İ¸Ä±ä£¬
-// ²¢²»ÄÜÖ±½Ó²åÈëµ½±ê¼Ç´«²¥gray»ÒÉ«Á´±íÖĞ£¬ÒòÎªÕâÑù»áÇ±ÔÚ·çÏÕ£¬Èô±ê¼Ç´«²¥½×¶ÎĞÂÔöÈÎÎñÁ¿´óÓÚÄÜ´¦ÀíµÄÈÎÎñÁ¿£¬
-// »áµ¼ÖÂgrayÁ´±íÓÀÔ¶´¦Àí²»Íê£¬ËùÒÔĞèÒªÓĞÁíÒ»¸öÌØÊâµÄ»ÒÉ«Á´±í´æ´¢ÕâĞ©Ê¹ÓÃºóÍËÆÁÕÏµÄ¶ÔÏó£¬ÇÒ¸ÃÁ´±í²»ÄÜÓ°Ïì±ê¼Ç´«²¥½×¶Î¡£
-// 2£©µÈ´ı±ê¼Ç½áÊøĞèÇó£ºKey_WeakTable¼üÈõÒıÓÃ±íĞèÒªÒ»¸ö½×¶ÎÈ¥µÈ´ıÆäËü¶ÔÏó´¦ÀíÍê±Ï²ÅÄÜÆô¶¯ËüµÄÖµ±ê¼ÇÁ÷³Ì£¬
-// ÒòÎªÔÚ¼üÎ´±»±ê¼ÇµÄÇé¿öÏÂTable×ÔÉíÊÇ²»ÔÊĞí±ê¼ÇËüµÄÖµµÄ¡£
+// åŸå­é˜¶æ®µ
+// è¿™ä¸ªé˜¶æ®µèƒ½è§£å†³çš„å¢é‡å¼ç®—æ³•å¸¦æ¥çš„ä¸¤ä¸ªé—®é¢˜ï¼š
+// 1ï¼‰ç‰¹æ®Šç°è‰²é“¾è¡¨éœ€æ±‚ï¼šTable/UserDataåœ¨ä½¿ç”¨åé€€å±éšœä¿è¯æ ‡è®°é˜¶æ®µä¸€è‡´æ€§åŸåˆ™æ—¶ï¼Œè‹¥å­˜åœ¨é¢‘ç¹å¤§é‡æ•°æ®æ”¹å˜ï¼Œ
+// å¹¶ä¸èƒ½ç›´æ¥æ’å…¥åˆ°æ ‡è®°ä¼ æ’­grayç°è‰²é“¾è¡¨ä¸­ï¼Œå› ä¸ºè¿™æ ·ä¼šæ½œåœ¨é£é™©ï¼Œè‹¥æ ‡è®°ä¼ æ’­é˜¶æ®µæ–°å¢ä»»åŠ¡é‡å¤§äºèƒ½å¤„ç†çš„ä»»åŠ¡é‡ï¼Œ
+// ä¼šå¯¼è‡´grayé“¾è¡¨æ°¸è¿œå¤„ç†ä¸å®Œï¼Œæ‰€ä»¥éœ€è¦æœ‰å¦ä¸€ä¸ªç‰¹æ®Šçš„ç°è‰²é“¾è¡¨å­˜å‚¨è¿™äº›ä½¿ç”¨åé€€å±éšœçš„å¯¹è±¡ï¼Œä¸”è¯¥é“¾è¡¨ä¸èƒ½å½±å“æ ‡è®°ä¼ æ’­é˜¶æ®µã€‚
+// 2ï¼‰ç­‰å¾…æ ‡è®°ç»“æŸéœ€æ±‚ï¼šKey_WeakTableé”®å¼±å¼•ç”¨è¡¨éœ€è¦ä¸€ä¸ªé˜¶æ®µå»ç­‰å¾…å…¶å®ƒå¯¹è±¡å¤„ç†å®Œæ¯•æ‰èƒ½å¯åŠ¨å®ƒçš„å€¼æ ‡è®°æµç¨‹ï¼Œ
+// å› ä¸ºåœ¨é”®æœªè¢«æ ‡è®°çš„æƒ…å†µä¸‹Tableè‡ªèº«æ˜¯ä¸å…è®¸æ ‡è®°å®ƒçš„å€¼çš„ã€‚
 static lu_mem atomic (lua_State *L) {
-  // ÔÚ±ê¼Ç¹ı³ÌÖĞÈôÕâ¼¸¸ö±ê¼Ç¸ù½áµã¶ÔÏó±»ĞŞ¸Ä»òÌæ»»£¬±ä³ÉÁË°×É«µÄ¶ÔÏó£¬Ò²²¢Ã»ÓĞÎ¥·´Ò»ÖÂĞÔÔ­Ôò£¬
-  // ÒòÎªÒ»ÖÂĞÔÔ­Ôò±£Ö¤µÄÊÇÃ»ÓĞºÚÉ«¶ÔÏóÒıÓÃ°×É«¶ÔÏó£¬¼ÈÈ»Èç´Ë£¬LuaÒ²ÎŞ·¨Ê¹ÓÃÆÁÕÏÈ¥ĞŞ¸´ÕâÖÖ¸ù½áµã¶ÔÏó±»ĞŞ¸ÄÑÕÉ«Òì³£µÄÎÊÌâ
-  // ÕâÀïĞèÒªÖØĞÂÉ¨Ãè
+  // åœ¨æ ‡è®°è¿‡ç¨‹ä¸­è‹¥è¿™å‡ ä¸ªæ ‡è®°æ ¹ç»“ç‚¹å¯¹è±¡è¢«ä¿®æ”¹æˆ–æ›¿æ¢ï¼Œå˜æˆäº†ç™½è‰²çš„å¯¹è±¡ï¼Œä¹Ÿå¹¶æ²¡æœ‰è¿åä¸€è‡´æ€§åŸåˆ™ï¼Œ
+  // å› ä¸ºä¸€è‡´æ€§åŸåˆ™ä¿è¯çš„æ˜¯æ²¡æœ‰é»‘è‰²å¯¹è±¡å¼•ç”¨ç™½è‰²å¯¹è±¡ï¼Œæ—¢ç„¶å¦‚æ­¤ï¼ŒLuaä¹Ÿæ— æ³•ä½¿ç”¨å±éšœå»ä¿®å¤è¿™ç§æ ¹ç»“ç‚¹å¯¹è±¡è¢«ä¿®æ”¹é¢œè‰²å¼‚å¸¸çš„é—®é¢˜
+  // è¿™é‡Œéœ€è¦é‡æ–°æ‰«æ
   global_State *g = G(L);
   lu_mem work = 0;
   GCObject *origweak, *origall;
@@ -1767,65 +1782,65 @@ static lu_mem atomic (lua_State *L) {
   /* remark occasional upvalues of (maybe) dead threads */
   work += remarkupvals(g);
   work += propagateall(g);  /* propagate changes */
-  // Ö±½ÓÏÈ°ÑgrayagainÁ´±íÖ±½Ó¸³Öµ¸øgrayÁ´±í£¬È»ºó¶ÔÕâ¸ö¸³ÖµºóµÄgrayÁ´±íÖ´ĞĞ±ê¼Ç´«²¥£¬
-  // ÕâÑù¾ÍÄÜÈ·±£Ê¹ÓÃÁËºóÍËÆÁÕÏ²åÈëµ½grayagainÁ´±íµÄÕâĞ©¶ÔÏó¶¼ÄÜµÃµ½ÕıÈ·µÄ±ê¼ÇÁË
+  // ç›´æ¥å…ˆæŠŠgrayagainé“¾è¡¨ç›´æ¥èµ‹å€¼ç»™grayé“¾è¡¨ï¼Œç„¶åå¯¹è¿™ä¸ªèµ‹å€¼åçš„grayé“¾è¡¨æ‰§è¡Œæ ‡è®°ä¼ æ’­ï¼Œ
+  // è¿™æ ·å°±èƒ½ç¡®ä¿ä½¿ç”¨äº†åé€€å±éšœæ’å…¥åˆ°grayagainé“¾è¡¨çš„è¿™äº›å¯¹è±¡éƒ½èƒ½å¾—åˆ°æ­£ç¡®çš„æ ‡è®°äº†
   g->gray = grayagain;
   work += propagateall(g);  /* traverse 'grayagain' list */
-  // ¼¯ÖĞ´¦Àí¼üÈõÒıÓÃ±í
+  // é›†ä¸­å¤„ç†é”®å¼±å¼•ç”¨è¡¨
   convergeephemerons(g);
-  // convergeephemerons½×¶Î½áÊøºó£¬ËùÓĞTableµÄ±ê¼Ç¾ùÒÑÍê³É£¬Í¨³£À´Ëµ£¬
-  // ´ËÊ±Î´±ê¼ÇµÄkey»òvalue¾ÍÊÇºóÃæÇå³ı½×¶ÎĞèÒªÇå³ıµÄÀ¬»ø¶ÔÏó¡£
-  // µ«ÊÇ¶ÔÓÚTableÀàĞÍÀ´Ëµ£¬ËüÔÚÊı¾İÇå³ıÉÏÓĞ¸öÌØĞÔ£º
-  // ¾ÍÊÇµ±ËüµÄÔªËØ£¨¼üÖµ¶Ô£©Ä³¸övalue±»Çå¿ÕÊ±£¬ËüµÄkeyÒ²ĞèÒª±»Çå¿Õ£¬´Ó¶ø¿ÉÒÔ´ïµ½É¾³ıÄ³¸öÔªËØµÄ×÷ÓÃ¡£
+  // convergeephemeronsé˜¶æ®µç»“æŸåï¼Œæ‰€æœ‰Tableçš„æ ‡è®°å‡å·²å®Œæˆï¼Œé€šå¸¸æ¥è¯´ï¼Œ
+  // æ­¤æ—¶æœªæ ‡è®°çš„keyæˆ–valueå°±æ˜¯åé¢æ¸…é™¤é˜¶æ®µéœ€è¦æ¸…é™¤çš„åƒåœ¾å¯¹è±¡ã€‚
+  // ä½†æ˜¯å¯¹äºTableç±»å‹æ¥è¯´ï¼Œå®ƒåœ¨æ•°æ®æ¸…é™¤ä¸Šæœ‰ä¸ªç‰¹æ€§ï¼š
+  // å°±æ˜¯å½“å®ƒçš„å…ƒç´ ï¼ˆé”®å€¼å¯¹ï¼‰æŸä¸ªvalueè¢«æ¸…ç©ºæ—¶ï¼Œå®ƒçš„keyä¹Ÿéœ€è¦è¢«æ¸…ç©ºï¼Œä»è€Œå¯ä»¥è¾¾åˆ°åˆ é™¤æŸä¸ªå…ƒç´ çš„ä½œç”¨ã€‚
   // 
-  // Ö®ËùÒÔÖ»ĞèÒª´¦ÀíÇå¿Õg->weakºÍg->allweakÖĞµÄkey£¬ÊÇÒòÎªTableÖ»ÓĞÔÚÕâÁ½ÖÖÖµÈõÒıÓÃ¹ØÏµÖĞ£¬
-  // TableµÄvalue²ÅÓĞ¿ÉÄÜ³öÏÖÎ´±ê¼Ç¶ø¶ÔÓ¦µÄkeyÓÖÊÇÒÑ±ê¼Ç×´Ì¬£¬Key_WeakTableËùÔÚµÄg->ephemeronÁ´±íÊÇ²»´æÔÚÕâÖÖÇé¿öµÄ£¬
-  // ËùÒÔÖ»ÓĞËüÃÇÁ½¸öÁ´±í²ÅĞèÒªÈ¥¸ù¾İvalueÈ¥Çå¿Õkey¡£
+  // ä¹‹æ‰€ä»¥åªéœ€è¦å¤„ç†æ¸…ç©ºg->weakå’Œg->allweakä¸­çš„keyï¼Œæ˜¯å› ä¸ºTableåªæœ‰åœ¨è¿™ä¸¤ç§å€¼å¼±å¼•ç”¨å…³ç³»ä¸­ï¼Œ
+  // Tableçš„valueæ‰æœ‰å¯èƒ½å‡ºç°æœªæ ‡è®°è€Œå¯¹åº”çš„keyåˆæ˜¯å·²æ ‡è®°çŠ¶æ€ï¼ŒKey_WeakTableæ‰€åœ¨çš„g->ephemeroné“¾è¡¨æ˜¯ä¸å­˜åœ¨è¿™ç§æƒ…å†µçš„ï¼Œ
+  // æ‰€ä»¥åªæœ‰å®ƒä»¬ä¸¤ä¸ªé“¾è¡¨æ‰éœ€è¦å»æ ¹æ®valueå»æ¸…ç©ºkeyã€‚
   /* at this point, all strongly accessible objects are marked. */
   /* Clear values from weak tables, before checking finalizers */
   clearbyvalues(g, g->weak, NULL);
   clearbyvalues(g, g->allweak, NULL);
-  // Ô­×Ó½×¶ÎÏÂÒ»²¿·Ö¾ÍÊÇ°ÑĞèÒªÊÍ·ÅµÄ´øFINALIZEDBIT±ê¼ÇµÄ¶ÔÏó´Óg->finobjÁ´±íÒÆÈëµ½g->tobefnzÁ´±í£¬
-  // ²¢¶Ôg->tobefnzÁ´±í¶ÔÏóÈ«²¿½øĞĞ±ê¼Ç
+  // åŸå­é˜¶æ®µä¸‹ä¸€éƒ¨åˆ†å°±æ˜¯æŠŠéœ€è¦é‡Šæ”¾çš„å¸¦FINALIZEDBITæ ‡è®°çš„å¯¹è±¡ä»g->finobjé“¾è¡¨ç§»å…¥åˆ°g->tobefnzé“¾è¡¨ï¼Œ
+  // å¹¶å¯¹g->tobefnzé“¾è¡¨å¯¹è±¡å…¨éƒ¨è¿›è¡Œæ ‡è®°
   origweak = g->weak; origall = g->allweak;
   separatetobefnz(g, 0);  /* separate objects to be finalized */
   work += markbeingfnz(g);  /* mark objects that will be finalized */
   work += propagateall(g);  /* remark, to propagate 'resurrection' */
-  // ÒòÎªÎö¹¹Æ÷g->tobefnzÁ´±íÖĞµÄ¶ÔÏó±»È«²¿±ê¼ÇÁË£¬ÔÚÕâ¸ö±ê¼ÇÓë±ê¼Ç´«²¥µÄ¹ı³ÌÖĞ£¬¿ÉÄÜ»á±éÀúµ½ĞÂµÄÈõÒıÓÃ¹ØÏµ±í£¬
-  // ÕâĞ©±íÒ²½«Í¬ÑùµØ±»°´ÀàĞÍ·ÅÈëµ½g->ephemeron£¬g->weak£¬g->allweakÁ´±íÖĞ¡£
-  // ËùÒÔ£¬ÔÚÎö¹¹Æ÷±ê¼Ç´«²¥½×¶Î½áÊøºó£¬ÎÒÃÇĞèÒªÖØĞÂ´¦ÀíÕâ²¿·ÖµÄ´úÂë¡£
-  // ²¢°ÑTableÖĞkey»òÕßvalueÎª¿ÕµÄ¼üÖµ¶ÔÔªËØ¶¼±ê¼ÇÎªÎŞĞ§´ıÇå³ı×´Ì¬
+  // å› ä¸ºææ„å™¨g->tobefnzé“¾è¡¨ä¸­çš„å¯¹è±¡è¢«å…¨éƒ¨æ ‡è®°äº†ï¼Œåœ¨è¿™ä¸ªæ ‡è®°ä¸æ ‡è®°ä¼ æ’­çš„è¿‡ç¨‹ä¸­ï¼Œå¯èƒ½ä¼šéå†åˆ°æ–°çš„å¼±å¼•ç”¨å…³ç³»è¡¨ï¼Œ
+  // è¿™äº›è¡¨ä¹Ÿå°†åŒæ ·åœ°è¢«æŒ‰ç±»å‹æ”¾å…¥åˆ°g->ephemeronï¼Œg->weakï¼Œg->allweaké“¾è¡¨ä¸­ã€‚
+  // æ‰€ä»¥ï¼Œåœ¨ææ„å™¨æ ‡è®°ä¼ æ’­é˜¶æ®µç»“æŸåï¼Œæˆ‘ä»¬éœ€è¦é‡æ–°å¤„ç†è¿™éƒ¨åˆ†çš„ä»£ç ã€‚
+  // å¹¶æŠŠTableä¸­keyæˆ–è€…valueä¸ºç©ºçš„é”®å€¼å¯¹å…ƒç´ éƒ½æ ‡è®°ä¸ºæ— æ•ˆå¾…æ¸…é™¤çŠ¶æ€
   convergeephemerons(g);
   /* at this point, all resurrected objects are marked. */
   /* remove dead objects from weak tables */
-  // ÆäÖĞÔÙ´ÎÊ¹ÓÃÁËclearbyvaluesº¯Êı£¬µ«ÕâÀïÓëÖ®Ç°Ê¹ÓÃ²»Í¬µÄÊÇÕâ´ÎµÚ3¸ö²ÎÊı²»Îª¿ÕÁË£¬
-  // ¸Ã²ÎÊı´ú±íµÄÊÇÒª´ÓÄÄ¸öÖ¸ÕëÎ»ÖÃ¿ªÊ¼´¦ÀíÁ´±í¡£ÉÏÍ¼ÖĞ´«ÈëorigweakºÍorigall×÷ÎªµÚ3¸ö²ÎÊı£¬
-  // ÒâË¼ÊÇ´Ó±ê¼ÇÎö¹¹Æ÷Á÷³Ì¿ªÊ¼Í³¼Æ£¬´ÓÄÇÖ®ºóĞÂÌí¼ÓµÄValue_WeakTableºÍKeyValue_WeakTable²ÅÊÇĞèÒªÖØĞÂ´¦Àí±ê¼ÇµÄ¶ÔÏó£¬
-  // ÒòÎªÔÚÕâÖ®Ç°µÄÄÇĞ©TableÒÑ¾­ÊÇ´¦Àí¹ıÁË£¬²»ĞèÒªÔÙ´Î´¦Àí¡£
+  // å…¶ä¸­å†æ¬¡ä½¿ç”¨äº†clearbyvalueså‡½æ•°ï¼Œä½†è¿™é‡Œä¸ä¹‹å‰ä½¿ç”¨ä¸åŒçš„æ˜¯è¿™æ¬¡ç¬¬3ä¸ªå‚æ•°ä¸ä¸ºç©ºäº†ï¼Œ
+  // è¯¥å‚æ•°ä»£è¡¨çš„æ˜¯è¦ä»å“ªä¸ªæŒ‡é’ˆä½ç½®å¼€å§‹å¤„ç†é“¾è¡¨ã€‚ä¸Šå›¾ä¸­ä¼ å…¥origweakå’Œorigallä½œä¸ºç¬¬3ä¸ªå‚æ•°ï¼Œ
+  // æ„æ€æ˜¯ä»æ ‡è®°ææ„å™¨æµç¨‹å¼€å§‹ç»Ÿè®¡ï¼Œä»é‚£ä¹‹åæ–°æ·»åŠ çš„Value_WeakTableå’ŒKeyValue_WeakTableæ‰æ˜¯éœ€è¦é‡æ–°å¤„ç†æ ‡è®°çš„å¯¹è±¡ï¼Œ
+  // å› ä¸ºåœ¨è¿™ä¹‹å‰çš„é‚£äº›Tableå·²ç»æ˜¯å¤„ç†è¿‡äº†ï¼Œä¸éœ€è¦å†æ¬¡å¤„ç†ã€‚
   clearbykeys(g, g->ephemeron);  /* clear keys from all ephemeron tables */
   clearbykeys(g, g->allweak);  /* clear keys from all 'allweak' tables */
   /* clear values from resurrected weak tables */
   clearbyvalues(g, g->weak, origweak);
   clearbyvalues(g, g->allweak, origall);
-  // Ô­×Ó½×¶Î»áÇå¿Õ×Ö·û´®»º´æg->strcache£¬Õâ¸ö»º´æÊÇÓÃÓÚÌá¸ß×Ö·û´®·ÃÎÊµÄÃüÖĞÂÊµÄ
+  // åŸå­é˜¶æ®µä¼šæ¸…ç©ºå­—ç¬¦ä¸²ç¼“å­˜g->strcacheï¼Œè¿™ä¸ªç¼“å­˜æ˜¯ç”¨äºæé«˜å­—ç¬¦ä¸²è®¿é—®çš„å‘½ä¸­ç‡çš„
   luaS_clearcache(g);
-  // ÔÚÔ­×Ó½×¶ÎµÄ×îºó£¬»á°Ñcurrent_whiteÓëother_white»¥»»
+  // åœ¨åŸå­é˜¶æ®µçš„æœ€åï¼Œä¼šæŠŠcurrent_whiteä¸other_whiteäº’æ¢
   g->currentwhite = cast_byte(otherwhite(g));  /* flip current white */
   lua_assert(g->gray == NULL);
   return work;  /* estimate of slots marked by 'atomic' */
 }
 
 
-// ÔöÁ¿Ê½Ëã·¨ÖĞÇå³ı½×¶ÎÖĞµÄÒ»²½Çå³ı²Ù×÷£¬¸Ãº¯ÊıµÚ3£¬µÚ4¸ö²ÎÊı·Ö±ğ´ú±í´¦ÀíÍêÖ®ºóÒª
-// ÇĞ»»µ½µÄÏÂÒ»¸ö½×¶ÎµÄÃ¶¾ÙÖµºÍÏÂÒ»¸ö½×¶Î½«Òª±»Çå³ıµÄÁ´±í
+// å¢é‡å¼ç®—æ³•ä¸­æ¸…é™¤é˜¶æ®µä¸­çš„ä¸€æ­¥æ¸…é™¤æ“ä½œï¼Œè¯¥å‡½æ•°ç¬¬3ï¼Œç¬¬4ä¸ªå‚æ•°åˆ†åˆ«ä»£è¡¨å¤„ç†å®Œä¹‹åè¦
+// åˆ‡æ¢åˆ°çš„ä¸‹ä¸€ä¸ªé˜¶æ®µçš„æšä¸¾å€¼å’Œä¸‹ä¸€ä¸ªé˜¶æ®µå°†è¦è¢«æ¸…é™¤çš„é“¾è¡¨
 // 
-// ¸Ãº¯ÊıÍ¨¹ıifÌõ¼şÓï¾ä°ÑÂß¼­·Ö³ÉÁ½ÖÖÇé¿ö£º
-// 1) ¸Ãº¯ÊıÄÚ²¿¾Í»áÊ¹ÓÃµ½ÁËÎÒÃÇÉÏÃæËµµÄÖØÒª×Ö¶Îg->sweepgc£¬ÔÚÉÏ¸ö½×¶ÎÖĞËüÖ¸ÏòallgcÁ´±íÖĞµÄÔªËØ¡£
-// ÔÚ±¾´¦µÄÂß¼­ÊÇ£¬Èôg->sweepgcÖ¸ÏòµÄ¶ÔÏó²»Îª¿Õ£¬Ôòµ÷ÓÃsweeplistº¯Êı¼ÌĞø¶Ôg->sweepgcÖ¸ÏòµÄÁ´±í¼ÌĞø½øĞĞ´¦Àí¡£
-// ÕâÀïº¯ÊıµÚ3¸ö²ÎÊıcountintÎªGCSWEEPMAX³£Á¿£¬ËüµÄÖµÎª100£¬´ú±íÔöÁ¿Ê½Çå³ı½×¶ÎÃ¿ÂÖÔÊĞí´¦Àí»òÇå³ıµÄ×î´ó¶ÔÏó¸öÊıÎª100¸ö
-// 2£©g->sweepgcÖ¸ÏòµÄÁ´±íÔÚÃ¿ÂÖsweepstepÖĞ×î¶à¿É´¦Àí100¸ö¶ÔÏó£¬ÔÚÒ»¶¨ÂÖ´Î¹ıºó£¬Á´±íÖĞµÄ¶ÔÏó»áÈ«²¿´¦ÀíÍê±Ï£¬
-// ´ËÊ±g->sweepgcÖ¸ÏòÁ´±íÄ©¶ËµÄÏÂÒ»¸öÔªËØ£¬¼´¿ÕÖ¸Õë¡£ÕâÊ±ºòÂß¼­»á×ßµ½ÁíÒ»¸ö·ÖÖ§£¬
-// sweepstep»áĞŞ¸ÄGC½×¶ÎÎªÏÂÒ»¸ö½×¶Î£¬²¢°Ñg->sweepgcÕâ¸öµü´úÆ÷Ö¸ÕëÖ¸ÏòÏÂÒ»¸öĞèÒª±»´¦ÀíµÄÁ´±í¡£
+// è¯¥å‡½æ•°é€šè¿‡ifæ¡ä»¶è¯­å¥æŠŠé€»è¾‘åˆ†æˆä¸¤ç§æƒ…å†µï¼š
+// 1) è¯¥å‡½æ•°å†…éƒ¨å°±ä¼šä½¿ç”¨åˆ°äº†æˆ‘ä»¬ä¸Šé¢è¯´çš„é‡è¦å­—æ®µg->sweepgcï¼Œåœ¨ä¸Šä¸ªé˜¶æ®µä¸­å®ƒæŒ‡å‘allgcé“¾è¡¨ä¸­çš„å…ƒç´ ã€‚
+// åœ¨æœ¬å¤„çš„é€»è¾‘æ˜¯ï¼Œè‹¥g->sweepgcæŒ‡å‘çš„å¯¹è±¡ä¸ä¸ºç©ºï¼Œåˆ™è°ƒç”¨sweeplistå‡½æ•°ç»§ç»­å¯¹g->sweepgcæŒ‡å‘çš„é“¾è¡¨ç»§ç»­è¿›è¡Œå¤„ç†ã€‚
+// è¿™é‡Œå‡½æ•°ç¬¬3ä¸ªå‚æ•°countintä¸ºGCSWEEPMAXå¸¸é‡ï¼Œå®ƒçš„å€¼ä¸º100ï¼Œä»£è¡¨å¢é‡å¼æ¸…é™¤é˜¶æ®µæ¯è½®å…è®¸å¤„ç†æˆ–æ¸…é™¤çš„æœ€å¤§å¯¹è±¡ä¸ªæ•°ä¸º100ä¸ª
+// 2ï¼‰g->sweepgcæŒ‡å‘çš„é“¾è¡¨åœ¨æ¯è½®sweepstepä¸­æœ€å¤šå¯å¤„ç†100ä¸ªå¯¹è±¡ï¼Œåœ¨ä¸€å®šè½®æ¬¡è¿‡åï¼Œé“¾è¡¨ä¸­çš„å¯¹è±¡ä¼šå…¨éƒ¨å¤„ç†å®Œæ¯•ï¼Œ
+// æ­¤æ—¶g->sweepgcæŒ‡å‘é“¾è¡¨æœ«ç«¯çš„ä¸‹ä¸€ä¸ªå…ƒç´ ï¼Œå³ç©ºæŒ‡é’ˆã€‚è¿™æ—¶å€™é€»è¾‘ä¼šèµ°åˆ°å¦ä¸€ä¸ªåˆ†æ”¯ï¼Œ
+// sweepstepä¼šä¿®æ”¹GCé˜¶æ®µä¸ºä¸‹ä¸€ä¸ªé˜¶æ®µï¼Œå¹¶æŠŠg->sweepgcè¿™ä¸ªè¿­ä»£å™¨æŒ‡é’ˆæŒ‡å‘ä¸‹ä¸€ä¸ªéœ€è¦è¢«å¤„ç†çš„é“¾è¡¨ã€‚
 static int sweepstep (lua_State *L, global_State *g,
                       int nextstate, GCObject **nextlist) {
   if (g->sweepgc) {
@@ -1843,7 +1858,7 @@ static int sweepstep (lua_State *L, global_State *g,
 }
 
 
-// ÔöÁ¿GCËã·¨Èë¿Ú
+// å¢é‡GCç®—æ³•å…¥å£
 static lu_mem singlestep (lua_State *L) {
   global_State *g = G(L);
   lu_mem work;
@@ -1851,14 +1866,16 @@ static lu_mem singlestep (lua_State *L) {
   g->gcstopem = 1;  /* no emergency collections while collecting */
   switch (g->gcstate) {
     case GCSpause: {
-      // ±ê¼ÇÆğÊ¼½×¶Î
+      // å¼€å¯æ–°ä¸€è½®å¢é‡GCï¼Œä¸å¯ä»¥åˆ†æ­¥è¿›è¡Œ
+      // æ ‡è®°
       restartcollection(g);
+      // åˆ‡æ¢åˆ°æ‰«æé˜¶æ®µ
       g->gcstate = GCSpropagate;
       work = 1;
       break;
     }
     case GCSpropagate: {
-      // ±ê¼Ç´«²¥½×¶Î
+      // æ‰«æ
       if (g->gray == NULL) {  /* no more gray objects? */
         g->gcstate = GCSenteratomic;  /* finish propagate phase */
         work = 0;
@@ -1868,56 +1885,56 @@ static lu_mem singlestep (lua_State *L) {
       break;
     }
     case GCSenteratomic: {
-      // ±ê¼ÇÔ­×Ó½×¶Î
+      // æ ‡è®°åŸå­é˜¶æ®µ
       work = atomic(L);  /* work is what was traversed by 'atomic' */
-      // É¨Ãè±ê¼Ç½áÊø£¬½øÈëÇå³ı½×¶Î
+      // æ‰«ææ ‡è®°ç»“æŸï¼Œè¿›å…¥æ¸…é™¤é˜¶æ®µ
       entersweep(L);
       g->GCestimate = gettotalbytes(g);  /* first estimate */
       break;
     }
     case GCSswpallgc: {  /* sweep "regular" objects */
-      // ÔÚg->allgcÁ´±íÖĞÕÒµ½ÁËÒ»¸öÎ´±ê¼ÇµÄ¶ÔÏó£¬Ò²ÉèÖÃÍêÁËg->sweepgc£¬
-      // ½ÓÏÂÀ´¾Í¿´±ê¼ÇÇå³ıËã·¨µÄÏÂÒ»²¿·Ö£ºallgcÁ´±íÇå³ı½×¶Î¡£¸Ã×Ó½×¶ÎÃ¶¾ÙÖµÎª¡°GCSswpallgc¡±£¬
-      // È«³Æ¡°Garbage Collect State sweep allgc¡±£¬¼´¡°À¬»ø»ØÊÕÇå³ıallgcÁ´±í¡±½×¶Î
+      // åœ¨g->allgcé“¾è¡¨ä¸­æ‰¾åˆ°äº†ä¸€ä¸ªæœªæ ‡è®°çš„å¯¹è±¡ï¼Œä¹Ÿè®¾ç½®å®Œäº†g->sweepgcï¼Œ
+      // æ¥ä¸‹æ¥å°±çœ‹æ ‡è®°æ¸…é™¤ç®—æ³•çš„ä¸‹ä¸€éƒ¨åˆ†ï¼šallgcé“¾è¡¨æ¸…é™¤é˜¶æ®µã€‚è¯¥å­é˜¶æ®µæšä¸¾å€¼ä¸ºâ€œGCSswpallgcâ€ï¼Œ
+      // å…¨ç§°â€œGarbage Collect State sweep allgcâ€ï¼Œå³â€œåƒåœ¾å›æ”¶æ¸…é™¤allgcé“¾è¡¨â€é˜¶æ®µ
       work = sweepstep(L, g, GCSswpfinobj, &g->finobj);
       break;
     }
     case GCSswpfinobj: {  /* sweep objects with finalizers */
-      // 1£©ËùÓĞ´øÓĞÎ´´¥·¢µÄÎö¹¹Æ÷µÄGCObject¶ÔÏóÔÚ´´½¨µÄÊ±ºò²¢²»ÊÇ´æ´¢ÓÚg->allgcÁ´±íÖĞµÄ£¬¶øÊÇ»á´æ´¢µ½g->finobjÁ´±íÖĞ£»
-      // 2£©µ±g->finobjÖĞµÄ¶ÔÏóÒòÎªÎ´±ê¼Ç½«Òª±»ÊÍ·ÅÊ±£¬»áÔÚÔ­×Ó½×¶Î°ÑËüÃÇ´Óg->finobjÁ´±íÒÆ³ö£¬²¢ÒÆÈëµ½g->tobefnzÁ´±íÖĞ£¬
-      // ²¢ÔÚÔ­×Ó½×¶ÎÖĞ¶Ôg->tobefnzÁ´±íµÄËùÓĞµÄÔªËØ½øĞĞ±ê¼Ç£¬ÒÔÈ·±£ËüÃÇÔÚGC×îºóµÄÎö¹¹Æ÷Ö´ĞĞ½×¶ÎÖ®Ç°£¬²»»áÒòÎ´±ê¼Ç¶øÔÚÇå³ı½×¶Î±»Çå³ı¡£
-      // 3£©Îö¹¹Æ÷¶ÔÏóµÄ»ØÊÕ²ğ·ÖÔÚ2ÂÖÍêÕûGCÁ÷³ÌÖĞ£¬ÔÚµÚÒ»ÂÖGCÎö¹¹Æ÷Ö´ĞĞÖ®ºó£¬»á°ÑËûÃÇ´Óg->tobefnzÁ´±íÒÆ³ö£¬²¢É¾³ıÆäÎö¹¹Æ÷±ê¼Ç£¬
-      // °Ñ¶ÔÏóµ±×÷Ò»¸öÎŞÎö¹¹Æ÷¶ÔÏóÖØĞÂ²åÈëµ½g->allgcÁ´±íÖĞ¡£ÔÚµÚ¶şÂÖÍêÕûGCÖĞ£¬Èô¶ÔÏóÈÔÈ»Ã»ÓĞ±»±ê¼Ç£¬
-      // ÔòÖ»ĞèÒª°ÑËüµ±×÷ÆÕÍ¨µÄ¶ÔÏó½øĞĞÕı³£µÄÉ¾³ıÓëÄÚ´æ»ØÊÕ¼´¿É¡£
+      // 1ï¼‰æ‰€æœ‰å¸¦æœ‰æœªè§¦å‘çš„ææ„å™¨çš„GCObjectå¯¹è±¡åœ¨åˆ›å»ºçš„æ—¶å€™å¹¶ä¸æ˜¯å­˜å‚¨äºg->allgcé“¾è¡¨ä¸­çš„ï¼Œè€Œæ˜¯ä¼šå­˜å‚¨åˆ°g->finobjé“¾è¡¨ä¸­ï¼›
+      // 2ï¼‰å½“g->finobjä¸­çš„å¯¹è±¡å› ä¸ºæœªæ ‡è®°å°†è¦è¢«é‡Šæ”¾æ—¶ï¼Œä¼šåœ¨åŸå­é˜¶æ®µæŠŠå®ƒä»¬ä»g->finobjé“¾è¡¨ç§»å‡ºï¼Œå¹¶ç§»å…¥åˆ°g->tobefnzé“¾è¡¨ä¸­ï¼Œ
+      // å¹¶åœ¨åŸå­é˜¶æ®µä¸­å¯¹g->tobefnzé“¾è¡¨çš„æ‰€æœ‰çš„å…ƒç´ è¿›è¡Œæ ‡è®°ï¼Œä»¥ç¡®ä¿å®ƒä»¬åœ¨GCæœ€åçš„ææ„å™¨æ‰§è¡Œé˜¶æ®µä¹‹å‰ï¼Œä¸ä¼šå› æœªæ ‡è®°è€Œåœ¨æ¸…é™¤é˜¶æ®µè¢«æ¸…é™¤ã€‚
+      // 3ï¼‰ææ„å™¨å¯¹è±¡çš„å›æ”¶æ‹†åˆ†åœ¨2è½®å®Œæ•´GCæµç¨‹ä¸­ï¼Œåœ¨ç¬¬ä¸€è½®GCææ„å™¨æ‰§è¡Œä¹‹åï¼Œä¼šæŠŠä»–ä»¬ä»g->tobefnzé“¾è¡¨ç§»å‡ºï¼Œå¹¶åˆ é™¤å…¶ææ„å™¨æ ‡è®°ï¼Œ
+      // æŠŠå¯¹è±¡å½“ä½œä¸€ä¸ªæ— ææ„å™¨å¯¹è±¡é‡æ–°æ’å…¥åˆ°g->allgcé“¾è¡¨ä¸­ã€‚åœ¨ç¬¬äºŒè½®å®Œæ•´GCä¸­ï¼Œè‹¥å¯¹è±¡ä»ç„¶æ²¡æœ‰è¢«æ ‡è®°ï¼Œ
+      // åˆ™åªéœ€è¦æŠŠå®ƒå½“ä½œæ™®é€šçš„å¯¹è±¡è¿›è¡Œæ­£å¸¸çš„åˆ é™¤ä¸å†…å­˜å›æ”¶å³å¯ã€‚
       work = sweepstep(L, g, GCSswptobefnz, &g->tobefnz);
       break;
     }
     case GCSswptobefnz: {  /* sweep objects to be finalized */
-      // Çå³ı½×¶Îµ¥²½Çå³ı²Ù×÷sweepstepº¯Êı£¬ÄÚ²¿ÓÖµ÷ÓÃÁËsweeplist¡£¸Ãº¯Êı³ıÁËÇå³ıÎ´±ê¼Ç¶ÔÏóÒÔÍâ£¬»¹¸ºÔğÖØÖÃ¸Ã¶ÔÏóµÄÑÕÉ«±ê¼Ç¡£
-      // g->tobefnzÁ´±íÖĞµÄ¶ÔÏóÈ·ÊµÔÚÔ­×Ó½×¶Î±»±ê¼ÇÁË£¬ËùÒÔËûÃÇ¶¼ÊÇºÚÉ«¶ÔÏó£¬ÕâÀïĞèÒª°ÑËûÃÇÑÕÉ«ÖØÖÃÎªµ±Ç°°×É«¡£
+      // æ¸…é™¤é˜¶æ®µå•æ­¥æ¸…é™¤æ“ä½œsweepstepå‡½æ•°ï¼Œå†…éƒ¨åˆè°ƒç”¨äº†sweeplistã€‚è¯¥å‡½æ•°é™¤äº†æ¸…é™¤æœªæ ‡è®°å¯¹è±¡ä»¥å¤–ï¼Œè¿˜è´Ÿè´£é‡ç½®è¯¥å¯¹è±¡çš„é¢œè‰²æ ‡è®°ã€‚
+      // g->tobefnzé“¾è¡¨ä¸­çš„å¯¹è±¡ç¡®å®åœ¨åŸå­é˜¶æ®µè¢«æ ‡è®°äº†ï¼Œæ‰€ä»¥ä»–ä»¬éƒ½æ˜¯é»‘è‰²å¯¹è±¡ï¼Œè¿™é‡Œéœ€è¦æŠŠä»–ä»¬é¢œè‰²é‡ç½®ä¸ºå½“å‰ç™½è‰²ã€‚
       work = sweepstep(L, g, GCSswpend, NULL);
       break;
     }
     case GCSswpend: {  /* finish sweeps */
-      // CSswpfinobjÓëGCSswptobefnz½×¶Î½áÊøºó£¬¶ÔÎö¹¹Æ÷Ïà¹ØµÄg->finobjÁ´±íÓëg->tobefnzÁ´±í¶¼Íê³ÉÁËÇå³ıÓëÑÕÉ«ÖØÖÃ²Ù×÷¡£
-      // ½ÓÏÂÀ´¾Í½øÈëµ½¡°Çå³ı½áÊø¡±½×¶Î
+      // CSswpfinobjä¸GCSswptobefnzé˜¶æ®µç»“æŸåï¼Œå¯¹ææ„å™¨ç›¸å…³çš„g->finobjé“¾è¡¨ä¸g->tobefnzé“¾è¡¨éƒ½å®Œæˆäº†æ¸…é™¤ä¸é¢œè‰²é‡ç½®æ“ä½œã€‚
+      // æ¥ä¸‹æ¥å°±è¿›å…¥åˆ°â€œæ¸…é™¤ç»“æŸâ€é˜¶æ®µ
       checkSizes(L, g);
       g->gcstate = GCScallfin;
       work = 0;
       break;
     }
     case GCScallfin: {  /* call remaining finalizers */
-      // ÔÚÔ­×Ó½×¶ÎÖĞ»á°Ñ½«Òª±»ÊÍ·ÅµÄ´øÎö¹¹Æ÷µÄ¶ÔÏó²åÈëµ½g->tobefnzÁ´±íÖĞ£¬²¢¶Ô¸Ãg->tobefnzÁ´±íµÄËùÓĞ¶ÔÏó½øĞĞ±ê¼ÇÒÔ·ÀÖ¹Çå³ı½×¶Î±»Çå³ı¡£
-      // µ½ÁËGCScallfinÕâÒ»¸ö½×¶Î£¬¾ÍÊÇÒª¶Ôg->tobefnzÁ´±íÔªËØ½øĞĞ´¦ÀíÁË£¬¸Ã½×¶Îµ÷ÓÃÁËrunafewfinalizersº¯Êı£¬Ö´ĞĞÒ»Ğ©Îö¹¹Æ÷¡£
-      // µ÷ÓÃ´Ëº¯ÊıµÄ²ÎÊıGCFINMAXÎª³£Á¿10£¬´ú±íÃ¿²½GC×î´óÖ´ĞĞ10¸öÎö¹¹Æ÷º¯Êı
-      // Ã¿Ò»¸öÎö¹¹Æ÷º¯ÊıµÄÖ´ĞĞ¹¤×÷Á¿µÄÆÀ¹ÀÎªGCFINALIZECOST£¬ËüÊÇ³£Á¿50£¬ÒâË¼ÊÇ¶ÔÓÚGC¶øÑÔ£¬Ö´ĞĞÒ»´ÎÎö¹¹Æ÷µÄĞÔÄÜ»¨ÏúÔ¤¹À£¬
-      // ´ó¸Å»á¸ú±éÀú50¸ö¶ÔÏóÒ»Ñù£¬
+      // åœ¨åŸå­é˜¶æ®µä¸­ä¼šæŠŠå°†è¦è¢«é‡Šæ”¾çš„å¸¦ææ„å™¨çš„å¯¹è±¡æ’å…¥åˆ°g->tobefnzé“¾è¡¨ä¸­ï¼Œå¹¶å¯¹è¯¥g->tobefnzé“¾è¡¨çš„æ‰€æœ‰å¯¹è±¡è¿›è¡Œæ ‡è®°ä»¥é˜²æ­¢æ¸…é™¤é˜¶æ®µè¢«æ¸…é™¤ã€‚
+      // åˆ°äº†GCScallfinè¿™ä¸€ä¸ªé˜¶æ®µï¼Œå°±æ˜¯è¦å¯¹g->tobefnzé“¾è¡¨å…ƒç´ è¿›è¡Œå¤„ç†äº†ï¼Œè¯¥é˜¶æ®µè°ƒç”¨äº†runafewfinalizerså‡½æ•°ï¼Œæ‰§è¡Œä¸€äº›ææ„å™¨ã€‚
+      // è°ƒç”¨æ­¤å‡½æ•°çš„å‚æ•°GCFINMAXä¸ºå¸¸é‡10ï¼Œä»£è¡¨æ¯æ­¥GCæœ€å¤§æ‰§è¡Œ10ä¸ªææ„å™¨å‡½æ•°
+      // æ¯ä¸€ä¸ªææ„å™¨å‡½æ•°çš„æ‰§è¡Œå·¥ä½œé‡çš„è¯„ä¼°ä¸ºGCFINALIZECOSTï¼Œå®ƒæ˜¯å¸¸é‡50ï¼Œæ„æ€æ˜¯å¯¹äºGCè€Œè¨€ï¼Œæ‰§è¡Œä¸€æ¬¡ææ„å™¨çš„æ€§èƒ½èŠ±é”€é¢„ä¼°ï¼Œ
+      // å¤§æ¦‚ä¼šè·Ÿéå†50ä¸ªå¯¹è±¡ä¸€æ ·ï¼Œ
       if (g->tobefnz && !g->gcemergency) {
         g->gcstopem = 0;  /* ok collections during finalizers */
         work = runafewfinalizers(L, GCFINMAX) * GCFINALIZECOST;
       }
       else {  /* emergency mode or no more finalizers */
-        // µ±È«²¿Îö¹¹Æ÷Ö´ĞĞÍê±Ïºó£¬GC¾Í»áÖØĞÂ»Ö¸´µ½³õÊ¼µÄGCSpause½×¶Î£¬µÈ´ıÏÂÒ»´ÎGCµÄ´¥·¢
+        // å½“å…¨éƒ¨ææ„å™¨æ‰§è¡Œå®Œæ¯•åï¼ŒGCå°±ä¼šé‡æ–°æ¢å¤åˆ°åˆå§‹çš„GCSpauseé˜¶æ®µï¼Œç­‰å¾…ä¸‹ä¸€æ¬¡GCçš„è§¦å‘
         g->gcstate = GCSpause;  /* finish collection */
         work = 0;
       }
@@ -1926,7 +1943,7 @@ static lu_mem singlestep (lua_State *L) {
     default: lua_assert(0); return 0;
   }
   g->gcstopem = 0;
-  // ·µ»ØÁËÕâ´ÎGC²½Öè¶ÔÓ¦µÄ¹¤×÷Á¿
+  // è¿”å›äº†è¿™æ¬¡GCæ­¥éª¤å¯¹åº”çš„å·¥ä½œé‡
   return work;
 }
 
@@ -1950,33 +1967,13 @@ void luaC_runtilstate (lua_State *L, int statesmask) {
 ** finishing a cycle (pause state). Finally, it sets the debt that
 ** controls when next step will be performed.
 */
-// ²½½øÊ½GC
-// Ëã·¨Ã¿´Î´¥·¢ºó£¬ÔÚ¿ªÊ¼Ëã·¨ÕæÕı¿ªÊ¼Ö®Ç°£¬»á¸ù¾İµ±Ç°Ç·ÏÂµÄÕ®ÎñÒÔ¼°ĞèÒªÔ¤³äÖµµÄ½ğ¶î£¬
-// ½øĞĞÒ»¸ö¹¤×÷Á¿µÄÆÀ¹À£¬È»ºóÍ¨¹ıwhileÑ­»·²»¶ÏµØÈ¥¹¤×÷£¬Ö±µ½Íê³ÉÕâĞ©¹¤×÷Á¿£¬²ÅÔÊĞí½áÊø±¾ÂÖGC
+// å¢é‡GC
 static void incstep (lua_State *L, global_State *g) {
-  // ²½½ø±¶ÂÊ |1 ²Ù×÷ÊÇÎªÁË±ÜÃâÏÂÃæ³ı0²Ù×÷
+  // 
   int stepmul = (getgcparam(g->gcstepmul) | 1);  /* avoid division by 0 */
-  // Ã»ÓĞÀûÓÃglobal_StateÖĞµÄg->GCdebt£¨ÕæÊµ¸ºÕ®£©£¬ÊÇÒòÎªÈç¹ûÓÃÁËg->GCdebtÀ´ÅĞ¶Ï£¬
-  // ¶ø±¾ÂÖGCÃ»ÄÜ¹»³É¹¦ÊÍ·Åµ½×ã¹»ÄÚ´æµÄÊ±ºò£¬±ê¼ÇÇå³ıËã·¨¾Í»á½øÈëËÀÑ­»·£¬
-  // »òÕßÖ´ĞĞÁË¹ı¶àµÄ¹¤×÷²Å½áÊø¶ø¼«´óÓ°ÏìĞÔÄÜ
-  // Òò´Ë±ê¼ÇÇå³ıËã·¨Ã»ÓĞÖ±½ÓÊ¹ÓÃg->GCdebt£¬¶øÊÇÔÚ¿ªÊ¼µÄÊ±ºò°ÑËüÏÈÓÃ×Ô¶¨ÒåµÄ¹«Ê½×ª»¯Îª¹¤×÷Á¿£¬
-  // È»ºó°ÑÃ¿ÂÖGCÁ÷³Ì²ğ·Ö³ÉÒ»²½²½¶ÀÁ¢µÄ¹¤×÷singlestep£¬Ã¿²½¹¤×÷ÀÛ»ıÒ»¶¨¹¤×÷Á¿£¬µ±¹¤×÷Á¿»ıÀÛ×ã¹»ÁË¾ÍÍ£Ö¹±¾ÂÖGC£¬
-  // ¶ø²»ĞèÒªÍê³ÉÍêÕûGCÖĞËùÓĞµÄÁ÷³Ì£¬Õâ¾ÍÊÇÔöÁ¿Ê½±ê¼ÇÇå³ıËã·¨Ö®ËùÒÔ³ÆÖ®ÎªÔöÁ¿Ê½£¨¿É·Ö²½£©¶ø²»ÊÇÈ«Á¿Ê½£¨²»¿É´ò¶Ï£©µÄÔ­Òò
   // 
-  // ¹¤×÷Á¿ debt = (µÖ¿ÛÍêÔ¤³äÖµ²¿·ÖµÄĞÂ¶ÔÏó·ÖÅäµÄ¶ÑÄÚ´æ / sizeof(TValue)) * 100
   l_mem debt = (g->GCdebt / WORK2MEM) * stepmul;
-  // ĞèÒªÏòÏµÍ³Ô¤³äÖµµÄ½ğ¶î
-  // Ö®ËùÒÔ»¹ÇåÕ®Îñºó»¹ÒªÔ¤³äÖµÒ»±Ê½ğ¶î£¬ÊÇÒòÎªÕâÑù¿ÉÒÔ×öÒ»¸öÕ®Îñ»º³å£¬ÏÂ´ÎÕ®ÎñÔö³¤Ê±¿ÉÒÔÏÈ´ÓÔ¤³äÖµµÄ½ğ¶î¿Û³ı£¬
-  // ¿ÉÒÔ±ÜÃâÕ®ÎñÑ¸ËÙ´óÓÚ0¶øÔÙ´Î¿ìËÙ´¥·¢GC£¬ÄÜÓĞĞ§¿ØÖÆGCµÄÆµÂÊ
-  // ¼òµ¥À´Ëµ±ê¼ÇÇå³ıËã·¨¶ÔÕ®ÎñµÄÇåËã£º¾ÍÊÇ´¦Àí¹¤×÷µÄ¹ı³Ì£¬È»ºóÔÚ¹¤×÷Á¿Íê³Éºó°ÑÈ«¾ÖµÄ¸ºÕ®g->GCdebtÉèÖÃÎªÄÇ¸öÔ¤³äÖµµÄ½ğ¶î
   // 
-  // ¹¤×÷µÄ½áÊøÌõ¼şÎªÏòÏµÍ³Ô¤³äÖµµÄ¹¤×÷Á¿£¬ÊıÖµÖÁÉÙÎª£º
-  // stepsize = £¨8KB / sizeof(TValue)) * 100
-  // ¼´´¦Àí800KB¶ÔÓ¦µÄTValueµÄ¸öÊı¡£
-  //
-  // ÓÉdebtºÍstepsizeÕâÁ½Ìõ¹«Ê½¿ÉÖª£¬Èç¹ûÉè±¸ĞÔÄÜºÃ£¬ÏëÒªÃ¿´Îµ¥²½À¬»ø»ØÊÕ¹ı³Ì£¨singlestep¹¤×÷£©´¦Àí¸ü¶àµÄ¶ÔÏó£¬
-  // ¼´ÔÊĞíÍê³É¸ü¶àµÄ¹¤×÷£¬¿ÉÒÔµ÷´óstepmulµÄÊıÖµ¡£ÒâÎ¶×ÅÃ¿´Î±ê¼ÇÇå³ıËã·¨´¥·¢ºó£¬ĞèÒªÍê³É¸ü¶àµÄ¹¤×÷ºÍÔ¤³äÖµ¸ü¶àµÄ½ğ¶î£¬
-  // ¼´ĞèÒª´¦Àí¸ü¶àµÄTValue¶ÔÏó¸öÊı£¬²ÅÄÜ½áÊø±¾ÂÖÀ¬»ø»ØÊÕ¹ı³Ì¡£
   l_mem stepsize = (g->gcstepsize <= log2maxs(l_mem))
                  ? ((cast(l_mem, 1) << g->gcstepsize) / WORK2MEM) * stepmul
                  : MAX_LMEM;  /* overflow; keep maximum value */
@@ -1987,7 +1984,7 @@ static void incstep (lua_State *L, global_State *g) {
   if (g->gcstate == GCSpause)
     setpause(g);  /* pause until next cycle */
   else {
-    // ºÍÉÏÃæµÄËã·¨Ïà·´£¬´Ówork unitsµ½×Ö½ÚÊı
+    // 
     debt = (debt / stepmul) * WORK2MEM;  /* convert 'work units' to bytes */
     luaE_setdebt(g, debt);
   }
@@ -2004,10 +2001,10 @@ void luaC_step (lua_State *L) {
     luaE_setdebt(g, -2000);
   else {
     if(isdecGCmodegen(g))
-      // ·Ö´úGC
+      // åˆ†ä»£GC
       genstep(L, g);
     else
-      // ²½½øÊ½GC
+      // å¢é‡GC
       incstep(L, g);
   }
 }

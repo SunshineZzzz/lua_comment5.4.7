@@ -231,3 +231,98 @@ GCObject *luaC_newobjdt (lua_State *L, int tt, size_t sz, size_t offset) {
 // 是否为白色
 #define luaC_white(g)	cast_byte((g)->currentwhite & WHITEBITS)
 ```
+9. 创建对象
+```C
+/*
+** create a new collectable object (with given type, size, and offset)
+** and link it to 'allgc' list.
+*/
+GCObject *luaC_newobjdt (lua_State *L, int tt, size_t sz, size_t offset) {
+  global_State *g = G(L);
+  char *p = cast_charp(luaM_newobject(L, novariant(tt), sz));
+  GCObject *o = cast(GCObject *, p + offset);
+  o->marked = luaC_white(g);
+  o->tt = tt;
+  o->next = g->allgc;
+  g->allgc = o;
+  return o;
+}
+
+// 分配一块大小为s的内存块空间
+void *luaM_malloc_ (lua_State *L, size_t size, int tag) {
+  if (size == 0)
+    return NULL;  /* that's all */
+  else {
+    global_State *g = G(L);
+    void *newblock = firsttry(g, NULL, tag, size);
+    if (l_unlikely(newblock == NULL)) {
+      newblock = tryagain(L, NULL, tag, size);
+      if (newblock == NULL)
+        luaM_error(L);
+    }
+    // 增加债务
+    g->GCdebt += size;
+    return newblock;
+  }
+}
+```
+10. 销毁对象
+```C
+/*
+#define luaM_freemem(L, b, s)	luaM_free_(L, (b), (s))
+#define luaM_free(L, b)		luaM_free_(L, (b), sizeof(*(b)))
+#define luaM_freearray(L, b, n)   luaM_free_(L, (b), (n)*sizeof(*(b)))
+
+** Free memory
+*/
+// 释放内存
+void luaM_free_ (lua_State *L, void *block, size_t osize) {
+  global_State *g = G(L);
+  lua_assert((osize == 0) == (block == NULL));
+  callfrealloc(g, block, osize, 0);
+  // 减少债务
+  g->GCdebt -= osize;
+}
+```
+
+11. 自动触发GC，基本上是在创建GC对象时候，如果债务为正，就会自动触发GC步骤
+```C
+/*
+** Does one step of collection when debt becomes positive. 'pre'/'pos'
+** allows some adjustments to be done only when needed. macro
+** 'condchangemem' is used only for heavy tests (forcing a full
+** GC cycle on every opportunity)
+*/
+// 债务大于0就需要进行GC操作
+#define luaC_condGC(L,pre,pos) \
+  { if (G(L)->GCdebt > 0) { pre; luaC_step(L); pos;}; \
+    condchangemem(L,pre,pos); }
+
+/* more often than not, 'pre'/'pos' are empty */
+// 调用时机基本上是在创建GC对象的时候，具体可以查代码
+#define luaC_checkGC(L)		luaC_condGC(L,(void)0,(void)0)
+```
+
+12. 手动触发GC
+```lua
+collectgarbage("step")
+```
+> collectgarbage(opt)
+> 
+> "collect", 执行一次完整的垃圾回收周期。这是默认行为。
+> 
+> "stop", 停止自动垃圾回收。垃圾回收器将只在你显式调用时运行。
+> 
+> "restart", 重启自动垃圾回收。
+> 
+> "count", 返回Lua使用的总内存量，单位为KB。返回的值可能包含小数部分。
+> 
+> "step", 
+> 
+> "isrunning"	返回一个布尔值，指示垃圾收集器是否正在自动运行（即，没有被 stop）。
+> 
+> "incremental"	将回收器模式更改为增量模式。你可以传入三个可选的数值参数来调整其行为。
+> 
+> "generational"	将回收器模式更改为分代模式。你可以传入两个可选的数值参数来调整其行为。
+> 
+> **这个函数不应该在终结器（finalizer）中调用。终结器是当一个对象被垃圾回收时调用的函数。在终结器中调用 collectgarbage() 可能会导致不可预料的行为。**

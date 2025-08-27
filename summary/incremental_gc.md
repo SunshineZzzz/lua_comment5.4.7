@@ -46,74 +46,32 @@ typedef struct global_State {
 3. 三色标记清楚算法流程概述：
    
 4. 三色标记清楚算法流程拆分：
-  - 创建对象
-  ```C
-  /*
-  ** create a new collectable object (with given type, size, and offset)
-  ** and link it to 'allgc' list.
-  */
-  GCObject *luaC_newobjdt (lua_State *L, int tt, size_t sz, size_t offset) {
-    global_State *g = G(L);
-    char *p = cast_charp(luaM_newobject(L, novariant(tt), sz));
-    GCObject *o = cast(GCObject *, p + offset);
-    o->marked = luaC_white(g);
-    o->tt = tt;
-    o->next = g->allgc;
-    g->allgc = o;
-    return o;
+  - GC开始阶段，GCSpause
+  ```c
+  case GCSpause: {
+    // 开启新一轮增量GC，不可以分步进行
+    // 标记
+    restartcollection(g);
+    // 切换到扫描阶段
+    g->gcstate = GCSpropagate;
+    work = 1;
+    break;
   }
 
-  // 分配一块大小为s的内存块空间
-  void *luaM_malloc_ (lua_State *L, size_t size, int tag) {
-    if (size == 0)
-      return NULL;  /* that's all */
-    else {
-      global_State *g = G(L);
-      void *newblock = firsttry(g, NULL, tag, size);
-      if (l_unlikely(newblock == NULL)) {
-        newblock = tryagain(L, NULL, tag, size);
-        if (newblock == NULL)
-          luaM_error(L);
-      }
-      // 增加债务
-      g->GCdebt += size;
-      return newblock;
-    }
+  /*
+  ** mark root set and reset all gray lists, to start a new collection
+  */
+  // 标记
+  static void restartcollection (global_State *g) {
+    // 清空灰色链表和弱表相关
+    cleargraylists(g);
+    // 标记主状态机为灰色
+    markobject(g, g->mainthread);
+    // 标记全局注册表为灰色
+    markvalue(g, &g->l_registry);
+    // 标记基础类型对应的全局元表为灰色
+    markmt(g);
+    // 对上一轮g->tobefnz链表还未执行__gc元方法存留下的对象，标记为灰色
+    markbeingfnz(g);  /* mark any finalizing object left from previous cycle */
   }
   ```
-  - 销毁对象
-  ```C
-  /*
-  #define luaM_freemem(L, b, s)	luaM_free_(L, (b), (s))
-  #define luaM_free(L, b)		luaM_free_(L, (b), sizeof(*(b)))
-  #define luaM_freearray(L, b, n)   luaM_free_(L, (b), (n)*sizeof(*(b)))
-
-  ** Free memory
-  */
-  // 释放内存
-  void luaM_free_ (lua_State *L, void *block, size_t osize) {
-    global_State *g = G(L);
-    lua_assert((osize == 0) == (block == NULL));
-    callfrealloc(g, block, osize, 0);
-    // 减少债务
-    g->GCdebt -= osize;
-  }
-  ```
-  - 触发GC
-  ```C
-  /*
-  ** Does one step of collection when debt becomes positive. 'pre'/'pos'
-  ** allows some adjustments to be done only when needed. macro
-  ** 'condchangemem' is used only for heavy tests (forcing a full
-  ** GC cycle on every opportunity)
-  */
-  // 债务大于0就需要进行GC操作
-  #define luaC_condGC(L,pre,pos) \
-    { if (G(L)->GCdebt > 0) { pre; luaC_step(L); pos;}; \
-      condchangemem(L,pre,pos); }
-
-  /* more often than not, 'pre'/'pos' are empty */
-  // 调用时机基本上是在创建GC对象的时候，具体可以查代码
-  #define luaC_checkGC(L)		luaC_condGC(L,(void)0,(void)0)
-  ```
-  - 

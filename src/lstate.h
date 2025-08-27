@@ -302,16 +302,11 @@ struct CallInfo {
 typedef struct global_State {
   lua_Alloc frealloc;  /* function to reallocate memory */
   void *ud;         /* auxiliary data to 'frealloc' */
-  // 在程序运行中，随着内存的不断使用，真实消费会不断增加，因为增长的消费金额先消耗预充值部分，
-  // 当消费增加的部分超过了预充值的金额，说明预充值的金额耗尽了，又要去借债了，此时则会触发GC。
-  // GC触发后会继续处理那些未被处理完毕的消费订单，GC结束后则会再次预充值一笔金额并等待下次GC的重新开始
-  // 个人总消费，数值等于真实消费（allocated已分配的总内存）+ 预充值到系统的金额（用于后续抵消债务）。
+  // 
   l_mem totalbytes;  /* number of bytes currently allocated - GCdebt */
   // 债务(需要回收的内存数量)，负数代表预充值多少金额到系统，正数代表需要偿还多少债务
   l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
-  // 非垃圾对象内存占用。在GC中已经处理完毕，被视为合法非垃圾对象的内存占用，
-  // 在债务算法中可理解为消费后已经确认的订单消费金额
-  // 在分代GC中，可以理解为固定消费支出
+  // 
   lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
   // 分代式算法中用于代表上一轮GC原子阶段中被标记的对象个数
   // 然后下轮GC最终还是会回来这个stepgenfull函数，重复该流程，直到新一轮的完全增量式算法标记的数量小于8分之1，
@@ -393,12 +388,10 @@ typedef struct global_State {
   GCObject *finobjold1;  /* list of old1 objects with finalizers */
   // [finobjrold, 链表末尾]区间对象：G_OLD
   GCObject *finobjrold;  /* list of really old objects with finalizers */
-  // 拥有UpValue的协程链表，一个对象如果是被协程通过UpValue引用了，
-  // 尽管该对象可能已经脱离了它原本声明的作用域（例如局部函数已经结束），
-  // 但在协程生命周期结束之前也是不能被回收，所以标记阶段需要对这些协程以及他们引用了的UpValue进行标记。
+  // 
   struct lua_State *twups;  /* list of threads with open upvalues */
   lua_CFunction panic;  /* to be called in unprotected errors */
-  // 当前运行的状态机
+  // 主状态机
   struct lua_State *mainthread;
   // 初始为"not enough memory"该字符串永远不会被回收
   TString *memerrmsg;  /* message for memory-allocation errors */
