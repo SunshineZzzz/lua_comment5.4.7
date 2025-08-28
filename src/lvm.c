@@ -811,6 +811,7 @@ lua_Integer luaV_shiftl (lua_Integer x, lua_Integer y) {
 // 创建Lua闭包
 static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
                          StkId ra) {
+  // 词语法编译好的结果，上值的个数
   int nup = p->sizeupvalues;
   Upvaldesc *uv = p->upvalues;
   int i;

@@ -218,6 +218,24 @@ bool coroutine()
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+bool upvalue()
+{
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+
+	if (luaL_dofile(L, "upvalue.lua") != LUA_OK)
+	{
+		fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
+		lua_close(L);
+		return false;
+	}
+
+	lua_close(L);
+	return true;
+}
+
 int main() 
 {
 	if (!overview()) 
@@ -246,6 +264,11 @@ int main()
 	}
 
 	if (!coroutine())
+	{
+		return -1;
+	}
+
+	if (!upvalue())
 	{
 		return -1;
 	}

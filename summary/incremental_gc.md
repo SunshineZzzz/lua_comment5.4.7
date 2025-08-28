@@ -39,6 +39,9 @@ typedef struct global_State {
   GCObject *finobj;  /* list of collectable objects with finalizers */
   // 三色标记清楚：灰色链表
   GCObject *gray;  /* list of gray objects */
+  // 具有open upvalue的状态机链表，只要当线程L第一次创建开放上值时，它需要被添加到G(L)->twups指向的链表中
+  // G->twups => LN->twups => LN-1->twups => ... L1-> twups => NULL
+  struct lua_State *twups;  /* list of threads with open upvalues */
   ...
 };
 ```

@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lfunc.c $
 ** Auxiliary functions to manipulate prototypes and closures
 ** See Copyright Notice in lua.h
@@ -24,7 +24,7 @@
 
 
 
-// ´´½¨CÓïÑÔ±Õ°ü
+// åˆ›å»ºCè¯­è¨€é—­åŒ…
 CClosure *luaF_newCclosure (lua_State *L, int nupvals) {
   GCObject *o = luaC_newobj(L, LUA_VCCL, sizeCclosure(nupvals));
   CClosure *c = gco2ccl(o);
@@ -33,7 +33,7 @@ CClosure *luaF_newCclosure (lua_State *L, int nupvals) {
 }
 
 
-// ´´½¨lua±Õ°ü
+// åˆ›å»ºluaé—­åŒ…
 LClosure *luaF_newLclosure (lua_State *L, int nupvals) {
   GCObject *o = luaC_newobj(L, LUA_VLCL, sizeLclosure(nupvals));
   LClosure *c = gco2lcl(o);
@@ -47,7 +47,7 @@ LClosure *luaF_newLclosure (lua_State *L, int nupvals) {
 /*
 ** fill a closure with new closed upvalues
 */
-// Õâ¸öº¯ÊıÊÇÓÃÀ´³õÊ¼»¯Lua±Õ°üÖĞµÄupvalueµÄ¡£ËüÎª±Õ°üÖĞµÄÃ¿¸öupvalue´´½¨Ò»¸öĞÂµÄUpVal¶ÔÏó£¬½«ÆäÖµÉèÖÃÎªnil£¬²¢½«ÆäÁ´½Óµ½±Õ°üÖĞ
+// è¿™ä¸ªå‡½æ•°æ˜¯ç”¨æ¥åˆå§‹åŒ–Luaé—­åŒ…ä¸­çš„upvalueçš„ã€‚å®ƒä¸ºé—­åŒ…ä¸­çš„æ¯ä¸ªupvalueåˆ›å»ºä¸€ä¸ªæ–°çš„UpValå¯¹è±¡ï¼Œå°†å…¶å€¼è®¾ç½®ä¸ºnilï¼Œå¹¶å°†å…¶é“¾æ¥åˆ°é—­åŒ…ä¸­
 void luaF_initupvals (lua_State *L, LClosure *cl) {
   int i;
   for (i = 0; i < cl->nupvalues; i++) {
@@ -65,20 +65,20 @@ void luaF_initupvals (lua_State *L, LClosure *cl) {
 ** Create a new upvalue at the given level, and link it to the list of
 ** open upvalues of 'L' after entry 'prev'.
 **/
-// ´´½¨Ò»¸öĞÂµÄupvalue
+// åˆ›å»ºä¸€ä¸ªæ–°çš„open upvalue
 static UpVal *newupval (lua_State *L, StkId level, UpVal **prev) {
   GCObject *o = luaC_newobj(L, LUA_VUPVAL, sizeof(UpVal));
   UpVal *uv = gco2upv(o);
   UpVal *next = *prev;
-  // 
   uv->v.p = s2v(level);  /* current value lives in the stack */
-  // ĞÂ½¨Ò»¸öUpValºó°ÑËüÁ´½Óµ½*prevÁ´±íµÄÇ°Ãæ
+  // æ”¾åˆ°prevçš„åé¢
   uv->u.open.next = next;  /* link it to list of open upvalues */
   uv->u.open.previous = prev;
   if (next)
     next->u.open.previous = &uv->u.open.next;
   *prev = uv;
   if (!isintwups(L)) {  /* thread not in list of threads with upvalues? */
+    // æ²¡æœ‰åˆå§‹åŒ–ï¼Œå°±é“¾èµ·æ¥å§
     L->twups = G(L)->twups;  /* link it to the list */
     G(L)->twups = L;
   }
@@ -90,13 +90,12 @@ static UpVal *newupval (lua_State *L, StkId level, UpVal **prev) {
 ** Find and reuse, or create if it does not exist, an upvalue
 ** at the given level.
 */
-// ²éÕÒ»òÕß´´½¨Ò»¸öUpVal
-// ²ÎÊıStkId level¼´ÎªÎÒÃÇ¸ù¾İUpValÉùÃ÷Ë³ĞòÔÚÁ´±íÖĞµÄLevelÖµ
+// æŸ¥æ‰¾open upvalueï¼Œlevelæ˜¯æ ˆä¸­çš„ä½ç½®
 UpVal *luaF_findupval (lua_State *L, StkId level) {
-  // UpVal¶¼´æ´¢ÓÚµ±Ç°Ïß³Ìlua_State¶ÔÏóµÄopenupvalÖĞ£¬ËùÒÔ²éÕÒÒ»¸öUpValÒ²ÊÇ´ÓÕâ¸öÁ´±í½øĞĞ²éÕÒ
   UpVal **pp = &L->openupval;
   UpVal *p;
   lua_assert(isintwups(L) || L->openupval == NULL);
+  // éå†é“¾è¡¨å°è¯•æŸ¥æ‰¾levelå¯¹åº”çš„ä¸Šå€¼UpVal
   while ((p = *pp) != NULL && uplevel(p) >= level) {  /* search for it */
     lua_assert(!isdead(G(L), p));
     if (uplevel(p) == level)  /* corresponding upvalue? */
@@ -104,8 +103,7 @@ UpVal *luaF_findupval (lua_State *L, StkId level) {
     pp = &p->u.open.next;
   }
   /* not found: create a new upvalue after 'pp' */
-  // µ±Ã»ÓĞÕÒµ½Ö¸¶¨levelµÄUpValµÄ»°£¬¾Í»á½øĞĞ´´½¨£¬
-  // ÕâÀïÔò°ÑUpVal ** pp(openupvalµÄÁ´Í·)×÷Îª²ÎÊıµ÷ÓÃnewupval
+  // æ‰¾ä¸åˆ°å°±åˆ›å»ºæ–°çš„open upvalue
   return newupval(L, level, pp);
 }
 
@@ -176,7 +174,7 @@ static void prepcallclosemth (lua_State *L, StkId level, int status, int yy) {
 /*
 ** Insert a variable in the list of to-be-closed variables.
 */
-// ½«levelÕ»ÉÏµÄ±äÁ¿²åÈëµ½to-be-closedÁ´±íÖĞ
+// å°†levelæ ˆä¸Šçš„å˜é‡æ’å…¥åˆ°to-be-closedé“¾è¡¨ä¸­
 void luaF_newtbcupval (lua_State *L, StkId level) {
   lua_assert(level > L->tbclist.p);
   if (l_isfalse(s2v(level)))
@@ -191,7 +189,7 @@ void luaF_newtbcupval (lua_State *L, StkId level) {
 }
 
 
-// °Ñµ±Ç°UpVal´ÓÁ´±íÒÆ³ı
+// æŠŠå½“å‰UpValä»é“¾è¡¨ç§»é™¤
 void luaF_unlinkupval (UpVal *uv) {
   lua_assert(upisopen(uv));
   *uv->u.open.previous = uv->u.open.next;
@@ -203,14 +201,16 @@ void luaF_unlinkupval (UpVal *uv) {
 /*
 ** Close all upvalues up to the given stack level.
 */
-// º¯ÊıÔÚ·µ»Øºó»áÇĞ»»µ½close×´Ì¬
+// å‡½æ•°è¦ç»“æŸäº†ï¼Œå¤„ç†open upvalue
 void luaF_closeupval (lua_State *L, StkId level) {
   UpVal *uv;
   StkId upl;  /* stack index pointed by 'uv' */
+  // é«˜äºleveléƒ½éœ€è¦closed upvalue
   while ((uv = L->openupval) != NULL && (upl = uplevel(uv)) >= level) {
+    // è¿™ä¸ªä½ç½®æ”¾å…¥è¦æ¸…é™¤çš„å€¼
     TValue *slot = &uv->u.value;  /* new position for value */
     lua_assert(uplevel(uv) < L->top.p);
-    // °Ñµ±Ç°UpVal´ÓÁ´±íÒÆ³ı
+    // æŠŠå½“å‰UpValä»é“¾è¡¨ç§»é™¤
     luaF_unlinkupval(uv);  /* remove upvalue from 'openupval' list */
     setobj(L, slot, uv->v.p);  /* move value to upvalue slot */
     uv->v.p = slot;  /* now current value lives here */
@@ -239,6 +239,7 @@ static void poptbclist (lua_State *L) {
 ** Close all upvalues and to-be-closed variables up to the given stack
 ** level. Return restored 'level'.
 */
+// å‡½æ•°è¦ç»“æŸäº†ï¼Œå¤„ç†open upvalueå’Œ to-be-closedå˜é‡
 StkId luaF_close (lua_State *L, StkId level, int status, int yy) {
   ptrdiff_t levelrel = savestack(L, level);
   luaF_closeupval(L, level);  /* first, close the upvalues */

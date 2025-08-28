@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** $Id: lfunc.h $
 ** Auxiliary functions to manipulate prototypes and closures
 ** See Copyright Notice in lua.h
@@ -29,9 +29,11 @@
 #define MAXUPVAL	255
 
 
+// 上值是否是open
 #define upisopen(up)	((up)->v.p != &(up)->u.value)
 
 
+// 是open upvalue，v.p指向的就是栈中的位置，转成StkId
 #define uplevel(up)	check_exp(upisopen(up), cast(StkId, (up)->v.p))
 
 

@@ -388,7 +388,8 @@ typedef struct global_State {
   GCObject *finobjold1;  /* list of old1 objects with finalizers */
   // [finobjrold, 链表末尾]区间对象：G_OLD
   GCObject *finobjrold;  /* list of really old objects with finalizers */
-  // 
+  // 具有open upvalue的状态机链表，只要当线程L第一次创建open上值时，它需要被添加到G(L)->twups指向的链表中
+  // G->twups => LN->twups => LN-1->twups => ... L1-> twups => NULL
   struct lua_State *twups;  /* list of threads with open upvalues */
   lua_CFunction panic;  /* to be called in unprotected errors */
   // 主状态机
@@ -431,9 +432,7 @@ struct lua_State {
   StkIdRel stack_last;  /* end of stack (last element + 1) */
   // Lua执行代码是通过堆栈的，这里就是记录堆栈尾部指针
   StkIdRel stack;  /* stack base */
-  // 可以理解为所有（open状态）的UpVal都链接在这个链表当中，
-  // 按照各个UpVal变量的声明顺序，后声明的会链接在表头，先声明的会保留在链表末端，
-  // 然后根据他们在链表的深度，会依次给他们一个level值
+  // 用于保存当前所有open状态的UpValue，按照上值绑定的变量在栈上的位置从高到低排序
   UpVal *openupval;  /* list of open upvalues in this stack */
   // 函数运行完成后准备关闭的函数
   // 记录着最后一个tbc节点，栈缩容时会判断该节点是否在缩容空间内，
@@ -442,7 +441,7 @@ struct lua_State {
   StkIdRel tbclist;  /* list of to-be-closed variables */
   // 用于GC垃圾回收算法链接到某个回收队列
   GCObject *gclist;
-  // 
+  // 指向下一个拥有open upvalue的状态机，链表头G->twups, 默认的时候，等于自身
   struct lua_State *twups;  /* list of threads with open upvalues */
   // 常用于保护模式下运行某个函数，若发生错误的时候会调用跳转指令跳转到这个位置
   struct lua_longjmp *errorJmp;  /* current error recover point */
