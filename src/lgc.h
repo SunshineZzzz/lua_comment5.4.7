@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lgc.h $
 ** Garbage Collector
 ** See Copyright Notice in lua.h
@@ -28,13 +28,13 @@
 /*
 ** Possible states of the Garbage Collector
 */
-// GC½×¶Î
-// É¨Ãè
+// GCé˜¶æ®µ
+// æ‰«æ
 #define GCSpropagate	0
-// 
+// åŸå­
 #define GCSenteratomic	1
 #define GCSatomic	2
-// 
+// æ¸…é™¤
 #define GCSswpallgc	3
 // 
 #define GCSswpfinobj	4
@@ -44,7 +44,7 @@
 #define GCSswpend	6
 // 
 #define GCScallfin	7
-// ¿ªÆôĞÂÒ»ÂÖÔöÁ¿GC£¬²»¿ÉÒÔ·Ö²½½øĞĞ
+// å¼€å¯æ–°ä¸€è½®å¢é‡GCï¼Œä¸å¯ä»¥åˆ†æ­¥è¿›è¡Œ
 #define GCSpause	8
 
 
@@ -60,24 +60,16 @@
 ** all objects are white again.
 */
 
-// ÊÇ·ñÊÇ±ê¼Ç½×¶Î
-// ÔÚ±ê¼ÇÇå³ıËã·¨µÄÕû¸ö±ê¼Ç½×¶Î£¬Lua»á¼áÊØÒ»¸öÔ­Ôò£¬¾ÍÊÇ¡°Ò»ÖÂĞÔÔ­Ôò¡±»òÕß¡°²»±äĞÔÔ­Ôò¡±¡£
-// Õâ¸öÔ­ÔòµÄÄÚÈİ¾ÍÊÇ£ººÚÉ«¶ÔÏó²»ÄÜÒıÓÃ°×É«¶ÔÏó
-// ±ê¼Ç½×¶ÎÓĞ¿ÉÄÜ´òÆÆÕâ¸ö¹æÔò£º
-// 1£©´´½¨ÁËĞÂµÄ¶ÔÏó£¬ĞÂ¶ÔÏó»á±»³õÊ¼»¯Îª°×É«£¬µ«ÒıÓÃÕâ¸öĞÂ¶ÔÏóµÄÈ´ÊÇÒ»¸öºÚÉ«¶ÔÏó£»
-// 2£©ĞŞ¸ÄÒ»¸öÈÔÎ´±»±ê¼ÇµÄ¶ÔÏó£¨°×É«£©µÄÒıÓÃÕß£¨¸¸½áµã£©ÎªÒ»¸öºÚÉ«¶ÔÏó£»
-// ÕâĞ©Çé¿ö¶¼»áµ¼ÖÂºÚÉ«¶ÔÏóÒıÓÃ°×É«¶ÔÏó£¬´òÆÆÒ»ÖÂĞÔÔ­Ôò¡£ÈôÒ»ÖÂĞÔÔ­ÔòÔÚ±»´òÆÆºóÃ»ÓĞ±»ĞŞ¸´£¬
-// ÔòÕâ¸ö°×É«¶ÔÏóÓÉÓÚ¸¸½áµãºÚÉ«µÄ¹ØÏµÊÇÃ»ÓĞ»ú»áÔÚ±¾ÂÖGCµÄ±ê¼Ç½×¶Î±»´¦Àí±ê¼Çµ½µÄ£¬
-// ´Ó¶øµ¼ÖÂÒ»Ö±±£³Ö°×É«²¢ÔÚÇå³ı½×¶Î±»Çå³ı¡£Õâ²¢²»ÊÇÎÒÃÇÆÚ´ıµÄ½á¹û£¬ÎªÁË½â¾öÕâ¸öÎÊÌâ£¬
-// LuaÒıÈëÁËÆÁÕÏ£¨barrier£©Õâ¸ö¸ÅÄî¡£
-// ÆÁÕÏµÄ×÷ÓÃ¾ÍÊÇÎªÁË·ÀÖ¹Ò»ÖÂĞÔÔ­Ôò±»ÆÆ»µµÄ£¬ËüÊÇÍ¨¹ıÖØĞÂĞŞ¸ÄÑÕÉ«µÄ·½Ê½À´ÊµÏÖµÄ¡£
+// å½“å‰GCé˜¶æ®µæ˜¯å¦éœ€è¦ä¿æŒ"å¼ºä¸‰è‰²ä¸å˜æ€§",é»‘è‰²å¯¹è±¡ç»å¯¹ä¸èƒ½ç›´æ¥å¼•ç”¨ä»»ä½•ç™½è‰²å¯¹è±¡â€‹â€‹,åªè¦ä¿è¯è¿™ä¸ªï¼Œ
+// å°±ä¿è¯ä¸ä¼šå‡ºæ–°å»ºç™½è‰²å¯¹è±¡è¢«é”™è¯¯æ¸…é™¤ã€‚
+// åœ¨åŸå­é˜¶æ®µä¹‹åï¼ŒGC è¿›å…¥æ¸…æ‰«é˜¶æ®µï¼ˆGCSsweepï¼‰ï¼Œåœ¨è¿™ä¸ªé˜¶æ®µï¼ŒGC ä¼šæ•…æ„ç ´åä¸‰è‰²ä¸å˜å¼ï¼Œå°†ä¸€äº›å¯¹è±¡å˜æˆç™½è‰²ä»¥ä¾¿å›æ”¶ã€‚
 #define keepinvariant(g)	((g)->gcstate <= GCSatomic)
 
 
 /*
 ** some useful bit tricks
 */
-// ¶ş½øÖÆÎ»Ïà¹Ø²Ù×÷
+// äºŒè¿›åˆ¶ä½ç›¸å…³æ“ä½œ
 #define resetbits(x,m)		((x) &= cast_byte(~(m)))
 #define setbits(x,m)		((x) |= (m))
 #define testbits(x,m)		((x) & (m))
@@ -93,54 +85,54 @@
 ** used for object "age" in generational mode. Last bit is used
 ** by tests.
 */
-// 8bit,´ÓµÚÈıÎ»¿ªÊ¼Ê¹ÓÃ£¬µÚ7Î»Ã»ÓÃµ½£¬ºóÃæÈıÎ»¸øÁË·Ö´úÊ¹ÓÃÁË
-// ÈıÉ«±ê¼ÇÇå³ıÑÕÉ«¶¨Òå
-// °×0£¬bitmask(3)£¬00001000
+// 8bit,ä»ç¬¬ä¸‰ä½å¼€å§‹ä½¿ç”¨ï¼Œç¬¬7ä½æ²¡ç”¨åˆ°ï¼Œåé¢ä¸‰ä½ç»™äº†åˆ†ä»£ä½¿ç”¨äº†
+// ä¸‰è‰²æ ‡è®°æ¸…é™¤é¢œè‰²å®šä¹‰
+// ç™½0ï¼Œbitmask(3)ï¼Œ00001000
 #define WHITE0BIT	3  /* object is white (type 0) */
-// °×1£¬bitmask(4)£¬00010000
+// ç™½1ï¼Œbitmask(4)ï¼Œ00010000
 #define WHITE1BIT	4  /* object is white (type 1) */
-// ºÚÉ«£¬bitmask(5)£¬00100000
+// é»‘è‰²ï¼Œbitmask(5)ï¼Œ00100000
 #define BLACKBIT	5  /* object is black */
-// Îö¹¹±ê¼Ç£¬¶¨ÒåÁËÎö¹¹Æ÷µÄ¶ÔÏóÓµÓĞÕâ¸öÎö¹¹±ê¼Ç£¬´ú±íÊÍ·ÅÖ®Ç°ĞèÒªÏÈµ÷ÓÃ__GCÔª·½·¨£¬bitmask(6)£¬01000000
+// ææ„æ ‡è®°ï¼Œå®šä¹‰äº†ææ„å™¨çš„å¯¹è±¡æ‹¥æœ‰è¿™ä¸ªææ„æ ‡è®°ï¼Œä»£è¡¨é‡Šæ”¾ä¹‹å‰éœ€è¦å…ˆè°ƒç”¨__GCå…ƒæ–¹æ³•ï¼Œbitmask(6)ï¼Œ01000000
 #define FINALIZEDBIT	6  /* object has been marked for finalization */
 
 #define TESTBIT		7
 
 
-// °×É« bitmask(3)|bitmask(4) 00011000
+// ç™½è‰² bitmask(3)|bitmask(4) 00011000
 #define WHITEBITS	bit2mask(WHITE0BIT, WHITE1BIT)
 
 
-// ÊÇ·ñÊÇ°×É«
+// æ˜¯å¦æ˜¯ç™½è‰²
 #define iswhite(x)      testbits((x)->marked, WHITEBITS)
-// ÊÇ·ñÊÇºÚÉ«
+// æ˜¯å¦æ˜¯é»‘è‰²
 #define isblack(x)      testbit((x)->marked, BLACKBIT)
-// ÊÇ·ñÊÇ»ÒÉ«£¬3£¬4£¬5¶ÔÓ¦µÄbitÎ»¶¼²»ÊÇ0£¬×ÔÈ»¾ÍÊÇ»ÒÉ«
+// æ˜¯å¦æ˜¯ç°è‰²ï¼Œ3ï¼Œ4ï¼Œ5å¯¹åº”çš„bitä½éƒ½ä¸æ˜¯0ï¼Œè‡ªç„¶å°±æ˜¯ç°è‰²
 #define isgray(x)  /* neither white nor black */  \
 	(!testbits((x)->marked, WHITEBITS | bitmask(BLACKBIT)))
 
-// ÊÇ·ñ¾ßÓĞ__GCÔ­·½·¨µÄ±í/full user data
+// æ˜¯å¦å…·æœ‰__GCåŸæ–¹æ³•çš„è¡¨/full user data
 #define tofinalize(x)	testbit((x)->marked, FINALIZEDBIT)
 
-// »ñÈ¡·Çµ±Ç°°×É«
+// è·å–éå½“å‰ç™½è‰²
 #define otherwhite(g)	((g)->currentwhite ^ WHITEBITS)
 #define isdeadm(ow,m)	((m) & (ow))
-// µ±Ç°°×£¬±¾´ÎGC²»»á»ØÊÕ
-// ÆäËû°×£¬±¾´ÎGCĞèÒª»ØÊÕ
+// å½“å‰ç™½ï¼Œæœ¬æ¬¡GCä¸ä¼šå›æ”¶
+// å…¶ä»–ç™½ï¼Œæœ¬æ¬¡GCéœ€è¦å›æ”¶
 #define isdead(g,v)	isdeadm(otherwhite(g), (v)->marked)
 
-// ĞŞ¸Äµ±Ç°°×É«Îª·Çµ±Ç°°×
+// ä¿®æ”¹å½“å‰ç™½è‰²ä¸ºéå½“å‰ç™½
 #define changewhite(x)	((x)->marked ^= WHITEBITS)
-// ±ê¼ÇÎªºÚÉ«
+// æ ‡è®°ä¸ºé»‘è‰²
 #define nw2black(x)  \
 	check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
 
-// ÊÇ·ñÎª°×É«
+// æ˜¯å¦ä¸ºç™½è‰²
 #define luaC_white(g)	cast_byte((g)->currentwhite & WHITEBITS)
 
 
 /* object age in generational mode */
-// ·Ö´úGCÄêÁä¶¨Òå
+// åˆ†ä»£GCå¹´é¾„å®šä¹‰
 #define G_NEW		0	/* created in current cycle */
 #define G_SURVIVAL	1	/* created in previous cycle */
 #define G_OLD0		2	/* marked old by frw. barrier in this cycle */
@@ -185,7 +177,7 @@
 ** generational mode, the collector can go temporarily to incremental
 ** mode to improve performance. This is signaled by 'g->lastatomic != 0'.
 */
-// ÊÇ·ñÊÇ·Ö´úGCÄ£Ê½
+// æ˜¯å¦æ˜¯åˆ†ä»£GCæ¨¡å¼
 #define isdecGCmodegen(g)	(g->gckind == KGC_GEN || g->lastatomic != 0)
 
 
@@ -204,13 +196,13 @@
 ** 'condchangemem' is used only for heavy tests (forcing a full
 ** GC cycle on every opportunity)
 */
-// Õ®Îñ´óÓÚ0¾ÍĞèÒª½øĞĞGC²Ù×÷
+// å€ºåŠ¡å¤§äº0å°±éœ€è¦è¿›è¡ŒGCæ“ä½œ
 #define luaC_condGC(L,pre,pos) \
 	{ if (G(L)->GCdebt > 0) { pre; luaC_step(L); pos;}; \
 	  condchangemem(L,pre,pos); }
 
 /* more often than not, 'pre'/'pos' are empty */
-// µ÷ÓÃÊ±»ú»ù±¾ÉÏÊÇÔÚ´´½¨GC¶ÔÏóµÄÊ±ºò£¬¾ßÌå¿ÉÒÔ²é´úÂë
+// è°ƒç”¨æ—¶æœºåŸºæœ¬ä¸Šæ˜¯åœ¨åˆ›å»ºGCå¯¹è±¡çš„æ—¶å€™ï¼Œå…·ä½“å¯ä»¥æŸ¥ä»£ç 
 #define luaC_checkGC(L)		luaC_condGC(L,(void)0,(void)0)
 
 

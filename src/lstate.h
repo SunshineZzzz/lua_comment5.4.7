@@ -323,7 +323,9 @@ typedef struct global_State {
   // 空值
   TValue nilvalue;  /* a nil value */
   unsigned int seed;  /* randomized seed for hashes */
+  // 当前gc过程的白色类型，包括WHITE0BIT,WHITE1BIT，通过两种类型交替使用，来表示对象是上一轮还是当前轮gc处理的对象
   lu_byte currentwhite;
+  // 当前GC阶段
   lu_byte gcstate;  /* state of garbage collector */
   // GC算法类型，增量式/分代
   lu_byte gckind;  /* kind of GC running */
@@ -340,6 +342,7 @@ typedef struct global_State {
   // 默认值为100，所以可以理解为若内存没有增长到达（100%）基准值的2倍，则保持部分执行模式，否则全部模式
   lu_byte genmajormul;  /* control for major generational collections */
   lu_byte gcstp;  /* control whether GC is running */
+  // 是否是GC紧急收集
   lu_byte gcemergency;  /* true if this is an emergency collection */
   lu_byte gcpause;  /* size of pause between successive GCs */
   // 步进倍率

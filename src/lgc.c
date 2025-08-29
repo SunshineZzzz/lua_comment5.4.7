@@ -212,12 +212,12 @@ static int iscleared (global_State *g, const GCObject *o) {
 ** whites from deads.)
 */
 // 前向屏障
-// Lua在大部分情况下都是使用前向屏障，即立刻把该白色对象进行标记，只有在处理Table和UserData时使用后退屏障
 void luaC_barrier_ (lua_State *L, GCObject *o, GCObject *v) {
   global_State *g = G(L);
   lua_assert(isblack(o) && iswhite(v) && !isdead(g, v) && !isdead(g, o));
+  // 是否需要保持​​强三色不变性(黑色对象绝对不能直接引用任何白色对象)
   if (keepinvariant(g)) {  /* must keep invariant? */
-    // 标记阶段，会对该被黑色对象引用的白色对象立刻进行标记，修改它的颜色为灰色或黑色
+    // 进行染色
     reallymarkobject(g, v);  /* restore invariant */
     if (isold(o)) {
       lua_assert(!isold(v));  /* white object could not be old */
@@ -227,6 +227,7 @@ void luaC_barrier_ (lua_State *L, GCObject *o, GCObject *v) {
   else {  /* sweep phase */
     lua_assert(issweepphase(g));
     if (g->gckind == KGC_INC)  /* incremental mode? */
+      // 清理阶段不需要保持，直接置白色(白色切换了)，不会清楚
       makewhite(g, o);  /* mark 'o' as white to avoid other barriers */
   }
 }
@@ -241,10 +242,11 @@ void luaC_barrierback_ (lua_State *L, GCObject *o) {
   global_State *g = G(L);
   lua_assert(isblack(o) && !isdead(g, o));
   lua_assert((g->gckind == KGC_GEN) == (isold(o) && getage(o) != G_TOUCHED1));
-  // 把标记阶段往后回退了一步，重新把引用该白色对象的黑色对象修改回灰色
   if (getage(o) == G_TOUCHED2)  /* already in gray list? */
     set2gray(o);  /* make it gray to become touched1 */
   else  /* link it in 'grayagain' and paint it gray */
+    // 新创建白色对象被引用的黑色对象直接放入grayagain链表，应该是弱三色不变式
+    // 如果放入gray链表，扫描阶段有可能没法结束，或者延迟结束
     linkobjgclist(o, g->grayagain);
   if (isold(o))  /* generational mode? */
     setage(o, G_TOUCHED1);  /* touched in current cycle */
@@ -321,9 +323,12 @@ static void reallymarkobject (global_State *g, GCObject *o) {
       // 上值
       UpVal *uv = gco2upv(o);
       if (upisopen(uv))
+        // open upvalue，
         set2gray(uv);  /* open upvalues are kept gray */
       else
+        // closed upvalue直接标记为黑色
         set2black(uv);  /* closed upvalues are visited here */
+      // 里面的内容也需要标记
       markvalue(g, uv->v.p);  /* mark its content */
       break;
     }
@@ -479,6 +484,7 @@ static void traverseweakvalue (global_State *g, Table *h) {
   Node *n, *limit = gnodelast(h);
   /* if there is array part, assume it may have white values (it is not
      worth traversing it now just to check) */
+  // 数组部分开起来优化了，这里不进行处理，后续步骤进行处理
   int hasclears = (h->alimit > 0);
   for (n = gnode(h, 0); n < limit; n++) {  /* traverse hash part */
     // 当值被清空后，对应的键无论是否被标记，都会被清楚
@@ -578,9 +584,28 @@ static void traversestrongtable (global_State *g, Table *h) {
 // 遍历table，标记所有可达的结点
 static lu_mem traversetable (global_State *g, Table *h) {
   const char *weakkey, *weakvalue;
+  // 从元表中获取弱表信息
   const TValue *mode = gfasttm(g, h->metatable, TM_MODE);
   TString *smode;
+  // 元表标记
   markobjectN(g, h->metatable);
+  /*
+    local clearValue = {"123"}
+    local t = {
+        ["value_key"] = clearValue
+    }
+    -- 声明值为弱引用
+    setmetatable(t, {__mode = "v"})
+  
+    -- set value to nil
+    clearValue = nil
+  
+    --  手动执行gc回收操作
+    collectgarbage()
+    
+    -- nil
+    print(t["value_key"])
+  */
   // 1)"k": 声明键为弱引用，当键被置空时，table会清除这个结点
   // 2)"v": 声明值为弱引用，当值被置空时，table会清除这个结点
   // 3)"kv": 声明键和值都为弱引用，当其中一个被置空时，table会清除这个结点
@@ -590,8 +615,10 @@ static lu_mem traversetable (global_State *g, Table *h) {
        cast_void(weakvalue = strchr(getshrstr(smode), 'v')),
        (weakkey || weakvalue))) {  /* is really weak? */
     if (!weakkey)  /* strong keys? */
+      // 值为弱引用
       traverseweakvalue(g, h);
     else if (!weakvalue)  /* strong values? */
+      // 键为弱引用
       traverseephemeron(g, h, 0);
     else  /* all weak */
       // 代表键与值都为弱引用，直接把当前这个table链接到待gc垃圾回收的链表中，后面若没有其它对象标记这个表内的元素，则将被全部清除
@@ -677,13 +704,17 @@ static int traversethread (global_State *g, lua_State *th) {
   UpVal *uv;
   StkId o = th->stack.p;
   if (isold(th) || g->gcstate == GCSpropagate)
+    // 因为在GC的扫描阶段，可以分步，Lua代码可能仍然在运行并修改线程栈，所以GC无法保证一次扫描就能标记所有可达对象，
+    // 将线程放入grayagain列表，意味着GC会在原子阶段（GCSatomic）再次安全地扫描它。
     linkgclist(th, g->grayagain);  /* insert into 'grayagain' list */
   if (o == NULL)
     return 1;  /* stack not completely built yet */
   lua_assert(g->gcstate == GCSatomic ||
              th->openupval == NULL || isintwups(th));
+  // 标记栈上的值
   for (; o < th->top.p; o++)  /* mark live elements in the stack */
     markvalue(g, s2v(o));
+  // 标记open upvalue
   for (uv = th->openupval; uv != NULL; uv = uv->u.open.next)
     markobject(g, uv);  /* open upvalues cannot be collected */
   if (g->gcstate == GCSatomic) {  /* final traversal? */
@@ -693,6 +724,7 @@ static int traversethread (global_State *g, lua_State *th) {
       setnilvalue(s2v(o));  /* clear dead stack slice */
     /* 'remarkupvals' may have removed thread from 'twups' list */
     if (!isintwups(th) && th->openupval != NULL) {
+      // 其他GC步骤可能会将线程从twups链表中移除，这里再加回去
       th->twups = g->twups;  /* link it back to the list */
       g->twups = th;
     }
@@ -704,11 +736,14 @@ static int traversethread (global_State *g, lua_State *th) {
 /*
 ** traverse one gray object, turning it to black.
 */
-// 颜色传播
+// 颜色扫描
 static lu_mem propagatemark (global_State *g) {
   GCObject *o = g->gray;
+  // 自己标记为黑色
   nw2black(o);
+  // 从gray脱离
   g->gray = *getgclist(o);  /* remove from 'gray' list */
+  // 扫描所引用的内容
   switch (o->tt) {
     case LUA_VTABLE: return traversetable(g, gco2t(o));
     case LUA_VUSERDATA: return traverseudata(g, gco2u(o));
@@ -1756,16 +1791,7 @@ void luaC_freeallobjects (lua_State *L) {
 
 
 // 原子阶段
-// 这个阶段能解决的增量式算法带来的两个问题：
-// 1）特殊灰色链表需求：Table/UserData在使用后退屏障保证标记阶段一致性原则时，若存在频繁大量数据改变，
-// 并不能直接插入到标记传播gray灰色链表中，因为这样会潜在风险，若标记传播阶段新增任务量大于能处理的任务量，
-// 会导致gray链表永远处理不完，所以需要有另一个特殊的灰色链表存储这些使用后退屏障的对象，且该链表不能影响标记传播阶段。
-// 2）等待标记结束需求：Key_WeakTable键弱引用表需要一个阶段去等待其它对象处理完毕才能启动它的值标记流程，
-// 因为在键未被标记的情况下Table自身是不允许标记它的值的。
 static lu_mem atomic (lua_State *L) {
-  // 在标记过程中若这几个标记根结点对象被修改或替换，变成了白色的对象，也并没有违反一致性原则，
-  // 因为一致性原则保证的是没有黑色对象引用白色对象，既然如此，Lua也无法使用屏障去修复这种根结点对象被修改颜色异常的问题
-  // 这里需要重新扫描
   global_State *g = G(L);
   lu_mem work = 0;
   GCObject *origweak, *origall;
@@ -1875,8 +1901,9 @@ static lu_mem singlestep (lua_State *L) {
       break;
     }
     case GCSpropagate: {
-      // 扫描
+      // 扫描，可以分步
       if (g->gray == NULL) {  /* no more gray objects? */
+        // 扫描阶段结束
         g->gcstate = GCSenteratomic;  /* finish propagate phase */
         work = 0;
       }
@@ -1885,9 +1912,9 @@ static lu_mem singlestep (lua_State *L) {
       break;
     }
     case GCSenteratomic: {
-      // 标记原子阶段
+      // 原子阶段
       work = atomic(L);  /* work is what was traversed by 'atomic' */
-      // 扫描标记结束，进入清除阶段
+      // 进入清除阶段
       entersweep(L);
       g->GCestimate = gettotalbytes(g);  /* first estimate */
       break;
