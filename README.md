@@ -15,3 +15,5 @@ lua5.4.7 comment
 [上值](./summary/upvalue.md)
 
 [GC基础](./summary/gcbase.md)
+
+[三色标记清除算法](./summary/incremental_gc.md)
