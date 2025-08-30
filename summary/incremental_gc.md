@@ -42,6 +42,8 @@ typedef struct global_State {
   // 具有open upvalue的状态机链表，只要当线程L第一次创建开放上值时，它需要被添加到G(L)->twups指向的链表中
   // G->twups => LN->twups => LN-1->twups => ... L1-> twups => NULL
   struct lua_State *twups;  /* list of threads with open upvalues */
+  // 存放弱值表的链表，等待GC完成对强可达对象的标记，这个时候就可以处理该weak链表，还是iscleared就可以从数组和hash中移除了
+  GCObject *weak;  /* list of tables with weak values */
   ...
 };
 ```
@@ -188,7 +190,7 @@ typedef struct global_State {
     return 1 + cl->nupvalues;
   }
 
-  // 遍历函数类型，标记所有可达的结点
+  // 遍历函数原型类型，标记所有可达的结点
   static int traverseproto (global_State *g, Proto *f) {
     int i;
     markobjectN(g, f->source);
@@ -237,6 +239,84 @@ typedef struct global_State {
   }
   ```
 
+  - 这里仔细看看表的操作
+    - 强表, 无需多言
+    ```C
+    // 遍历table，标记所有可达的结点
+    static void traversestrongtable (global_State *g, Table *h) {
+      Node *n, *limit = gnodelast(h);
+      unsigned int i;
+      unsigned int asize = luaH_realasize(h);
+      for (i = 0; i < asize; i++)  /* traverse array part */
+        markvalue(g, &h->array[i]);
+      for (n = gnode(h, 0); n < limit; n++) {  /* traverse hash part */
+        if (isempty(gval(n)))  /* entry is empty? */
+          clearkey(n);  /* clear its key */
+        else {
+          lua_assert(!keyisnil(n));
+          markkey(g, n);
+          markvalue(g, gval(n));
+        }
+      }
+      genlink(g, obj2gco(h));
+    }
+    ```
+    - 弱值表
+    > 对于弱值表的处理，在GC的propagate阶段，塞入grayagain列表。在GC的atomic阶段，则需要经历先扫描，再标记，再塞入weak列表，最后清理weak列表引用的过程。
+    >
+    > 在原子阶段，Lua虚拟机扫描它时，并不会对array部分进行任何处理，如果一个弱值表，的array部分不为空，那么这个表一定会被塞入到weak列表中。具体还是看下面注释源码注释把，写的很清楚了
+    
+    ```C
+    // 遍历弱值表，扫描阶段时，那些值为空了，就直接清理k-v了，再放入grayagain中，等待原子阶段处理。
+    // 原子阶段，那些值为空了，就直接清理k-v了，如果数组或者hash部分的值还存在白色对象，需要被清除，这个时候放入weak链表，
+    // 等待GC完成对强可达对象的标记，这个时候就可以处理该weak链表，还是iscleared就可以从数组和hash中移除了。其实这个工作还是
+    // 在原子阶段，具体可以搜atomic 函数中 调用clearbyvalues阶段
+    static void traverseweakvalue (global_State *g, Table *h) {
+      Node *n, *limit = gnodelast(h);
+      /* if there is array part, assume it may have white values (it is not
+        worth traversing it now just to check) */
+      // 原子阶段有效，只要数组有东西就假设里面有需要被清理的对象，直接放入weak就好。
+      // 这个阶段没必要对数组进行遍历，等待GC完成对强可达对象的标记，在进行遍历处理即可，算是优化
+      int hasclears = (h->alimit > 0);
+      for (n = gnode(h, 0); n < limit; n++) {  /* traverse hash part */
+        // 值为空，键也需要被清理
+        if (isempty(gval(n)))  /* entry is empty? */
+          clearkey(n);  /* clear its key */
+        else {
+          lua_assert(!keyisnil(n));
+          // 只需要标记键
+          markkey(g, n);
+          // 原子阶段，没有数组部分，hash部分有白色对象，还是需要放入weak链表
+          if (!hasclears && iscleared(g, gcvalueN(gval(n))))  /* a white value? */
+            hasclears = 1;  /* table will have to be cleared */
+        }
+      }
+      if (g->gcstate == GCSatomic && hasclears)
+        // 等待GC完成对强可达对象的标记，才可以处理弱值表
+        linkgclist(h, g->weak);  /* has to be cleared later */
+      else
+        // 确保了所有弱引用表都会在后续的原子阶段被再次检查​​，这是必须的，因为当前传播阶段对象的状态可能还在变化
+        linkgclist(h, g->grayagain);  /* must retraverse it in atomic phase */
+    }
+
+    // 用于判断弱引用表中的键或值是否可以被清除
+    static int iscleared (global_State *g, const GCObject *o) {
+      if (o == NULL) return 0;  /* non-collectable value */
+      else if (novariant(o->tt) == LUA_TSTRING) {
+        // 在弱表的上下文中，字符串被当作强引用来对待，永远不会被清除
+        // 这样做猜测是因为lua短字符串被内部化了，字符串允许弱引用，垃圾收集器就需要花费大量额外的工作来跟踪和可能回收它们，
+        // 这会降低 GC 的效率
+        markobject(g, o);  /* strings are 'values', so are never weak */
+        return 0;
+      }
+      else return iswhite(o);
+    }
+    ```
+
+    - 弱键表
+  
+    - 纯弱表
+
   - 扫描阶段是可以分步进行，那就存在一个问题，黑色对象引用了新创建的白色对象，白色对象又没有被灰色对象引用，最终这个对象将会被错误清除，对于这种情况，lua采用2种方式应对：
     - 前向屏障，luaC_barrier_，直接将新创建的对象设置为灰色，并放入gray列表，其实这就是强三色不变式
     ```C
@@ -256,7 +336,7 @@ typedef struct global_State {
       else {  /* sweep phase */
         lua_assert(issweepphase(g));
         if (g->gckind == KGC_INC)  /* incremental mode? */
-          // 清理阶段不需要保持，直接置白色(白色切换了)，不会清楚
+          // 清理阶段可以分步，清理阶段不需要保持，直接置白色(白色切换了)，不会清楚
           makewhite(g, o);  /* mark 'o' as white to avoid other barriers */
       }
     }

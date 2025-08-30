@@ -359,7 +359,7 @@ typedef struct global_State {
   GCObject *gray;  /* list of gray objects */
   // 
   GCObject *grayagain;  /* list of objects to be traversed atomically */
-  // 
+  // 存放弱值表的链表，等待GC完成对强可达对象的标记，这个时候就可以处理该weak链表，还是iscleared就可以从数组和hash中移除了
   GCObject *weak;  /* list of tables with weak values */
   // 
   GCObject *ephemeron;  /* list of ephemeron tables (weak keys) */
