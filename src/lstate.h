@@ -357,15 +357,15 @@ typedef struct global_State {
   GCObject *finobj;  /* list of collectable objects with finalizers */
   // 三色标记清楚：灰色链表
   GCObject *gray;  /* list of gray objects */
-  // 
+  // 三色标记清除：后向屏障对象，常见的比如table，在原子阶段需要再次标记扫描
   GCObject *grayagain;  /* list of objects to be traversed atomically */
   // 存放弱值表的链表，等待GC完成对强可达对象的标记，这个时候就可以处理该weak链表，还是iscleared就可以从数组和hash中移除了
   GCObject *weak;  /* list of tables with weak values */
-  // 
+  // 存放弱键表的链表，原子阶段，如果发现 key 是 gc 对象，并且是白色，值也是白色，加入到 g->ephemeron 链表
   GCObject *ephemeron;  /* list of ephemeron tables (weak keys) */
-  // 
+  // 存放纯弱表 和 弱键表中key为白色，值为黑色 的链表
   GCObject *allweak;  /* list of all-weak tables */
-  // 
+  // 对象带有 __gc 元方法，原子阶段还是白色的对象都会记录在这个链表中
   GCObject *tobefnz;  /* list of userdata to be GC */
   // 避免被GC
   GCObject *fixedgc;  /* list of objects not to be collected */

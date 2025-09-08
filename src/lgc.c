@@ -174,6 +174,7 @@ static void linkgclist_ (GCObject *o, GCObject **pnext, GCObject **list) {
 ** its associated empty value is enough to signal that the entry is
 ** logically empty.
 */
+// 值为空(nil)，对应的键如果是可回收，就需要把键 key_tt 标记为 LUA_TDEADKEY
 static void clearkey (Node *n) {
   lua_assert(isempty(gval(n)));
   if (keyiscollectable(n))
@@ -190,7 +191,7 @@ static void clearkey (Node *n) {
 */
 // 用于判断弱引用表中的键或值是否可以被清除
 static int iscleared (global_State *g, const GCObject *o) {
-  if (o == NULL) return 0;  /* non-collectable value */
+  if (o == NULL) return 0;  /* non-collectable value */ // 非回收对象，是非cleared
   else if (novariant(o->tt) == LUA_TSTRING) {
     // 在弱表的上下文中，字符串被当作强引用来对待，永远不会被清除
     // 这样做猜测是因为lua短字符串被内部化了，字符串允许弱引用，垃圾收集器就需要花费大量额外的工作来跟踪和可能回收它们，
@@ -374,7 +375,8 @@ static void markmt (global_State *g) {
 /*
 ** mark all objects in list of being-finalized
 */
-// 对上一轮g->tobefnz链表还未执行__gc元方法存留下的对象，标记为灰色
+// 需要对 g->tobefnz 链表上的对象进行 mark 操作，因为这些对象在调用 __gc 方法前是不能被回收的，
+// 而且它们引用到的其他 gc 可回收对象，不能在本轮 gc 中回收，所以，需要不断的遍历 mark。
 static lu_mem markbeingfnz (global_State *g) {
   GCObject *o;
   lu_mem count = 0;
@@ -397,7 +399,7 @@ static lu_mem markbeingfnz (global_State *g) {
 ** upvalues, as they have nothing to be checked. (If the thread gets an
 ** upvalue later, it will be linked in the list again.)
 */
-// 未标记的线程的栈上，存有open状态的upvalue，所以要在这里标记
+// 原子阶段，标记扫描阶段后有一些协程open upvalue还没被正确的标记，这里进行标记
 static int remarkupvals (global_State *g) {
   lua_State *thread;
   lua_State **p = &g->twups;
@@ -450,7 +452,7 @@ static void restartcollection (global_State *g) {
   markvalue(g, &g->l_registry);
   // 标记基础类型对应的全局元表为灰色
   markmt(g);
-  // 对上一轮g->tobefnz链表还未执行__gc元方法存留下的对象，标记为灰色
+  // 
   markbeingfnz(g);  /* mark any finalizing object left from previous cycle */
 }
 
@@ -501,7 +503,7 @@ static void traverseweakvalue (global_State *g, Table *h) {
   // 这个阶段没必要对数组进行遍历，等待GC完成对强可达对象的标记，在进行遍历处理即可，算是优化
   int hasclears = (h->alimit > 0);
   for (n = gnode(h, 0); n < limit; n++) {  /* traverse hash part */
-    // 值为空，键也需要被清理
+    // 值为空(nil)，对应的键如果是可回收，就需要把键 key_tt 标记为 LUA_TDEADKEY
     if (isempty(gval(n)))  /* entry is empty? */
       clearkey(n);  /* clear its key */
     else {
@@ -534,16 +536,22 @@ static void traverseweakvalue (global_State *g, Table *h) {
 ** must be kept in some gray list for post-processing; this is done
 ** by 'genlink'.
 */
-// 代表键采用弱引用，而值还是强引用，所以只需要标记值，而不需要标记键
+// 遍历弱键表，扫描阶段，直接放入 g->grayagain。等待原子阶段处理。
+// 原子阶段，如果存在 white-key -> white-value，放入 g->ephemeron。
+// 原子阶段，white-key -> not white-value, 放入 g->allweak
 static int traverseephemeron (global_State *g, Table *h, int inv) {
+  // 1 - 有value被标记
   int marked = 0;  /* true if an object is marked in this traversal */
+  // 1 - 存在白色key
   int hasclears = 0;  /* true if table has white keys */
+  // 1 - 存在key和value都是白色的，未被标记的对象
   int hasww = 0;  /* true if table has entry "white-key -> white-value" */
   unsigned int i;
   unsigned int asize = luaH_realasize(h);
   unsigned int nsize = sizenode(h);
   /* traverse array part */
   for (i = 0; i < asize; i++) {
+    // 数组下标对应的值只要是可回收对象就进行标记
     if (valiswhite(&h->array[i])) {
       marked = 1;
       reallymarkobject(g, gcvalue(&h->array[i]));
@@ -552,25 +560,33 @@ static int traverseephemeron (global_State *g, Table *h, int inv) {
   /* traverse hash part; if 'inv', traverse descending
      (see 'convergeephemerons') */
   for (i = 0; i < nsize; i++) {
+    // 倒序或者正序遍历节点
     Node *n = inv ? gnode(h, nsize - 1 - i) : gnode(h, i);
     if (isempty(gval(n)))  /* entry is empty? */
+      // 值为空(nil)，对应的键如果是可回收，就需要把键 key_tt 标记为 LUA_TDEADKEY
       clearkey(n);  /* clear its key */
     else if (iscleared(g, gckeyN(n))) {  /* key is not marked (yet)? */
+      // key没被标记
       hasclears = 1;  /* table must be cleared */
       if (valiswhite(gval(n)))  /* value not marked yet? */
+        // 并且值也没被标记，也就是white-white entry，key和value都是白色的，未被标记的对象
         hasww = 1;  /* white-white entry */
     }
     else if (valiswhite(gval(n))) {  /* value not marked yet? */
+      // key被标记了，但是值没有被标记，肯定是需要标记值
       marked = 1;
       reallymarkobject(g, gcvalue(gval(n)));  /* mark it now */
     }
   }
   /* link table into proper list */
   if (g->gcstate == GCSpropagate)
+    // 只要是扫描阶段，都直接放入grayagain链表中，留到atomic阶段再处理
     linkgclist(h, g->grayagain);  /* must retraverse it in atomic phase */
   else if (hasww)  /* table has white->white entries? */
+    // 肯定是到了原子阶段，如果发现 key 是 gc 对象，并且是白色，值也是白色，加入到 g->ephemeron 链表
     linkgclist(h, g->ephemeron);  /* have to propagate again */
   else if (hasclears)  /* table has white keys? */
+    // 肯定是到了原子阶段，如果发现 key 是 gc 对象，并且是白色，值已经被标记，加入到 g->allweak 链表
     linkgclist(h, g->allweak);  /* may have to clean white keys */
   else
     genlink(g, obj2gco(h));  /* check whether collector still needs to see it */
@@ -735,13 +751,15 @@ static int traversethread (global_State *g, lua_State *th) {
   for (uv = th->openupval; uv != NULL; uv = uv->u.open.next)
     markobject(g, uv);  /* open upvalues cannot be collected */
   if (g->gcstate == GCSatomic) {  /* final traversal? */
+    // 原子阶段
     if (!g->gcemergency)
+      // 如果不是在紧急 GC 循环中，收缩线程的栈，释放未使用的内存
       luaD_shrinkstack(th); /* do not change stack in emergency cycle */
     for (o = th->top.p; o < th->stack_last.p + EXTRA_STACK; o++)
       setnilvalue(s2v(o));  /* clear dead stack slice */
     /* 'remarkupvals' may have removed thread from 'twups' list */
     if (!isintwups(th) && th->openupval != NULL) {
-      // 其他GC步骤可能会将线程从twups链表中移除，这里再加回去
+      //  remarkupvals 可能会将线程从twups链表中移除，这里再加回去
       th->twups = g->twups;  /* link it back to the list */
       g->twups = th;
     }
@@ -788,7 +806,7 @@ static lu_mem propagateall (global_State *g) {
 ** convergence on chains in the same table.
 **
 */
-// 集中处理键弱引用表
+// 解决弱键表中键和值之间的依赖性问题，确保在键被强引用时，其对应的值也能被正确标记，从而避免被错误回收
 static void convergeephemerons (global_State *g) {
   int changed;
   int dir = 0;
@@ -823,6 +841,7 @@ static void convergeephemerons (global_State *g) {
 /*
 ** clear entries with unmarked keys from all weaktables in list 'l'
 */
+// 遍历弱表l，哈希部分，key是可以被清除，value设置为无效待清除状态，如果value是无效状态整个node设置为deadkey
 static void clearbykeys (global_State *g, GCObject *l) {
   for (; l; l = gco2t(l)->gclist) {
     Table *h = gco2t(l);
@@ -842,7 +861,8 @@ static void clearbykeys (global_State *g, GCObject *l) {
 ** clear entries with unmarked values from all weaktables in list 'l' up
 ** to element 'f'
 */
-// 若Table中有未被标记的value，则把该value对应的key也设置为无效待清除状态，尽管这个key值可能在标记阶段被标记了
+// 遍历弱表l，数组部分，value是可以被清除则设置为无效待清除状态，哈希部分，value是可以被清除则设置为无效待清除状态，
+// 如果value是无效状态整个node设置为deadkey
 static void clearbyvalues (global_State *g, GCObject *l, GCObject *f) {
   for (; l != f; l = gco2t(l)->gclist) {
     Table *h = gco2t(l);
@@ -924,27 +944,7 @@ static void freeobj (lua_State *L, GCObject *o) {
 ** collection cycle. Return where to continue the traversal or NULL if
 ** list is finished. ('*countout' gets the number of elements traversed.)
 */
-// 函数会对通过参数传进来的链表按顺序进行遍历，并在遍历每一个元素的时候做如下操作：
-// 1）若当前遍历的链表元素未标记，即颜色为other_white，代表该对象是垃圾对象，需要被清除，
-// 于是会调用freeobj函数释放该对象的内存，并让链表指针往前进。
-// freeobj函数会根据对象的类型调用不同的释放函数，
-// 保证每种对象都能正确地处理并释放自身引用的其它子对象，
-// 2）若当前元素已经被标记了，此时它的颜色可能是current_white当前白（原子阶段后创建的对象）
-// 或者黑色（标记阶段被处理完成），则元素为合法对象，元素会继续保留，
-// 并把它的颜色标记重置为current_white当前白，处理完成后，链表头部指针不变，
-// 循环迭代器指针继续往前遍历指向下一个对象。、
 // 
-// 参数：
-// 1）lua_State * L：代表当前运行该函数的线程。几乎每个函数第一个参数都是它，
-// 因为很多函数运行所需要的状态都是存储于线程或者global_State中。
-// 2）GCObject **p：指向GCObject * 的指针，这里可以理解为传入了一个链表，
-// 链表中的元素可以通过next指针字段指向下一个元素。
-// 3）int countin：代表该函数允许处理的最大对象个数。函数中会逐一遍历链表的元素，
-// 每当遍历链表中一个对象的时候，计数加1，当计数达到countin时，循环结束，
-// 函数的返回值为下一个要处理的对象的指针。
-// 4）int countout：代表该函数执行完毕后实际处理了的对象个数。若链表对象数量足够多，
-// 则countout与countin相等，否则若遍历在未达到countin数量的时候就到达了链表末端，
-// 此时countout会小于countin。
 static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
                              int *countout) {
   global_State *g = G(L);
@@ -972,17 +972,7 @@ static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
 /*
 ** sweep a list until a live object (or end of list)
 */
-// sweeptolive函数完整逻辑如下：
-// 1）在每轮while循环调用中，sweeplist会被调用一次，调用时若发现当前链表第一个对象未被标记，
-// 则会对它进行清除，并让g->allgc链表指针与遍历迭代器指针同时往后移动，
-// 迭代初始的时候迭代器指针是指向g->allgc链表头部，然后因为这里是同时移动，所以它们仍然保持指向着同一个对象。
-// 本轮sweeplist结束后sweeptolive的while循环条件（p == old）依旧满足，会继续下一轮循环的处理。
-// 2）若当前链表第一个对象为已标记对象，则不执行清除，g->allgc链表指针维持不变，仍指向原来的对象，
-// 不过遍历迭代器指针会继续往前进，它会指向g->allgc链表的下一个对象，所以此时sweeplist函数返回后，
-// while循环条件（p == old）条件不满足，因为一个指针仍然指向g->allgc链表头部，
-// 一个指针指向的是头部的下一个对象，循环结束。
-// 最终，sweeptolive函数执行完毕返回后，此时的状态是：g->sweepgc指针会指向g->allgc链表中下一个需要处理的对象；
-// 而g->allgc链表表头第一个对象为一个已标记的合法对象。
+// 
 static GCObject **sweeptolive (lua_State *L, GCObject **p) {
   GCObject **old = p;
   do {
@@ -1115,6 +1105,7 @@ static GCObject **findlast (GCObject **p) {
 ** don't need to be traversed. In incremental mode, 'finobjold1' is NULL,
 ** so the whole list is traversed.)
 */
+// 将所有还是白色的需要进行终结处理的对象（或all为1）从“finobj”列表移至“tobefnz”列表（即将要进行终结处理的对象）中。
 static void separatetobefnz (global_State *g, int all) {
   GCObject *curr;
   GCObject **p = &g->finobj;
@@ -1160,21 +1151,29 @@ static void correctpointers (global_State *g, GCObject *o) {
 ** if object 'o' has a finalizer, remove it from 'allgc' list (must
 ** search the list to find it) and link it in 'finobj' list.
 */
+// 把具有 __gc 元方法行为的普通表从 g->allgc 链表中摘下来，放到 g->finobj 链表中，如果已经加入过了，就直接返回
 void luaC_checkfinalizer (lua_State *L, GCObject *o, Table *mt) {
   global_State *g = G(L);
+  // o 是已经被标记为需要终结的对象 或者 mt中没有 __gc 元方法 或者  Lua 状态正在关闭，
+  // 啥也不需要做
   if (tofinalize(o) ||                 /* obj. is already marked... */
       gfasttm(g, mt, TM_GC) == NULL ||    /* or has no finalizer... */
       (g->gcstp & GCSTPCLS))                   /* or closing state? */
     return;  /* nothing to be done */
   else {  /* move 'o' to 'finobj' list */
     GCObject **p;
+    // 如果当前处于清除阶段（清除阶段是可以分步执行的）, 这个对象有可能是死亡的，需要把这个对象从清除链表 g->sweepgc 中移除出去。
     if (issweepphase(g)) {
+      // 将对象设置成当前白，怎么都别死亡
       makewhite(g, o);  /* "sweep" object 'o' */
+      // 当前 g->sweepgc 链表正要清除的就是这个对象?
       if (g->sweepgc == &o->next)  /* should not remove 'sweepgc' object */
+        // 已经置为白色了，其实就是让g->sweepgc指向下一个
         g->sweepgc = sweeptolive(L, g->sweepgc);  /* change 'sweepgc' */
     }
     else
       correctpointers(g, o);
+    // 把具有 __gc 元方法行为的普通表从 g->allgc 链表中摘下来，放到 g->finobj 链表中
     /* search for pointer pointing to 'o' */
     for (p = &g->allgc; *p != o; p = &(*p)->next) { /* empty */ }
     *p = o->next;  /* remove 'o' from 'allgc' list */
@@ -1818,38 +1817,52 @@ static lu_mem atomic (lua_State *L) {
   // 上面各个根节点标记后进行扫描
   work += propagateall(g);  /* empties 'gray' list */
   /* remark occasional upvalues of (maybe) dead threads */
-  // 某些协程没有被标记，并且还有open upvalue，这里进行标记
+  // 原子阶段，标记扫描阶段后有一些协程open upvalue还没被正确的标记，这里进行标记
   work += remarkupvals(g);
   // 再次扫描
   work += propagateall(g);  /* propagate changes */
-  // 开始搞后向屏障
+  // 开始搞后向屏障，当然也包括弱表相关
   g->gray = grayagain;
   work += propagateall(g);  /* traverse 'grayagain' list */
-  // 
+  // 弱表，除了纯弱表，其他弱表扫描阶段都会放入grayagain中。扫描阶段分布进行时，表发生变化，还是在grayagain中。
+  // 原子阶段，处理完成grayagin后，最终都被记录在g->weak/g->allweak/g->ephemeron中了。
+  // 为什么我们的white-white entry要单独放在ephemeron列表中呢？在原子阶段中，存在可能，
+  // 原来的white-white entry可能发生变化，因为表的遍历顺序，key会被标记。
+  // 这个函数目的就是对ephemeron列表进行一次收敛操作，检查是否有键值对，需要被标记，
+  // 如果有，那么在遍历完本轮的ephemeron列表之后，还需要重头再遍历一次，
+  // 但凡一个table还有white-white entry，那么它仍然会被放入ephemeron列表中，如果没有white-white entry，
+  // 但是还有white key，那么就会从ephemeron列表中移除，被放入allweak列表中。
   convergeephemerons(g);
-  // 
   /* at this point, all strongly accessible objects are marked. */
   /* Clear values from weak tables, before checking finalizers */
+  // 弱值表 & 纯弱表 & 弱键表中key是白色，键是黑色的表
+  // 遍历弱表l，数组部分，value是可以被清除则设置为无效待清除状态，哈希部分，value是可以被清除则设置为无效待清除状态，
+  // 如果value是无效状态整个node设置为deadkey
   clearbyvalues(g, g->weak, NULL);
   clearbyvalues(g, g->allweak, NULL);
-  // 
   origweak = g->weak; origall = g->allweak;
+  // 遍历 g->finobj 链表，如果节点是白色的，就加入到 g->tobefnz 链表中 ，表示没有再被引用了，需要调用 __gc 指向的方法
   separatetobefnz(g, 0);  /* separate objects to be finalized */
+  // 需要对 g->tobefnz 链表上的对象进行 mark 操作，因为这些对象在调用 __gc 方法前是不能被回收的，而且它们引用到的其他 gc 可回收对象，
+  // 不能在本轮 gc 中回收，所以，需要不断的遍历 mark。
   work += markbeingfnz(g);  /* mark objects that will be finalized */
+  // 把上面标记的全部扫描
   work += propagateall(g);  /* remark, to propagate 'resurrection' */
-  // 
+  // 因为析构器g->tobefnz链表中的对象被全部标记了，在这个标记与标记传播的过程中，可能会遍历到新的弱引用关系表，
+  // 这些表也将同样地被按类型放入到g->ephemeron，g->weak，g->allweak链表中。所以，在析构器标记传播阶段结束后，
+  // 我们需要重新处理这部分的代码。
   convergeephemerons(g);
   /* at this point, all resurrected objects are marked. */
   /* remove dead objects from weak tables */
-  // 
+  // 把弱表中key或者value为空的键值对元素都标记为无效待清除状态
   clearbykeys(g, g->ephemeron);  /* clear keys from all ephemeron tables */
   clearbykeys(g, g->allweak);  /* clear keys from all 'allweak' tables */
   /* clear values from resurrected weak tables */
   clearbyvalues(g, g->weak, origweak);
   clearbyvalues(g, g->allweak, origall);
-  // 
+  // 字符串二级缓存清空
   luaS_clearcache(g);
-  // 
+  // 切换白色
   g->currentwhite = cast_byte(otherwhite(g));  /* flip current white */
   lua_assert(g->gray == NULL);
   return work;  /* estimate of slots marked by 'atomic' */
