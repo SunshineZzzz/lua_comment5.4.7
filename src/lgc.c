@@ -452,7 +452,9 @@ static void restartcollection (global_State *g) {
   markvalue(g, &g->l_registry);
   // 标记基础类型对应的全局元表为灰色
   markmt(g);
-  // 
+  // 应该是g->gcemergency为true，所以上一轮GC没有调用析构函数并且颜色重置为现在的白色，
+  // 析构都没有调用肯定需要标记，要不就没有调用析构就被释放了。
+  // 本轮如果g->gcemergency为false，本轮执行析构，下一轮释放。
   markbeingfnz(g);  /* mark any finalizing object left from previous cycle */
 }
 
@@ -491,8 +493,8 @@ static void genlink (global_State *g, GCObject *o) {
 ** atomic phase. In the atomic phase, if table has any white value,
 ** put it in 'weak' list, to be cleared.
 */
-// 遍历弱值表，扫描阶段时，那些值为空了，就直接清理k-v了，再放入grayagain中，等待原子阶段处理。
-// 原子阶段，那些值为空了，就直接清理k-v了，如果数组或者hash部分的值还存在白色对象，需要被清除，这个时候放入weak链表，
+// 遍历弱值表，扫描阶段时，那些值为空了，clearkey，再放入grayagain中，等待原子阶段处理。
+// 原子阶段，那些值为空了，clearkey，如果数组或者hash部分的值还存在白色对象，需要被清除，这个时候放入weak链表，
 // 等待GC完成对强可达对象的标记，这个时候就可以处理该weak链表，还是iscleared就可以从数组和hash中移除了。其实这个工作还是
 // 在原子阶段，具体可以搜atomic 函数中 调用clearbyvalues阶段
 static void traverseweakvalue (global_State *g, Table *h) {
@@ -944,26 +946,32 @@ static void freeobj (lua_State *L, GCObject *o) {
 ** collection cycle. Return where to continue the traversal or NULL if
 ** list is finished. ('*countout' gets the number of elements traversed.)
 */
-// 
+// 清理对象
 static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
                              int *countout) {
   global_State *g = G(L);
+  // old white，也就是dead object
   int ow = otherwhite(g);
   int i;
+  // new white
   int white = luaC_white(g);  /* current white */
   for (i = 0; *p != NULL && i < countin; i++) {
     GCObject *curr = *p;
     int marked = curr->marked;
     if (isdeadm(ow, marked)) {  /* is 'curr' dead? */
+      // 释放该对象的内存，g->allgc链表指针与遍历迭代器指针同时往后移动
       *p = curr->next;  /* remove 'curr' from list */
       freeobj(L, curr);  /* erase 'curr' */
     }
     else {  /* change mark to 'white' */
+      // 颜色标记重置为current_white当前白
       curr->marked = cast_byte((marked & ~maskgcbits) | white);
+      // g->allgc链表指针维持不变，仍指向原来的对象，不过遍历迭代器指针会继续往前进，它会指向g->allgc链表的下一个对象
       p = &curr->next;  /* go to next element */
     }
   }
   if (countout)
+    // 记录一下处理个数
     *countout = i;  /* number of elements traversed */
   return (*p == NULL) ? NULL : p;
 }
@@ -972,7 +980,7 @@ static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
 /*
 ** sweep a list until a live object (or end of list)
 */
-// 
+// 清除链表元素直到找到一个存活对象停止
 static GCObject **sweeptolive (lua_State *L, GCObject **p) {
   GCObject **old = p;
   do {
@@ -993,11 +1001,7 @@ static GCObject **sweeptolive (lua_State *L, GCObject **p) {
 /*
 ** If possible, shrink string table.
 */
-// 如果可能，收缩字符串表
-// 当一个短字符串没有被任意对象引用时，会在清除阶段被清除，同时它在strt中的指针也将被置为空指针，
-// 每移除1个短字符串对象，strt的就nuse会减1，但此时strt已经分配好的内存空间其实是不会那么灵活立刻自动跟着减小的。
-// checkSizes函数的作用，就是检测nuse的大小，若它已经减小到不足哈希表容量size的4分之1了，代表此时哈希表利用率较低，
-// 大量空间没有被用到，则会对哈希表内存进行重新分配与调整，每次会把容量降到原来的2分之1，这样就可以节省出原来一半的内存空间。
+// 对字符串缓存进行检测回收
 static void checkSizes (lua_State *L, global_State *g) {
   if (!g->gcemergency) {
     if (g->strt.nuse < g->strt.size / 4) {  /* string table too big? */
@@ -1013,6 +1017,7 @@ static void checkSizes (lua_State *L, global_State *g) {
 ** Get the next udata to be finalized from the 'tobefnz' list, and
 ** link it back into the 'allgc' list.
 */
+// 将对象从 g->tobefnz 链表中摘下来，重新放回到 g->allgc 链表中
 static GCObject *udata2finalize (global_State *g) {
   GCObject *o = g->tobefnz;  /* get first element */
   lua_assert(tofinalize(o));
@@ -1041,6 +1046,8 @@ static void GCTM (lua_State *L) {
   const TValue *tm;
   TValue v;
   lua_assert(!g->gcemergency);
+  // 将对象从 g->tobefnz 链表中摘下来，重新放回到 g->allgc 链表中，
+  // 再判断对象当前是否还存在 __gc 元方法，如果存在，就调用 __gc 元方法
   setgcovalue(L, &v, udata2finalize(g));
   tm = luaT_gettmbyobj(L, &v, TM_GC);
   if (!notm(tm)) {  /* is there a finalizer? */
@@ -1753,13 +1760,14 @@ static void genstep (lua_State *L, global_State *g) {
 ** not need to skip objects created between "now" and the start of the
 ** real sweep.
 */
-// 把GC阶段状态值由GCSenteratomic切换到下一个阶段GCSwpallgc以外，
-// 还通过sweeptolive函数的返回值来初始化我们上述的这个g->sweepgc迭代器指针，
-// 表示后面清除会从g->sweepgc指针指向的这个位置开始
+// 第一次进入清除阶段
 static void entersweep (lua_State *L) {
   global_State *g = G(L);
   g->gcstate = GCSswpallgc;
   lua_assert(g->sweepgc == NULL);
+  // 清除链表元素直到找到一个存活对象停止
+  // g->sweepgc指针会指向g->allgc链表中下一个需要处理的对象；
+  // 而g->allgc链表表头第一个对象为一个已标记的合法对象
   g->sweepgc = sweeptolive(L, &g->allgc);
 }
 
@@ -1869,12 +1877,13 @@ static lu_mem atomic (lua_State *L) {
 }
 
 
-// 
+// 正式清除阶段
 static int sweepstep (lua_State *L, global_State *g,
                       int nextstate, GCObject **nextlist) {
   if (g->sweepgc) {
     l_mem olddebt = g->GCdebt;
     int count;
+    // 增量式清除阶段每轮允许处理或清除的最大对象个数为GCSWEEPMAX(100)个
     g->sweepgc = sweeplist(L, g->sweepgc, GCSWEEPMAX, &count);
     g->GCestimate += g->GCdebt - olddebt;  /* update estimate */
     return count;
@@ -1923,48 +1932,38 @@ static lu_mem singlestep (lua_State *L) {
       break;
     }
     case GCSswpallgc: {  /* sweep "regular" objects */
-      // 在g->allgc链表中找到了一个未标记的对象，也设置完了g->sweepgc，
-      // 接下来就看标记清除算法的下一部分：allgc链表清除阶段。该子阶段枚举值为“GCSswpallgc”，
-      // 全称“Garbage Collect State sweep allgc”，即“垃圾回收清除allgc链表”阶段
+      // 正式清除阶段，可以分步
       work = sweepstep(L, g, GCSswpfinobj, &g->finobj);
       break;
     }
     case GCSswpfinobj: {  /* sweep objects with finalizers */
-      // 1）所有带有未触发的析构器的GCObject对象在创建的时候并不是存储于g->allgc链表中的，而是会存储到g->finobj链表中；
-      // 2）当g->finobj中的对象因为未标记将要被释放时，会在原子阶段把它们从g->finobj链表移出，并移入到g->tobefnz链表中，
-      // 并在原子阶段中对g->tobefnz链表的所有的元素进行标记，以确保它们在GC最后的析构器执行阶段之前，不会因未标记而在清除阶段被清除。
-      // 3）析构器对象的回收拆分在2轮完整GC流程中，在第一轮GC析构器执行之后，会把他们从g->tobefnz链表移出，并删除其析构器标记，
-      // 把对象当作一个无析构器对象重新插入到g->allgc链表中。在第二轮完整GC中，若对象仍然没有被标记，
-      // 则只需要把它当作普通的对象进行正常的删除与内存回收即可。
+      // 清除g->finobj链表, 可以分步，黑色的带有析构器的对象颜色改成当前白
       work = sweepstep(L, g, GCSswptobefnz, &g->tobefnz);
       break;
     }
     case GCSswptobefnz: {  /* sweep objects to be finalized */
-      // 清除阶段单步清除操作sweepstep函数，内部又调用了sweeplist。该函数除了清除未标记对象以外，还负责重置该对象的颜色标记。
-      // g->tobefnz链表中的对象确实在原子阶段被标记了，所以他们都是黑色对象，这里需要把他们颜色重置为当前白色。
+      // 清除g->tobefnz链表，可以分步，黑色的带有析构器的对象颜色改成当前白
       work = sweepstep(L, g, GCSswpend, NULL);
       break;
     }
     case GCSswpend: {  /* finish sweeps */
-      // CSswpfinobj与GCSswptobefnz阶段结束后，对析构器相关的g->finobj链表与g->tobefnz链表都完成了清除与颜色重置操作。
-      // 接下来就进入到“清除结束”阶段
+      // 清除结束阶段, 不可以分步，也没必要分步
       checkSizes(L, g);
       g->gcstate = GCScallfin;
       work = 0;
       break;
     }
     case GCScallfin: {  /* call remaining finalizers */
-      // 在原子阶段中会把将要被释放的带析构器的对象插入到g->tobefnz链表中，并对该g->tobefnz链表的所有对象进行标记以防止清除阶段被清除。
-      // 到了GCScallfin这一个阶段，就是要对g->tobefnz链表元素进行处理了，该阶段调用了runafewfinalizers函数，执行一些析构器。
-      // 调用此函数的参数GCFINMAX为常量10，代表每步GC最大执行10个析构器函数
-      // 每一个析构器函数的执行工作量的评估为GCFINALIZECOST，它是常量50，意思是对于GC而言，执行一次析构器的性能花销预估，
-      // 大概会跟遍历50个对象一样，
+      // 析构器调用阶段, 可以分步
+      // 不是紧急GC 并且 g->tobefnz对象需要调用析构函数
       if (g->tobefnz && !g->gcemergency) {
         g->gcstopem = 0;  /* ok collections during finalizers */
+        // GCFINMAX每步GC最大执行10个析构器函数, 每一个析构器函数的执行工作量的评估为GCFINALIZECOST，它是常量50，
+        // 意思是对于GC而言，执行一次析构器的性能花销预估，大概会跟遍历50个对象一样
         work = runafewfinalizers(L, GCFINMAX) * GCFINALIZECOST;
       }
       else {  /* emergency mode or no more finalizers */
-        // 当全部析构器执行完毕后，GC就会重新恢复到初始的GCSpause阶段，等待下一次GC的触发
+        // 下一轮 或者 紧急GC
         g->gcstate = GCSpause;  /* finish collection */
         work = 0;
       }

@@ -36,13 +36,13 @@
 #define GCSatomic	2
 // 清除
 #define GCSswpallgc	3
-// 
+// 清除g->finobj链表，黑色的带有析构器的对象颜色改成当前白
 #define GCSswpfinobj	4
-// 
+// 清除g->tobefnz链表，黑色的带有析构器的对象颜色改成当前白
 #define GCSswptobefnz	5
-// 
+// 清除结束
 #define GCSswpend	6
-// 
+// 析构器调用
 #define GCScallfin	7
 // 开启新一轮增量GC，不可以分步进行
 #define GCSpause	8
