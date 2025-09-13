@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lstate.c $
 ** Global State
 ** See Copyright Notice in lua.h
@@ -86,6 +86,7 @@ static unsigned int luai_makeseed (lua_State *L) {
 ** set GCdebt to a new value keeping the value (totalbytes + GCdebt)
 ** invariant (and avoiding underflows in 'totalbytes')
 */
+// è®¾ç½®å€ºåŠ¡ï¼Œå¹¶ä¸”ä¿è¯g->totalbytes + g->GCdebtç­‰äºç³»ç»Ÿå®é™…å ç”¨å†…å­˜
 void luaE_setdebt (global_State *g, l_mem debt) {
   l_mem tb = gettotalbytes(g);
   lua_assert(tb > 0);
@@ -102,8 +103,8 @@ LUA_API int lua_setcstacklimit (lua_State *L, unsigned int limit) {
 }
 
 
-// µ±×¼±¸µ÷ÓÃÒ»¸öº¯ÊıÊ±£¬ĞÂ´´½¨µÄº¯Êı¶ÔÓ¦µÄCallInfo»áÍ¨¹ı
-// nextÓëpreviousÖ¸ÕëÁ´½Óµ½lua_StateµÄCallInfo* ciÁ´±í±íÍ·
+// å½“å‡†å¤‡è°ƒç”¨ä¸€ä¸ªå‡½æ•°æ—¶ï¼Œæ–°åˆ›å»ºçš„å‡½æ•°å¯¹åº”çš„CallInfoä¼šé€šè¿‡
+// nextä¸previousæŒ‡é’ˆé“¾æ¥åˆ°lua_Stateçš„CallInfo* cié“¾è¡¨è¡¨å¤´
 CallInfo *luaE_extendCI (lua_State *L) {
   CallInfo *ci;
   lua_assert(L->ci->next == NULL);
@@ -179,7 +180,7 @@ LUAI_FUNC void luaE_incCstack (lua_State *L) {
 }
 
 
-// ³õÊ¼»¯µ÷ÓÃÕ»
+// åˆå§‹åŒ–è°ƒç”¨æ ˆ
 static void stack_init (lua_State *L1, lua_State *L) {
   int i; CallInfo *ci;
   /* initialize stack array */
@@ -286,9 +287,9 @@ static void close_state (lua_State *L) {
 }
 
 
-// ´´½¨Ò»¸öLuaÏß³Ì£¬²¢½«ÆäÑ¹ÈëÕ»ÖĞ£¬È»ºó·µ»ØÒ»¸ö´ú±íÕâ¸öĞÂLuaÏß³ÌµÄlua_StateÖ¸Õë¡£
-// Ëù·µ»ØµÄĞÂLuaÏß³ÌÓë´«µİ½øÀ´µÄÔ­Ïß³Ì¹²ÏíÍ¬Ò»¸öÈ«¾Ö»·¾³£¬µ«ÊÇÓĞ¶ÀÁ¢Ö´ĞĞÕ»¡£
-// LuaÏß³ÌºÍÆäËûLua¶ÔÏóÒ»Ñù£¬Ò²ÊÜGCµÄ¹ÜÀí¡£
+// åˆ›å»ºä¸€ä¸ªLuaçº¿ç¨‹ï¼Œå¹¶å°†å…¶å‹å…¥æ ˆä¸­ï¼Œç„¶åè¿”å›ä¸€ä¸ªä»£è¡¨è¿™ä¸ªæ–°Luaçº¿ç¨‹çš„lua_StateæŒ‡é’ˆã€‚
+// æ‰€è¿”å›çš„æ–°Luaçº¿ç¨‹ä¸ä¼ é€’è¿›æ¥çš„åŸçº¿ç¨‹å…±äº«åŒä¸€ä¸ªå…¨å±€ç¯å¢ƒï¼Œä½†æ˜¯æœ‰ç‹¬ç«‹æ‰§è¡Œæ ˆã€‚
+// Luaçº¿ç¨‹å’Œå…¶ä»–Luaå¯¹è±¡ä¸€æ ·ï¼Œä¹Ÿå—GCçš„ç®¡ç†ã€‚
 LUA_API lua_State *lua_newthread (lua_State *L) {
   global_State *g = G(L);
   GCObject *o;
@@ -363,7 +364,7 @@ LUA_API int lua_resetthread (lua_State *L) {
 }
 
 
-// ´´½¨Ò»¸ö×´Ì¬»ú
+// åˆ›å»ºä¸€ä¸ªçŠ¶æ€æœº
 LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   int i;
   lua_State *L;

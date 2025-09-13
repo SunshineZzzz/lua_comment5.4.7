@@ -29,8 +29,19 @@ void luaC_changemode (lua_State *L, int newmode) {
 ```C
 typedef struct global_State {
 	...
+  	// 系统实际占用内存量-g->GCdebt，实际保持：g->totalbytes + g->GCdebt = 系统实际占用内存量
+  	l_mem totalbytes;  /* number of bytes currently allocated - GCdebt */ 
+  	// 三色标记清除算法，本轮GC清除前(上一轮GC)系统实际分配总内存
+  	lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
 	// 债务(需要回收的内存数量)，负数代表预充值多少金额到系统，正数代表需要偿还多少债务。
 	l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
+  	// GC暂停倍数，这个值决定了在垃圾回收完成之后，在启动下一次回收之前可以“放松”多少。
+	// 例如，如果pause是200，意味着当内存使用量达到上一次GC预估值(g->GCestimate)的 200% 时，下一次 GC 循环才会启动。
+	lu_byte gcpause;  /* size of pause between successive GCs */
+	// GC步进倍数，越大，GC耗时越长，程序逻辑越被影响
+	lu_byte gcstepmul;  /* GC "speed" */
+	// GC步长，存储的是以2为底的对数
+	lu_byte gcstepsize;  /* (log2 of) GC granularity */
 	// 所有GC对象创建之后都会放入该链表中
 	GCObject *allgc;  /* list of all collectable objects */
 	// 三色标记清除：回收链表，因为回收阶段可以分步进行，所以需要保存当前回收的位置,下一次从这个位置开始继续回收操作
@@ -57,7 +68,8 @@ typedef struct global_State {
 ```
 
 3. 三色标记清楚算法流程概述：
-	 
+	![alt text](../img/incremental.png)
+
 4. 三色标记清楚算法流程拆分：
 	- GC开始阶段，标记，GCSpause
 	```c
@@ -460,6 +472,7 @@ typedef struct global_State {
 		work = atomic(L);  /* work is what was traversed by 'atomic' */
 		// 进入清除阶段
 		entersweep(L);
+		// 本轮GC清除前(上一轮GC)系统实际分配总内存
 		g->GCestimate = gettotalbytes(g);  /* first estimate */
 		break;
 	}

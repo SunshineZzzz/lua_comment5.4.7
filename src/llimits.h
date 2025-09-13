@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: llimits.h $
 ** Limits, basic types, and some other 'installation-dependent' definitions
 ** See Copyright Notice in lua.h
@@ -57,13 +57,15 @@ typedef signed char ls_byte;
 ** floor of the log2 of the maximum signed value for integral type 't'.
 ** (That is, maximum 'n' such that '2^n' fits in the given signed type.)
 */
+// è®¡ç®—ä¸€ä¸ªå¸¦ç¬¦å·æ•´æ•°ç±»å‹tæ‰€èƒ½è¡¨ç¤ºçš„æœ€å¤§æ­£æ•´æ•°çš„ä»¥2ä¸ºåº•çš„å¯¹æ•°çš„å‘ä¸‹å–æ•´å€¼â€‹â€‹ã€‚
+// è®¡ç®—çš„æ˜¯æœ€å¤§çš„æ•´æ•°nï¼Œä½¿å¾—2^nçš„å€¼ä»ç„¶èƒ½å¤Ÿè¢«è¯¥æ•´æ•°ç±»å‹tå®‰å…¨åœ°è¡¨ç¤ºï¼Œä¸æº¢å‡º
 #define log2maxs(t)	(sizeof(t) * 8 - 2)
 
 
 /*
 ** test whether an unsigned value is a power of 2 (or zero)
 */
-// ²âÊÔÊÇ·ñÊÇ2µÄÃİ
+// æµ‹è¯•æ˜¯å¦æ˜¯2çš„å¹‚
 #define ispow2(x)	(((x) & ((x) - 1)) == 0)
 
 
@@ -89,7 +91,7 @@ typedef signed char ls_byte;
 #define L_P2I	size_t
 #endif
 
-// Ö¸Õëµ½ÕûÊıµÄ×ª»»
+// æŒ‡é’ˆåˆ°æ•´æ•°çš„è½¬æ¢
 #define point2uint(p)	((unsigned int)((L_P2I)(p) & UINT_MAX))
 
 
@@ -135,22 +137,22 @@ typedef LUAI_UACINT l_uacInt;
 
 
 /* type casts (a macro highlights casts in the code) */
-// Ç¿ÖÆÀàĞÍ×ª»»
+// å¼ºåˆ¶ç±»å‹è½¬æ¢
 #define cast(t, exp)	((t)(exp))
 
 #define cast_void(i)	cast(void, (i))
 #define cast_voidp(i)	cast(void *, (i))
 #define cast_num(i)	cast(lua_Number, (i))
-// int×ª»»
+// intè½¬æ¢
 #define cast_int(i)	cast(int, (i))
 #define cast_uint(i)	cast(unsigned int, (i))
-// byte×ª»»
+// byteè½¬æ¢
 #define cast_byte(i)	cast(lu_byte, (i))
-// uchar×ª»»
+// ucharè½¬æ¢
 #define cast_uchar(i)	cast(unsigned char, (i))
-// char×ª»»
+// charè½¬æ¢
 #define cast_char(i)	cast(char, (i))
-// charptr×ª»»
+// charptrè½¬æ¢
 #define cast_charp(i)	cast(char *, (i))
 #define cast_sizet(i)	cast(size_t, (i))
 
@@ -231,7 +233,7 @@ typedef l_uint32 Instruction;
 ** metaevent keys + a few others). Libraries would typically add
 ** a few dozens more.
 */
-// lua×Ö·û´®hashtable³¤¶È£¬±ØĞëÊÇ2µÄÃİ
+// luaå­—ç¬¦ä¸²hashtableé•¿åº¦ï¼Œå¿…é¡»æ˜¯2çš„å¹‚
 #if !defined(MINSTRTABSIZE)
 #define MINSTRTABSIZE	128
 #endif
@@ -242,7 +244,7 @@ typedef l_uint32 Instruction;
 ** sets (better be a prime) and "M" is the size of each set (M == 1
 ** makes a direct cache.)
 */
-// ×Ö·û´®»º´æµÄ¶şÎ»Êı×é£¬TString[53][2]
+// å­—ç¬¦ä¸²ç¼“å­˜çš„äºŒä½æ•°ç»„ï¼ŒTString[53][2]
 #if !defined(STRCACHE_N)
 #define STRCACHE_N		53
 #define STRCACHE_M		2
@@ -353,7 +355,7 @@ typedef l_uint32 Instruction;
 
 /* the others are quite standard operations */
 #if !defined(luai_numadd)
-// ¸¡µãÊıÔËËãº¯Êı
+// æµ®ç‚¹æ•°è¿ç®—å‡½æ•°
 #define luai_numadd(L,a,b)      ((a)+(b))
 #define luai_numsub(L,a,b)      ((a)-(b))
 #define luai_nummul(L,a,b)      ((a)*(b))

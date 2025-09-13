@@ -302,11 +302,11 @@ struct CallInfo {
 typedef struct global_State {
   lua_Alloc frealloc;  /* function to reallocate memory */
   void *ud;         /* auxiliary data to 'frealloc' */
-  // 
+  // 系统实际占用内存量-g->GCdebt，实际保持：g->totalbytes + g->GCdebt = 系统实际占用内存量
   l_mem totalbytes;  /* number of bytes currently allocated - GCdebt */
   // 债务(需要回收的内存数量)，负数代表预充值多少金额到系统，正数代表需要偿还多少债务
   l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
-  // 
+  // 三色标记清除算法，本轮GC清除前(上一轮GC)系统实际分配总内存
   lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
   // 分代式算法中用于代表上一轮GC原子阶段中被标记的对象个数
   // 然后下轮GC最终还是会回来这个stepgenfull函数，重复该流程，直到新一轮的完全增量式算法标记的数量小于8分之1，
@@ -344,10 +344,12 @@ typedef struct global_State {
   lu_byte gcstp;  /* control whether GC is running */
   // 是否是GC紧急收集
   lu_byte gcemergency;  /* true if this is an emergency collection */
+  // GC暂停倍数，这个值决定了在垃圾回收完成之后，在启动下一次回收之前可以“放松”多少。
+  // 例如，如果pause是200，意味着当内存使用量达到上一次GC预估值(g->GCestimate)的 200% 时，下一次 GC 循环才会启动。
   lu_byte gcpause;  /* size of pause between successive GCs */
-  // 步进倍率
+  // GC步进倍数，越大，GC耗时越长，程序逻辑越被影响
   lu_byte gcstepmul;  /* GC "speed" */
-  // 在下一个GC步骤之前这次GC回收内存对应的Tvalue量
+  // GC步长，存储的是以2为底的对数
   lu_byte gcstepsize;  /* (log2 of) GC granularity */
   // 所有GC对象创建之后都会放入该链表中
   GCObject *allgc;  /* list of all collectable objects */
@@ -534,6 +536,7 @@ union GCUnion {
 
 
 /* actual number of total bytes allocated */
+// 系统实际分配的总内存
 #define gettotalbytes(g)	cast(lu_mem, (g)->totalbytes + (g)->GCdebt)
 
 LUAI_FUNC void luaE_setdebt (global_State *g, l_mem debt);

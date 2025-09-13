@@ -308,23 +308,102 @@ void luaM_free_ (lua_State *L, void *block, size_t osize) {
 collectgarbage("step")
 ```
 > collectgarbage(opt)
-> 
-> "collect", 执行一次完整的垃圾回收周期。这是默认行为。
-> 
+>  
 > "stop", 停止自动垃圾回收。垃圾回收器将只在你显式调用时运行。
 > 
 > "restart", 重启自动垃圾回收。
+>
+> "collect", 执行一次完整的垃圾回收周期。这是默认行为。
 > 
 > "count", 返回Lua使用的总内存量，单位为KB。返回的值可能包含小数部分。
 > 
-> "step", 
+> "step", 单步运行垃圾收集器。 步长“大小”由arg控制。 传入0时，执行一个基本GC步骤。传入非0值，执行一个或者多个GC步骤。如果收集器结束一个循环将返回true。
+>
+> "setpause", 将arg设为GC暂停倍数。返回前一个值。越大GC频率越低，自然内存峰值大。
+>
+> "setstepmul", 将arg设为GC步进倍数。 返回前一个值。越大GC耗时越长，程序逻辑越被影响，自然内存峰值好一些。
 > 
 > "isrunning"	返回一个布尔值，指示垃圾收集器是否正在自动运行（即，没有被 stop）。
-> 
-> "incremental"	将回收器模式更改为增量模式。你可以传入三个可选的数值参数来调整其行为。
-> 
+>  
 > "generational"	将回收器模式更改为分代模式。你可以传入两个可选的数值参数来调整其行为。
+>
+> "incremental"	将回收器模式更改为增量模式。你可以传入三个可选的数值参数来调整其行为。
 > 
 > **这个函数不应该在终结器（finalizer）中调用。终结器是当一个对象被垃圾回收时调用的函数。在终结器中调用 collectgarbage() 可能会导致不可预料的行为。**
 
 13. 增量式标记清除算法清算债务
+```C
+// 全局状态机
+typedef struct global_State {
+  ...
+  // 系统实际占用内存量-g->GCdebt，实际保持：g->totalbytes + g->GCdebt = 系统实际占用内存量
+  l_mem totalbytes;  /* number of bytes currently allocated - GCdebt */ 
+  // 债务(需要回收的内存数量)，负数代表预充值多少金额到系统，正数代表需要偿还多少债务
+  l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
+  // 三色标记清除算法，本轮GC清除前(上一轮GC)系统实际分配总内存
+  lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
+  // GC暂停倍数，这个值决定了在垃圾回收完成之后，在启动下一次回收之前可以“放松”多少。
+  // 例如，如果pause是200，意味着当内存使用量达到上一次GC预估值(g->GCestimate)的 200% 时，下一次 GC 循环才会启动。
+  lu_byte gcpause;  /* size of pause between successive GCs */
+  // GC步进倍数，越大，GC耗时越长，程序逻辑越被影响
+  lu_byte gcstepmul;  /* GC "speed" */
+  // GC步长，存储的是以2为底的对数
+  lu_byte gcstepsize;  /* (log2 of) GC granularity */
+  ...
+}
+
+// 增量GC，执行垃圾回收过程中的一个或多个步骤
+static void incstep (lua_State *L, global_State *g) {
+  // GC步进倍数
+  int stepmul = (getgcparam(g->gcstepmul) | 1);  /* avoid division by 0 */
+  // 本次执行需要解决的债务，将内存欠债g->GCdebt转换为以工作量单位(TValue)表示的债务，并乘以步进倍数stepmul
+  l_mem debt = (g->GCdebt / WORK2MEM) * stepmul;
+  // GC步长
+  l_mem stepsize = (g->gcstepsize <= log2maxs(l_mem))
+                 ? ((cast(l_mem, 1) << g->gcstepsize) / WORK2MEM) * stepmul
+                 : MAX_LMEM;  /* overflow; keep maximum value */
+  do {  /* repeat until pause or enough "credit" (negative debt) */
+    // ​​在当前GC周期内(gcstate != GCSpause)，持续执行GC步骤(singlestep)，
+    // 直到为本次GC分配的总工作量(debt)基本完成(扣除一个合理的信用额度stepsize后)。
+    lu_mem work = singlestep(L);  /* perform one single step */
+    debt -= work;
+  } while (debt > -stepsize && g->gcstate != GCSpause);
+  if (g->gcstate == GCSpause)
+    // GC周期完成，设置下一轮触发时机
+    setpause(g);  /* pause until next cycle */
+  else {
+    // GC周期没有完成，设置下一次触发时机
+    debt = (debt / stepmul) * WORK2MEM;  /* convert 'work units' to bytes */
+    luaE_setdebt(g, debt);
+  }
+}
+
+// 设置下一次GC循环启动的阈值
+static void setpause (global_State *g) {
+  l_mem threshold, debt;
+  // GC暂停倍数
+  int pause = getgcparam(g->gcpause);
+  // 预估值 = 上一轮GC系统实际分配总内存 / PAUSEADJ
+  l_mem estimate = g->GCestimate / PAUSEADJ;  /* adjust 'estimate' */
+  lua_assert(estimate > 0);
+  // 预估出下一次系统占用内存总量
+  threshold = (pause < MAX_LMEM / estimate)  /* overflow? */
+            ? estimate * pause  /* no overflow */
+            : MAX_LMEM;  /* overflow; truncate to maximum */
+  // 计算出债务量
+  debt = gettotalbytes(g) - threshold;
+  if (debt > 0) debt = 0;
+  // 设置债务量
+  luaE_setdebt(g, debt);
+}
+
+// 设置债务，并且保证g->totalbytes + g->GCdebt等于系统实际占用内存
+void luaE_setdebt (global_State *g, l_mem debt) {
+  l_mem tb = gettotalbytes(g);
+  lua_assert(tb > 0);
+  if (debt < tb - MAX_LMEM)
+    debt = tb - MAX_LMEM;  /* will make 'totalbytes == MAX_LMEM' */
+  g->totalbytes = tb - debt;
+  g->GCdebt = debt;
+}
+```

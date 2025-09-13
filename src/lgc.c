@@ -50,10 +50,7 @@
 ** The equivalent, in bytes, of one unit of "work" (visiting a slot,
 ** sweeping an object, etc.)
 */
-// 这里WORK2MEM没有使用GCObject的大小，而是取了TValue的大小
-// 因为标记清除算法工作的过程主要是以TValue对象为单位，做遍历，标记，清除等操作，这些操作就是用来衡量工作量，
-// 而且有可能多个TValue在数据上对应着同一个GCObject，另外工作量也跟工作过程中是否有释放GCObject对象内存无关，
-// 是否减少全局真实债务g->GCdebt无关，所以使用TValue为单位。
+// GC中工作单位对应的字节数
 #define WORK2MEM	sizeof(TValue)
 
 
@@ -1206,19 +1203,22 @@ void luaC_checkfinalizer (lua_State *L, GCObject *o, Table *mt) {
 ** PAUSEADJ). (Division by 'estimate' should be OK: it cannot be zero,
 ** because Lua cannot even start with less than PAUSEADJ bytes).
 */
-// 预充值金额 = 2 * 固定消费 - 真实消费
-// 我们令当前的固定消费为100（新增消费检测值默认与它相等，所以也为100），GC完毕后真实消费剩余为160。
-// 所以此时需要预充值的金额 = 2 * 100 - 160 = 40。
+// 设置下一次GC循环启动的阈值
 static void setpause (global_State *g) {
   l_mem threshold, debt;
+  // GC暂停倍数
   int pause = getgcparam(g->gcpause);
+  // 预估值 = 上一轮GC系统实际分配总内存 / PAUSEADJ
   l_mem estimate = g->GCestimate / PAUSEADJ;  /* adjust 'estimate' */
   lua_assert(estimate > 0);
+  // 预估出下一次系统占用内存总量
   threshold = (pause < MAX_LMEM / estimate)  /* overflow? */
             ? estimate * pause  /* no overflow */
             : MAX_LMEM;  /* overflow; truncate to maximum */
+  // 计算出债务量
   debt = gettotalbytes(g) - threshold;
   if (debt > 0) debt = 0;
+  // 设置债务量
   luaE_setdebt(g, debt);
 }
 
@@ -1928,6 +1928,7 @@ static lu_mem singlestep (lua_State *L) {
       work = atomic(L);  /* work is what was traversed by 'atomic' */
       // 进入清除阶段
       entersweep(L);
+      // 本轮GC清除前(上一轮GC)系统实际分配总内存
       g->GCestimate = gettotalbytes(g);  /* first estimate */
       break;
     }
@@ -1996,24 +1997,27 @@ void luaC_runtilstate (lua_State *L, int statesmask) {
 ** finishing a cycle (pause state). Finally, it sets the debt that
 ** controls when next step will be performed.
 */
-// 增量GC
+// 增量GC，执行垃圾回收过程中的一个或多个步骤
 static void incstep (lua_State *L, global_State *g) {
-  // 
+  // GC步进倍数
   int stepmul = (getgcparam(g->gcstepmul) | 1);  /* avoid division by 0 */
-  // 
+  // 本次执行需要解决的债务，将内存欠债g->GCdebt转换为以工作量单位(TValue)表示的债务，并乘以步进倍数stepmul
   l_mem debt = (g->GCdebt / WORK2MEM) * stepmul;
-  // 
+  // GC步长
   l_mem stepsize = (g->gcstepsize <= log2maxs(l_mem))
                  ? ((cast(l_mem, 1) << g->gcstepsize) / WORK2MEM) * stepmul
                  : MAX_LMEM;  /* overflow; keep maximum value */
   do {  /* repeat until pause or enough "credit" (negative debt) */
+    // ​​在当前GC周期内(gcstate != GCSpause)，持续执行GC步骤(singlestep)，
+    // 直到为本次GC分配的总工作量(debt)基本完成(扣除一个合理的信用额度stepsize后)。
     lu_mem work = singlestep(L);  /* perform one single step */
     debt -= work;
   } while (debt > -stepsize && g->gcstate != GCSpause);
   if (g->gcstate == GCSpause)
+    // GC周期完成，设置下一轮触发时机
     setpause(g);  /* pause until next cycle */
   else {
-    // 
+    // GC周期没有完成，设置下一次触发时机
     debt = (debt / stepmul) * WORK2MEM;  /* convert 'work units' to bytes */
     luaE_setdebt(g, debt);
   }

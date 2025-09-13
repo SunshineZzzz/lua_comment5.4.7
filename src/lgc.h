@@ -162,13 +162,15 @@
 ** some gc parameters are stored divided by 4 to allow a maximum value
 ** up to 1023 in a 'lu_byte'.
 */
+// 设置和获取GC参数，因为参数类型一般的都是unsigned char，这样保证最大值可以为1023
 #define getgcparam(p)	((p) * 4)
 #define setgcparam(p,v)	((p) = (v) / 4)
 
-// 
+// 默认GC步进倍率
 #define LUAI_GCMUL      100
 
 /* how much to allocate before next GC step (log2) */
+// 默认GC步长
 #define LUAI_GCSTEPSIZE 13      /* 8 KB */
 
 
