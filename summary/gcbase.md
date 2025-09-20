@@ -407,3 +407,6 @@ void luaE_setdebt (global_State *g, l_mem debt) {
   g->GCdebt = debt;
 }
 ```
+
+14. 分代清除算法清算债务
+   
