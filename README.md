@@ -17,3 +17,5 @@ lua5.4.7 comment
 [GC基础](./summary/gcbase.md)
 
 [三色标记清除算法](./summary/incremental_gc.md)
+
+[分代清除算法](./summary/gen_gc.md)
