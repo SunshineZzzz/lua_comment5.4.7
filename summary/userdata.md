@@ -71,7 +71,7 @@ people:setName("zzz")
 local strName = people:getName()
 print(strName)
 ```
-```C
+```C++
 struct people
 {
 	char name[128];
@@ -127,13 +127,14 @@ int userdata()
 	lua_pushvalue(L, -1);
 	// 元表.__index = 元表
 	lua_setfield(L, -2, "__index");
-	// 元表中设置其他key<=>value
+	// 将数组people_mts中的所有函数注册到peopleMT中
 	luaL_setfuncs(L, people_mts, 0);
 	lua_pop(L, 1);
 
-	// 全局表加入peopleMod
+	// 创建表，people_mods注册到其中
 	luaL_newlib(L, people_mods);
 	lua_pushvalue(L, -1);
+	// 注册到全局表中
 	lua_setglobal(L, "peopleMod");
 	lua_pop(L, 1);
 
@@ -147,4 +148,9 @@ int userdata()
 	lua_close(L);
 	return true;
 }
+```
+
+7. light userdata例子
+```C++
+
 ```

@@ -47,3 +47,19 @@ static int luaB_setmetatable (lua_State *L) {
   return 1;
 }
 ```
+```lua
+local myTable = {}
+local myMetatable = {
+    __metatable = "This metatable is protected",
+    __index = function(t, k) return "Default value" end
+}
+
+setmetatable(myTable, myMetatable)
+
+local mt = getmetatable(myTable)
+-- This metatable is protected
+print(mt)
+
+-- cannot change a protected metatable
+-- setmetatable(myTable, {})
+```
