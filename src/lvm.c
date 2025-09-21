@@ -831,6 +831,7 @@ static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
 /*
 ** finish execution of an opcode interrupted by a yield
 */
+// yield前的指令补全
 void luaV_finishOp (lua_State *L) {
   CallInfo *ci = L->ci;
   StkId base = ci->func.p + 1;

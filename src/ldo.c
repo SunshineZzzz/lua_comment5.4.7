@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: ldo.c $
 ** Stack and Call structure of Lua
 ** See Copyright Notice in lua.h
@@ -35,7 +35,7 @@
 
 
 
-// ÏÖ³É×´Ì¬ÊÇ·ñ³öÏÖ´íÎó
+// ç°æˆçŠ¶æ€æ˜¯å¦å‡ºç°é”™è¯¯
 #define errorstatus(s)	((s) > LUA_YIELD)
 
 
@@ -113,16 +113,16 @@ void luaD_seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 }
 
 
-// LuaÖ´ĞĞ¹ı³ÌÖĞÅ×³öÒì³£
+// Luaæ‰§è¡Œè¿‡ç¨‹ä¸­æŠ›å‡ºå¼‚å¸¸
 l_noret luaD_throw (lua_State *L, int errcode) {
   if (L->errorJmp) {  /* thread has an error handler? */
-    // ËµÃ÷µ±Ç°lua_StateÇ°Ãæ¿Ï¶¨´æÔÚÒ»¸ö°²È«µ÷ÓÃ£¬±ÈÈç£ºluaD_rawrunprotected£¬´Ó¶ø´¥·¢ÁËÒì³£
-    // ËùÒÔÕâÀïÓÃcº¯ÊıÌØĞÔÌø×ª»ØÈ¥
+    // è¯´æ˜å½“å‰lua_Stateå‰é¢è‚¯å®šå­˜åœ¨ä¸€ä¸ªå®‰å…¨è°ƒç”¨ï¼Œæ¯”å¦‚ï¼šluaD_rawrunprotectedï¼Œä»è€Œè§¦å‘äº†å¼‚å¸¸
+    // æ‰€ä»¥è¿™é‡Œç”¨cå‡½æ•°ç‰¹æ€§è·³è½¬å›å»
     L->errorJmp->status = errcode;  /* set status */
     LUAI_THROW(L, L->errorJmp);  /* jump to it */
   }
   else {  /* thread has no error handler */
-    // ËµÃ÷µ±Ç°lua_StateÇ°ÃæÃ»ÓĞ°²È«µ÷ÓÃ
+    // è¯´æ˜å½“å‰lua_Stateå‰é¢æ²¡æœ‰å®‰å…¨è°ƒç”¨
     global_State *g = G(L);
     errcode = luaE_resetthread(L, errcode);  /* close all upvalues */
     if (g->mainthread->errorJmp) {  /* main thread has a handler? */
@@ -140,24 +140,24 @@ l_noret luaD_throw (lua_State *L, int errcode) {
 }
 
 
-// ±£»¤ĞÔµ÷ÓÃf
+// ä¿æŠ¤æ€§è°ƒç”¨f
 int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
   l_uint32 oldnCcalls = L->nCcalls;
-  // µ±Ç°µÄÕ»ĞÅÏ¢±£´æÔÚÁËjmp_buf±äÁ¿ljÖĞ
+  // å½“å‰çš„æ ˆä¿¡æ¯ä¿å­˜åœ¨äº†jmp_bufå˜é‡ljä¸­
   struct lua_longjmp lj;
-  // ×´Ì¬ÉèÖÃ
+  // çŠ¶æ€è®¾ç½®
   lj.status = LUA_OK;
-  // ÉÏÒ»¸ö±£»¤×´Ì¬±£´æÆğÀ´
+  // ä¸Šä¸€ä¸ªä¿æŠ¤çŠ¶æ€ä¿å­˜èµ·æ¥
   lj.previous = L->errorJmp;  /* chain new error handler */
-  // Ö´ĞĞÇ°f°Ñµ±Ç°¶ÑÕ»±£´æÆğÀ´£¬³öÏÖÒì³£ÒÔºó¿ÉÒÔ»Ö¸´
+  // æ‰§è¡Œå‰fæŠŠå½“å‰å †æ ˆä¿å­˜èµ·æ¥ï¼Œå‡ºç°å¼‚å¸¸ä»¥åå¯ä»¥æ¢å¤
   L->errorJmp = &lj;
   // #define LUAI_TRY(L,c,a)		if (setjmp((c)->b) == 0) { a }
   // #define LUAI_THROW(L,c)		longjmp((c)->b, 1)
-  // µ±·¢ÉúLUAI_THROW£¬»¹ÊÇ×ßµ½ÕâÀï£¬µ«ÊÇ²»»á·´¸´Ö´ĞĞÒª±£»¤µÄº¯Êı
+  // å½“å‘ç”ŸLUAI_THROWï¼Œè¿˜æ˜¯èµ°åˆ°è¿™é‡Œï¼Œä½†æ˜¯ä¸ä¼šåå¤æ‰§è¡Œè¦ä¿æŠ¤çš„å‡½æ•°
   LUAI_TRY(L, &lj,
     (*f)(L, ud);
   );
-  // »Ö¸´ÉÏÒ»¸ö±£»¤×´Ì¬
+  // æ¢å¤ä¸Šä¸€ä¸ªä¿æŠ¤çŠ¶æ€
   L->errorJmp = lj.previous;  /* restore old error handler */
   L->nCcalls = oldnCcalls;
   return lj.status;
@@ -326,7 +326,7 @@ void luaD_shrinkstack (lua_State *L) {
 }
 
 
-// Õ»¶¥Ö¸ÕëÔö¼Ó
+// æ ˆé¡¶æŒ‡é’ˆå¢åŠ 
 void luaD_inctop (lua_State *L) {
   luaD_checkstack(L, 1);
   L->top.p++;
@@ -445,9 +445,9 @@ static StkId tryfuncTM (lua_State *L, StkId func) {
 ** expressions, multiple results for tail calls/single parameters)
 ** separated.
 */
-// luaº¯Êı¶à·µ»ØÖµ
-// nres¾ÍÊÇº¯ÊıµÄ·µ»ØÖµ¸öÊı
-// wanted¾ÍÊÇÍâ²¿µ÷ÓÃÕâ¸öº¯ÊıµÄÊ±ºòÆÚ´ıµÄ·µ»ØÖµ¸öÊı
+// luaå‡½æ•°å¤šè¿”å›å€¼
+// nreså°±æ˜¯å‡½æ•°çš„è¿”å›å€¼ä¸ªæ•°
+// wantedå°±æ˜¯å¤–éƒ¨è°ƒç”¨è¿™ä¸ªå‡½æ•°çš„æ—¶å€™æœŸå¾…çš„è¿”å›å€¼ä¸ªæ•°
 l_sinline void moveresults (lua_State *L, StkId res, int nres, int wanted) {
   StkId firstresult;
   int i;
@@ -467,7 +467,7 @@ l_sinline void moveresults (lua_State *L, StkId res, int nres, int wanted) {
       break;
     default:  /* two/more results and/or to-be-closed variables */
       if (hastocloseCfunc(wanted)) {  /* to-be-closed variables? */
-        // º¯Êı·µ»Øºó»áµ÷ÓÃclose£¬¼´ÎÒÃÇÇ°ÎÄÌáµ½µÄ»á°ÑUpValÇĞ»»µ½close×´Ì¬
+        // å‡½æ•°è¿”å›åä¼šè°ƒç”¨closeï¼Œå³æˆ‘ä»¬å‰æ–‡æåˆ°çš„ä¼šæŠŠUpValåˆ‡æ¢åˆ°closeçŠ¶æ€
         L->ci->callstatus |= CIST_CLSRET;  /* in case of yields */
         L->ci->u2.nres = nres;
         res = luaF_close(L, res, CLOSEKTOP, 1);
@@ -485,12 +485,12 @@ l_sinline void moveresults (lua_State *L, StkId res, int nres, int wanted) {
   }
   /* generic case */
   firstresult = L->top.p - nres;  /* index of first result */
-  // Èôº¯ÊıµÄ·µ»ØÖµ¶àÓÚµ÷ÓÃÕßµÄÆÚ´ıÖµ£¬ÔòÁî·µ»ØÖµµÄ¸öÊı¼õÉÙµ½¸úÆÚ´ıÖµÒ»Ñù¾Í¿ÉÒÔÁË£¬±ÜÃâ¶àÓàµÄ¶ÑÕ»Êı¾İ¸³Öµ²Ù×÷¡£
+  // è‹¥å‡½æ•°çš„è¿”å›å€¼å¤šäºè°ƒç”¨è€…çš„æœŸå¾…å€¼ï¼Œåˆ™ä»¤è¿”å›å€¼çš„ä¸ªæ•°å‡å°‘åˆ°è·ŸæœŸå¾…å€¼ä¸€æ ·å°±å¯ä»¥äº†ï¼Œé¿å…å¤šä½™çš„å †æ ˆæ•°æ®èµ‹å€¼æ“ä½œã€‚
   if (nres > wanted)  /* extra results? */
     nres = wanted;  /* don't need them */
   for (i = 0; i < nres; i++)  /* move all results to correct place */
     setobjs2s(L, res + i, firstresult + i);
-  // ÈôÆÚ´ıÖµÊıÁ¿´óÓÚ·µ»ØÖµÊıÁ¿£¬Ôò°Ñ¶àÓàµÄÆÚ´ıÖµ¸³ÖµÎªnil¡£
+  // è‹¥æœŸå¾…å€¼æ•°é‡å¤§äºè¿”å›å€¼æ•°é‡ï¼Œåˆ™æŠŠå¤šä½™çš„æœŸå¾…å€¼èµ‹å€¼ä¸ºnilã€‚
   for (; i < wanted; i++)  /* complete wanted number of results */
     setnilvalue(s2v(res + i));
   L->top.p = res + wanted;  /* top points after the last result */
@@ -503,13 +503,13 @@ l_sinline void moveresults (lua_State *L, StkId res, int nres, int wanted) {
 ** info. If function has to close variables, hook must be called after
 ** that.
 */
-// º¯Êıµ÷ÓÃµÄÉÆºó
+// å‡½æ•°è°ƒç”¨çš„å–„å
 void luaD_poscall (lua_State *L, CallInfo *ci, int nres) {
   int wanted = ci->nresults;
   if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted)))
     rethook(L, ci, nres);
   /* move results to proper place */
-  // µ÷Õû·µ»ØÖµ
+  // è°ƒæ•´è¿”å›å€¼
   moveresults(L, ci->func.p, nres, wanted);
   /* function cannot be in any of these cases when returning */
   lua_assert(!(ci->callstatus &
@@ -519,11 +519,11 @@ void luaD_poscall (lua_State *L, CallInfo *ci, int nres) {
 
 
 
-// ÓÖÏÂÒ»¸ö¸øÏÂÒ»¸ö£¬Ã»ÓĞ¾Í´´½¨
+// åˆä¸‹ä¸€ä¸ªç»™ä¸‹ä¸€ä¸ªï¼Œæ²¡æœ‰å°±åˆ›å»º
 #define next_ci(L)  (L->ci->next ? L->ci->next : luaE_extendCI(L))
 
 
-// ×¼±¸Ò»¸öĞÂµÄCallInfo
+// å‡†å¤‡ä¸€ä¸ªæ–°çš„CallInfo
 l_sinline CallInfo *prepCallInfo (lua_State *L, StkId func, int nret,
                                                 int mask, StkId top) {
   CallInfo *ci = L->ci = next_ci(L);  /* new frame */
@@ -538,7 +538,7 @@ l_sinline CallInfo *prepCallInfo (lua_State *L, StkId func, int nret,
 /*
 ** precall for C functions
 */
-// µ÷ÓÃcº¯Êı
+// è°ƒç”¨cå‡½æ•°
 l_sinline int precallC (lua_State *L, StkId func, int nresults,
                                             lua_CFunction f) {
   int n;  /* number of returns */
@@ -548,12 +548,12 @@ l_sinline int precallC (lua_State *L, StkId func, int nresults,
                                L->top.p + LUA_MINSTACK);
   lua_assert(ci->top.p <= L->stack_last.p);
   if (l_unlikely(L->hookmask & LUA_MASKCALL)) {
-    // ´æÔÚhook
+    // å­˜åœ¨hook
     int narg = cast_int(L->top.p - func) - 1;
     luaD_hook(L, LUA_HOOKCALL, -1, 1, narg);
   }
   lua_unlock(L);
-  // Ö±½Óµ÷ÓÃcº¯Êı
+  // ç›´æ¥è°ƒç”¨cå‡½æ•°
   n = (*f)(L);  /* do the actual call */
   lua_lock(L);
   api_checknelems(L, n);
@@ -568,8 +568,8 @@ l_sinline int precallC (lua_State *L, StkId func, int nresults,
 ** (so that it includes the function itself). Return the number of
 ** results, if it was a C function, or -1 for a Lua function.
 */
-// luaº¯ÊıÎ²µ÷ÓÃ,Î²µ÷ÓÃÏû³ı
-// ciÊÇµ±Ç°ÕıÔÚµ÷ÓÃµÄº¯ÊıµÄĞÅÏ¢
+// luaå‡½æ•°å°¾è°ƒç”¨,å°¾è°ƒç”¨æ¶ˆé™¤
+// ciæ˜¯å½“å‰æ­£åœ¨è°ƒç”¨çš„å‡½æ•°çš„ä¿¡æ¯
 int luaD_pretailcall (lua_State *L, CallInfo *ci, StkId func,
                                     int narg1, int delta) {
  retry:
@@ -583,8 +583,8 @@ int luaD_pretailcall (lua_State *L, CallInfo *ci, StkId func,
       int fsize = p->maxstacksize;  /* frame size */
       int nfixparams = p->numparams;
       int i;
-      // ¸ù¾İĞÂµ÷ÓÃµÄº¯ÊıµÄ²ÎÊı¸öÊı¶Ôµ±Ç°¶ÑÕ»½øĞĞÒ»¸öÍùÏÂ£¨Õ»µ×£©µÄµ÷Õû£¬¸´ÓÃµ±Ç°¿Õ¼ä£¬
-      // ²¢ÓÃÕ»ÉÏµÄ·µ»ØÖµ¶ÔÒªµ÷ÓÃµÄº¯ÊıµÄ²ÎÊı½øĞĞÒ»¸öÉèÖÃ¡£
+      // æ ¹æ®æ–°è°ƒç”¨çš„å‡½æ•°çš„å‚æ•°ä¸ªæ•°å¯¹å½“å‰å †æ ˆè¿›è¡Œä¸€ä¸ªå¾€ä¸‹ï¼ˆæ ˆåº•ï¼‰çš„è°ƒæ•´ï¼Œå¤ç”¨å½“å‰ç©ºé—´ï¼Œ
+      // å¹¶ç”¨æ ˆä¸Šçš„è¿”å›å€¼å¯¹è¦è°ƒç”¨çš„å‡½æ•°çš„å‚æ•°è¿›è¡Œä¸€ä¸ªè®¾ç½®ã€‚
       checkstackGCp(L, fsize - delta, func);
       ci->func.p -= delta;  /* restore 'func' (if vararg) */
       for (i = 0; i < narg1; i++)  /* move down function and arguments */
@@ -592,7 +592,7 @@ int luaD_pretailcall (lua_State *L, CallInfo *ci, StkId func,
       func = ci->func.p;  /* moved-down function */
       for (; narg1 <= nfixparams; narg1++)
         setnilvalue(s2v(func + narg1));  /* complete missing arguments */
-      // ¸Ä±äÔËĞĞ¶ÑÕ»µÄ¶¥²¿£¬Ê¹ÏÂÒ»¸öÖ´ĞĞµÄ´úÂë¾ÍÊÇµ±Ç°Õâ¸öÎ²µ÷ÓÃº¯Êı
+      // æ”¹å˜è¿è¡Œå †æ ˆçš„é¡¶éƒ¨ï¼Œä½¿ä¸‹ä¸€ä¸ªæ‰§è¡Œçš„ä»£ç å°±æ˜¯å½“å‰è¿™ä¸ªå°¾è°ƒç”¨å‡½æ•°
       ci->top.p = func + 1 + fsize;  /* top for new function */
       lua_assert(ci->top.p <= L->stack_last.p);
       ci->u.l.savedpc = p->code;  /* starting point */
@@ -618,8 +618,8 @@ int luaD_pretailcall (lua_State *L, CallInfo *ci, StkId func,
 ** returns NULL, with all the results on the stack, starting at the
 ** original function position.
 */
-// Ô¤´¦Àíº¯Êı(c/lua)»á´´½¨Ò»¸öµ÷ÓÃÕ»CallInfo£¬¹ÜÀíº¯Êıµ÷ÓÃÊ±µÄĞÅÏ¢
-// Ö»ÓĞµ÷ÓÃµÄÊÇluaº¯Êı,»òÕßÔª·½·¨__callÀïÃæµ÷ÓÃµÄÊÇluaº¯Êı,Õâ¸öÊ±ºò²Å·µ»Øci,ÆäÓàµÄ¶¼·µ»ØNULL
+// é¢„å¤„ç†å‡½æ•°(c/lua)ä¼šåˆ›å»ºä¸€ä¸ªè°ƒç”¨æ ˆCallInfoï¼Œç®¡ç†å‡½æ•°è°ƒç”¨æ—¶çš„ä¿¡æ¯
+// åªæœ‰è°ƒç”¨çš„æ˜¯luaå‡½æ•°,æˆ–è€…å…ƒæ–¹æ³•__callé‡Œé¢è°ƒç”¨çš„æ˜¯luaå‡½æ•°,è¿™ä¸ªæ—¶å€™æ‰è¿”å›ci,å…¶ä½™çš„éƒ½è¿”å›NULL
 CallInfo *luaD_precall (lua_State *L, StkId func, int nresults) {
  retry:
   switch (ttypetag(s2v(func))) {
@@ -630,24 +630,24 @@ CallInfo *luaD_precall (lua_State *L, StkId func, int nresults) {
       precallC(L, func, nresults, fvalue(s2v(func)));
       return NULL;
     case LUA_VLCL: {  /* Lua function */
-      // µ±ÎÒÃÇ¸æËßĞéÄâ»úÖ´ĞĞÆ÷Òª¿ªÊ¼×¼±¸µ÷ÓÃÒ»¸öLuaº¯ÊıµÄÊ±ºò£¬
-      // ĞéÄâ»ú»á°ÑÕâ¸öLuaº¯Êı¶ÔÓ¦µÄLua±Õ°ü·Åµ½Õ»¶¥Î»ÖÃ£¬
-      // È»ºóÕâÀï×¼±¸µ÷ÓÃĞÅÏ¢£¬´ÓÕ»¶¥µÄLua±Õ°üÀïÃæ£¬
-      // ÌáÈ¡³ö²Ù×÷LuaÔËĞĞÕ»ËùĞèÒªµÄÈ«²¿ĞÅÏ¢£¨ÕâĞ©ĞÅÏ¢´æ´¢ÓÚLua±Õ°üµÄProtoÖĞ£©£¬
-      // È»ºó·ÅÈëµ½CallInfoÖĞ£¬Ã¿¸öCallInfo´æ´¢Ò»¸öLua±Õ°üÔËĞĞÊ±Õ»Ïà¹ØÊµÊ±¶¯Ì¬ĞÅÏ¢
+      // å½“æˆ‘ä»¬å‘Šè¯‰è™šæ‹Ÿæœºæ‰§è¡Œå™¨è¦å¼€å§‹å‡†å¤‡è°ƒç”¨ä¸€ä¸ªLuaå‡½æ•°çš„æ—¶å€™ï¼Œ
+      // è™šæ‹Ÿæœºä¼šæŠŠè¿™ä¸ªLuaå‡½æ•°å¯¹åº”çš„Luaé—­åŒ…æ”¾åˆ°æ ˆé¡¶ä½ç½®ï¼Œ
+      // ç„¶åè¿™é‡Œå‡†å¤‡è°ƒç”¨ä¿¡æ¯ï¼Œä»æ ˆé¡¶çš„Luaé—­åŒ…é‡Œé¢ï¼Œ
+      // æå–å‡ºæ“ä½œLuaè¿è¡Œæ ˆæ‰€éœ€è¦çš„å…¨éƒ¨ä¿¡æ¯ï¼ˆè¿™äº›ä¿¡æ¯å­˜å‚¨äºLuaé—­åŒ…çš„Protoä¸­ï¼‰ï¼Œ
+      // ç„¶åæ”¾å…¥åˆ°CallInfoä¸­ï¼Œæ¯ä¸ªCallInfoå­˜å‚¨ä¸€ä¸ªLuaé—­åŒ…è¿è¡Œæ—¶æ ˆç›¸å…³å®æ—¶åŠ¨æ€ä¿¡æ¯
       CallInfo *ci;
       Proto *p = clLvalue(s2v(func))->p;
-      // Êµ¼Ê´«µİµÄ²ÎÊı¸öÊı
+      // å®é™…ä¼ é€’çš„å‚æ•°ä¸ªæ•°
       int narg = cast_int(L->top.p - func) - 1;  /* number of real arguments */
-      // º¯Êı¶¨ÒåÊ±ÉùÃ÷µÄ¹Ì¶¨²ÎÊı¸öÊı
+      // å‡½æ•°å®šä¹‰æ—¶å£°æ˜çš„å›ºå®šå‚æ•°ä¸ªæ•°
       int nfixparams = p->numparams;
-      // ±àÒëÊ±ºòÈ·ÈÏµÄ×î´óÕ»¿Õ¼ä
+      // ç¼–è¯‘æ—¶å€™ç¡®è®¤çš„æœ€å¤§æ ˆç©ºé—´
       int fsize = p->maxstacksize;  /* frame size */
       checkstackGCp(L, fsize, func);
-      // func + 1 + fsize ¾ÍÊÇÒª×¼±¸ci->top£¬¿Ï¶¨¹»ÁË
+      // func + 1 + fsize å°±æ˜¯è¦å‡†å¤‡ci->topï¼Œè‚¯å®šå¤Ÿäº†
       L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
       ci->u.l.savedpc = p->code;  /* starting point */
-      // ¶àÓà²ÎÊıÌî³änil
+      // å¤šä½™å‚æ•°å¡«å……nil
       for (; narg < nfixparams; narg++)
         setnilvalue(s2v(L->top.p++));  /* complete missing arguments */
       lua_assert(ci->top.p <= L->stack_last.p);
@@ -670,11 +670,11 @@ CallInfo *luaD_precall (lua_State *L, StkId func, int nresults) {
 ** check the stack before doing anything else. 'luaD_precall' already
 ** does that.
 */
-// µ÷ÓÃc/luaº¯Êı
-// LÏß³Ì
-// funcÒªµ÷ÓÃµÄº¯Êı
-// nResultsÆÚÍûµÄ·µ»ØÖµÊıÁ¿
-// incµ÷ÓÃÉî¶È´ÎÊı
+// è°ƒç”¨c/luaå‡½æ•°
+// Lçº¿ç¨‹
+// funcè¦è°ƒç”¨çš„å‡½æ•°
+// nResultsæœŸæœ›çš„è¿”å›å€¼æ•°é‡
+// incè°ƒç”¨æ·±åº¦æ¬¡æ•°
 l_sinline void ccall (lua_State *L, StkId func, int nResults, l_uint32 inc) {
   CallInfo *ci;
   L->nCcalls += inc;
@@ -682,8 +682,9 @@ l_sinline void ccall (lua_State *L, StkId func, int nResults, l_uint32 inc) {
     checkstackp(L, 0, func);  /* free any use of EXTRA_STACK */
     luaE_checkcstack(L);
   }
-  // ²»Îª¿Õ¾ÍÊÇµ÷ÓÃµÄluaº¯Êı
+  // ä¸ä¸ºç©ºå°±æ˜¯è°ƒç”¨çš„luaå‡½æ•°
   if ((ci = luaD_precall(L, func, nResults)) != NULL) {  /* Lua function? */
+    // åˆ°è¿™é‡Œäº†è‚¯å®šæ˜¯luaå‡½æ•°
     ci->callstatus = CIST_FRESH;  /* mark that it is a "fresh" execute */
     luaV_execute(L, ci);  /* call it */
   }
@@ -694,7 +695,7 @@ l_sinline void ccall (lua_State *L, StkId func, int nResults, l_uint32 inc) {
 /*
 ** External interface for 'ccall'
 */
-// µ÷ÓÃc/luaº¯Êı
+// è°ƒç”¨c/luaå‡½æ•°
 void luaD_call (lua_State *L, StkId func, int nResults) {
   ccall(L, func, nResults, 1);
 }
@@ -703,7 +704,7 @@ void luaD_call (lua_State *L, StkId func, int nResults) {
 /*
 ** Similar to 'luaD_call', but does not allow yields during the call.
 */
-// luaD_callÀàËÆ£¬²»ÔÊĞí¹ÒÆğ
+// luaD_callç±»ä¼¼ï¼Œä¸å…è®¸æŒ‚èµ·
 void luaD_callnoyield (lua_State *L, StkId func, int nResults) {
   ccall(L, func, nResults, nyci);
 }
@@ -786,6 +787,7 @@ static void finishCcall (lua_State *L, CallInfo *ci) {
 ** previously interrupted coroutine until the stack is empty (or another
 ** interruption long-jumps out of the loop).
 */
+// ç»§ç»­æ‰§è¡Œ yield ä¸­æ–­çš„åç»­ lua ä»£ç 
 static void unroll (lua_State *L, void *ud) {
   CallInfo *ci;
   UNUSED(ud);
@@ -793,7 +795,9 @@ static void unroll (lua_State *L, void *ud) {
     if (!isLua(ci))  /* C function? */
       finishCcall(L, ci);  /* complete its execution */
     else {  /* Lua function */
+      // yieldå‰çš„æŒ‡ä»¤è¡¥å…¨ï¼Œå…ˆæ£€æµ‹ä¸‹å‰ä¸€æ¡æŒ‡ä»¤ï¼Œæ˜¯å¦æœ‰éœ€è¦è¡¥å…¨çš„ï¼Œå¦‚æœæœ‰å°±è¡¥å…¨æŒ‡ä»¤å‰©ä½™é€»è¾‘
       luaV_finishOp(L);  /* finish interrupted instruction */
+      // ç»§ç»­æ‰§è¡Œyieldåçš„é€»è¾‘
       luaV_execute(L, ci);  /* execute down to higher C 'boundary' */
     }
   }
@@ -835,21 +839,21 @@ static int resume_error (lua_State *L, const char *msg, int narg) {
 ** function), plus erroneous cases: non-suspended coroutine or dead
 ** coroutine.
 */
-// lua_resumeº¯ÊıµÄºËĞÄÂß¼­
+// lua_resumeå‡½æ•°çš„æ ¸å¿ƒé€»è¾‘
 static void resume (lua_State *L, void *ud) {
-  // ²ÎÊı¸öÊı
+  // å‚æ•°ä¸ªæ•°
   int n = *(cast(int*, ud));  /* number of arguments */
-  // µÚÒ»¸ö²ÎÊı
+  // ç¬¬ä¸€ä¸ªå‚æ•°
   StkId firstArg = L->top.p - n;  /* first argument */
   CallInfo *ci = L->ci;
   if (L->status == LUA_OK)  /* starting a coroutine? */
-    // Æô¶¯Ğ­³Ì
-    // Ö´ĞĞĞ­³ÌµÄÖ÷Ìåº¯Êı£¬Ö´ĞĞLClosureÖĞµÄÖ¸Áî£¬Ã»ÓĞyield¾ÍÖ´ĞĞÍê£¬ÓĞyield¾Íthrow
+    // å¯åŠ¨åç¨‹
+    // æ‰§è¡Œåç¨‹çš„ä¸»ä½“å‡½æ•°ï¼Œæ‰§è¡ŒLClosureä¸­çš„æŒ‡ä»¤ï¼Œæ²¡æœ‰yieldå°±æ‰§è¡Œå®Œï¼Œæœ‰yieldå°±throw
     ccall(L, firstArg - 1, LUA_MULTRET, 0);  /* just call its body */
   else {  /* resuming from previous yield */
-	// »Ö¸´
+	// æ¢å¤æ‰§è¡Œ yield ä¸­æ–­åçš„é€»è¾‘ï¼ŒL->status çŠ¶æ€ä¸€å®šæ˜¯æŒ‚èµ·çš„
     lua_assert(L->status == LUA_YIELD);
-    // »Ö¸´ÖĞ¶ÏµÄĞ­³Ì£¬ÉèÖÃLUA_OK
+    // æ¢å¤ä¸­æ–­çš„åç¨‹ï¼Œè®¾ç½®LUA_OK
     L->status = LUA_OK;  /* mark that it is running (again) */
     if (isLua(ci)) {  /* yielded inside a hook? */
       /* undo increment made by 'luaG_traceexec': instruction was not
@@ -866,9 +870,10 @@ static void resume (lua_State *L, void *ud) {
         lua_lock(L);
         api_checknelems(L, n);
       }
+      // é€€å‡º luaB_yield è¿™ä¸ª ciï¼Œå›åˆ°ä¸Šä¸€çº§è°ƒ yield é‚£ä¸ª lua ci ä¸­ï¼Œå¹¶å°†ä¸»çº¿ç¨‹çš„ä¼ é€’è¿‡æ¥çš„å‚æ•°åšä¸ºæ–°çº¿ç¨‹çš„è¿”å›å€¼
       luaD_poscall(L, ci, n);  /* finish 'luaD_call' */
     }
-    // ÎÒÀí½â¾ÍÊÇ¼ÌĞøÖ´ĞĞÉÏ´ÎLClosureµÄÖ¸Áî½áÊø»òÕßÔÙ´ÎÓöµ½yield
+    // ç»§ç»­æ‰§è¡Œ yield ä¸­æ–­çš„åç»­ lua ä»£ç 
     unroll(L, NULL);  /* run continuation */
   }
 }
@@ -894,41 +899,41 @@ static int precover (lua_State *L, int status) {
 
 
 
-// Æô¶¯»òÕß»Ö¸´Ò»¸öĞ­³Ì
-// LÒªÖ´ĞĞĞ­³Ì¶ÔÓ¦µÄÏß³Ì
-// fromÔ­Ê¼Ïß³Ì
-// nargs LÕ»ÖĞµÄ²ÎÊı¸öÊı
-// nresults ·µ»ØÖµ¸öÊı
+// å¯åŠ¨æˆ–è€…æ¢å¤ä¸€ä¸ªåç¨‹
+// Lè¦æ‰§è¡Œåç¨‹å¯¹åº”çš„çº¿ç¨‹
+// fromåŸå§‹çº¿ç¨‹
+// nargs Læ ˆä¸­çš„å‚æ•°ä¸ªæ•°
+// nresults è¿”å›å€¼ä¸ªæ•°
 LUA_API int lua_resume (lua_State *L, lua_State *from, int nargs,
                                       int *nresults) {
   int status;
   lua_lock(L);
   if (L->status == LUA_OK) {  /* may be starting a coroutine */
     if (L->ci != &L->base_ci)  /* not in base level? */
-      // ÕâÀïËµÃ÷´òËãÆô¶¯Ò»¸öĞÂµÄĞ­³Ì£¬µ«ÊÇµ÷ÓÃÕ»²»ÊÇbase level£¬ËµÃ÷ÀïÃæÓĞÆäËûµ÷ÓÃÕ»´æÔÚ£¬ÕâÊÇ²»ÔÊĞíµÄ
+      // è¿™é‡Œè¯´æ˜æ‰“ç®—å¯åŠ¨ä¸€ä¸ªæ–°çš„åç¨‹ï¼Œä½†æ˜¯è°ƒç”¨æ ˆä¸æ˜¯base levelï¼Œè¯´æ˜é‡Œé¢æœ‰å…¶ä»–è°ƒç”¨æ ˆå­˜åœ¨ï¼Œè¿™æ˜¯ä¸å…è®¸çš„
       return resume_error(L, "cannot resume non-suspended coroutine", nargs);
     else if (L->top.p - (L->ci->func.p + 1) == nargs)  /* no function? */
-      // ÕâÖÖËµÃ÷Ğ­³ÌÒÑ¾­Ö´ĞĞÍêÁË£¬»¹Ïë×Å»Ö¸´ÄØ£¿µ±È»ÊÇdeadÁË
+      // è¿™ç§è¯´æ˜åç¨‹å·²ç»æ‰§è¡Œå®Œäº†ï¼Œè¿˜æƒ³ç€æ¢å¤å‘¢ï¼Ÿå½“ç„¶æ˜¯deadäº†
       return resume_error(L, "cannot resume dead coroutine", nargs);
   }
   else if (L->status != LUA_YIELD)  /* ended with errors? */
-    // ËµÃ÷³ö´íÁË
+    // è¯´æ˜å‡ºé”™äº†
     return resume_error(L, "cannot resume dead coroutine", nargs);
-  // Ğ­³ÌµÄµ÷ÓÃÊÇÓĞÉî¶ÈÏŞÖÆµÄ£¬±ÈÈçÎÒÃÇresume AĞ­³ÌµÄÊ±ºò£¬
-  // AĞ­³ÌÄÚ²¿ÓÖÈ¥resume BĞ­³Ì£¬È»ºóBĞ­³ÌÄÚ²¿ÔÚ×ÔÉí±»resumeµÄ¹ı³ÌÖĞÓÖÈ¥resume CĞ­³Ì£¬
-  // È»ºóÕâÒ»´Î´ÎµÄÇ¶Ì×£¬ÔÚLuaÖĞ£¬»áÓĞÒ»¸ö×î´óµÄÉî¶ÈÏŞÖÆ£¬¾ÍÊÇ²»ÄÜ³¬¹ıLUAI_MAXCCALLS£¬¼´ÏÂÍ¼¶¨ÒåµÄ200
+  // åç¨‹çš„è°ƒç”¨æ˜¯æœ‰æ·±åº¦é™åˆ¶çš„ï¼Œæ¯”å¦‚æˆ‘ä»¬resume Aåç¨‹çš„æ—¶å€™ï¼Œ
+  // Aåç¨‹å†…éƒ¨åˆå»resume Båç¨‹ï¼Œç„¶åBåç¨‹å†…éƒ¨åœ¨è‡ªèº«è¢«resumeçš„è¿‡ç¨‹ä¸­åˆå»resume Cåç¨‹ï¼Œ
+  // ç„¶åè¿™ä¸€æ¬¡æ¬¡çš„åµŒå¥—ï¼Œåœ¨Luaä¸­ï¼Œä¼šæœ‰ä¸€ä¸ªæœ€å¤§çš„æ·±åº¦é™åˆ¶ï¼Œå°±æ˜¯ä¸èƒ½è¶…è¿‡LUAI_MAXCCALLSï¼Œå³ä¸‹å›¾å®šä¹‰çš„200
   L->nCcalls = (from) ? getCcalls(from) : 0;
   if (getCcalls(L) >= LUAI_MAXCCALLS)
     return resume_error(L, "C stack overflow", nargs);
   L->nCcalls++;
   luai_userstateresume(L, nargs);
   api_checknelems(L, (L->status == LUA_OK) ? nargs + 1 : nargs);
-  // LÉÏ±£»¤Ä£Ê½ÏÂÖ´ĞĞresume£¬nargs²ÎÊı¸öÊı
+  // Lä¸Šä¿æŠ¤æ¨¡å¼ä¸‹æ‰§è¡Œresumeï¼Œnargså‚æ•°ä¸ªæ•°
   status = luaD_rawrunprotected(L, resume, &nargs);
    /* continue running after recoverable errors */
-  // ÉÏÃæ±£»¤Ä£Ê½ÔËĞĞ£¬ÓĞ¿ÉÄÜÕæµÄ³öÏÖÁËÒì³££¬¸ü³£¼ûµÄ¾ÍÊÇyield£¬²¢ÇÒÕâ¸öÊ±ºò
+  // ä¸Šé¢ä¿æŠ¤æ¨¡å¼è¿è¡Œï¼Œæœ‰å¯èƒ½çœŸçš„å‡ºç°äº†å¼‚å¸¸ï¼Œæ›´å¸¸è§çš„å°±æ˜¯yieldï¼Œå¹¶ä¸”è¿™ä¸ªæ—¶å€™
   // L->status = LUA_YIELD;
-  // Èç¹ûÊÇÕı³£¹ÒÆğ£¬Õâ¸öº¯Êı¿Ï¶¨É¶Ò²Ã»×ö£¬»¹ÊÇ·µ»ØLUA_YIELD
+  // å¦‚æœæ˜¯æ­£å¸¸æŒ‚èµ·ï¼Œè¿™ä¸ªå‡½æ•°è‚¯å®šå•¥ä¹Ÿæ²¡åšï¼Œè¿˜æ˜¯è¿”å›LUA_YIELD
   status = precover(L, status);
   if (l_likely(!errorstatus(status)))
     lua_assert(status == L->status);  /* normal end or yield */
@@ -937,7 +942,7 @@ LUA_API int lua_resume (lua_State *L, lua_State *from, int nargs,
     luaD_seterrorobj(L, status, L->top.p);  /* push error message */
     L->ci->top.p = L->top.p;
   }
-  // ¹ÒÆğ×´Ì¬£¬yieldĞèÒª·µ»Ø²ÎÊı¸öÊı,·Ç¹ÒÆğ×´Ì¬£¬·µ»ØÕ»ÄÚµÄ²ÎÊı¸öÊı
+  // æŒ‚èµ·çŠ¶æ€ï¼Œyieldéœ€è¦è¿”å›å‚æ•°ä¸ªæ•°,éæŒ‚èµ·çŠ¶æ€ï¼Œè¿”å›æ ˆå†…çš„å‚æ•°ä¸ªæ•°
   *nresults = (status == LUA_YIELD) ? L->ci->u2.nyield
                                     : cast_int(L->top.p - (L->ci->func.p + 1));
   lua_unlock(L);
@@ -950,9 +955,9 @@ LUA_API int lua_isyieldable (lua_State *L) {
 }
 
 
-// Ğ­³Ì¹ÒÆğ²Ù×÷
-// LÒª¹ÒÆğµÄĞ­³ÌËùÔÚµÄÏß³Ì
-// nresults·µ»ØÖµ¸öÊı
+// åç¨‹æŒ‚èµ·æ“ä½œ
+// Lè¦æŒ‚èµ·çš„åç¨‹æ‰€åœ¨çš„çº¿ç¨‹
+// nresultsè¿”å›å€¼ä¸ªæ•°
 // ctx
 // k
 LUA_API int lua_yieldk (lua_State *L, int nresults, lua_KContext ctx,
@@ -962,21 +967,21 @@ LUA_API int lua_yieldk (lua_State *L, int nresults, lua_KContext ctx,
   lua_lock(L);
   ci = L->ci;
   api_checknelems(L, nresults);
-  // ÅĞ¶Ïµ±Ç°Ğ­³ÌÊÇ·ñ¿ÉÒÔ¹ÒÆğ
+  // åˆ¤æ–­å½“å‰åç¨‹æ˜¯å¦å¯ä»¥æŒ‚èµ·
   if (l_unlikely(!yieldable(L))) {
     if (L != G(L)->mainthread)
       // (C)lua_resume -> Lua function -> C function 
       // -> (C)lua_call -> Lua function
       // ->coroutine.yield -> (C)lua_yield
-      // ÉÏÊöĞĞÎªÊÇ²»ÔÊĞí£¬ÕâÀï±¨´í
+      // ä¸Šè¿°è¡Œä¸ºæ˜¯ä¸å…è®¸ï¼Œè¿™é‡ŒæŠ¥é”™
       luaG_runerror(L, "attempt to yield across a C-call boundary");
     else
-      // Ö÷Ïß³Ì²»ÔÊĞí¹ÒÆğ
+      // ä¸»çº¿ç¨‹ä¸å…è®¸æŒ‚èµ·
       luaG_runerror(L, "attempt to yield from outside a coroutine");
   }
-  // ÉèÖÃ¹ÒÆğ×´Ì¬
+  // è®¾ç½®æŒ‚èµ·çŠ¶æ€
   L->status = LUA_YIELD;
-  // ÉèÖÃ²ÎÊı¸öÊı
+  // è®¾ç½®å‚æ•°ä¸ªæ•°
   ci->u2.nyield = nresults;  /* save number of results */
   if (isLua(ci)) {  /* inside a hook? */
     lua_assert(!isLuacode(ci));
@@ -986,7 +991,7 @@ LUA_API int lua_yieldk (lua_State *L, int nresults, lua_KContext ctx,
   else {
     if ((ci->u.c.k = k) != NULL)  /* is there a continuation? */
       ci->u.c.ctx = ctx;  /* save context */
-    // ¹ÒÆğ
+    // æŒ‚èµ·
     luaD_throw(L, LUA_YIELD);
   }
   lua_assert(ci->callstatus & CIST_HOOKED);  /* must be inside a hook */
@@ -1039,7 +1044,7 @@ int luaD_closeprotected (lua_State *L, ptrdiff_t level, int status) {
 ** thread information ('allowhook', etc.) and in particular
 ** its stack level in case of errors.
 */
-// ±£»¤Ä£Ê½ÏÂÔËĞĞcº¯Êı
+// ä¿æŠ¤æ¨¡å¼ä¸‹è¿è¡Œcå‡½æ•°
 int luaD_pcall (lua_State *L, Pfunc func, void *u,
                 ptrdiff_t old_top, ptrdiff_t ef) {
   int status;
@@ -1064,22 +1069,22 @@ int luaD_pcall (lua_State *L, Pfunc func, void *u,
 /*
 ** Execute a protected parser.
 */
-// ½âÎöÆ÷
+// è§£æå™¨
 struct SParser {  /* data to 'f_parser' */
-  // ´úÂë×Ö½ÚÁ÷¶ÁÈ¡Æ÷
+  // ä»£ç å­—èŠ‚æµè¯»å–å™¨
   ZIO *z;
-  // ×Ö½Ú»º´æ
+  // å­—èŠ‚ç¼“å­˜
   Mbuffer buff;  /* dynamic structure used by the scanner */
-  // Óï·¨·ÖÎöµÄ¶¯Ì¬Êı¾İ
+  // è¯­æ³•åˆ†æçš„åŠ¨æ€æ•°æ®
   Dyndata dyd;  /* dynamic structures used by the parser */
-  // ¶ÁÈ¡·½Ê½
+  // è¯»å–æ–¹å¼
   const char *mode;
-  // ÎÄ¼şÃû
+  // æ–‡ä»¶å
   const char *name;
 };
 
 
-// ¼ì²âmodeºÏ·¨ĞÔ
+// æ£€æµ‹modeåˆæ³•æ€§
 static void checkmode (lua_State *L, const char *mode, const char *x) {
   if (mode && strchr(mode, x[0]) == NULL) {
     luaO_pushfstring(L,
@@ -1089,18 +1094,18 @@ static void checkmode (lua_State *L, const char *mode, const char *x) {
 }
 
 
-// Óï·¨½âÎö
+// è¯­æ³•è§£æ
 static void f_parser (lua_State *L, void *ud) {
   LClosure *cl;
   struct SParser *p = cast(struct SParser *, ud);
   int c = zgetc(p->z);  /* read first character */
   if (c == LUA_SIGNATURE[0]) {
-    // ¶ÁÈ¡Ô¤±àÒëºÃµÄlua chunks
+    // è¯»å–é¢„ç¼–è¯‘å¥½çš„lua chunks
     checkmode(L, p->mode, "binary");
     cl = luaU_undump(L, p->z, p->name);
   }
   else {
-    // ½âÎö
+    // è§£æ
     checkmode(L, p->mode, "text");
     cl = luaY_parser(L, p->z, &p->buff, &p->dyd, p->name, c);
   }
@@ -1110,12 +1115,12 @@ static void f_parser (lua_State *L, void *ud) {
 }
 
 
-// ±£»¤Ä£Ê½ÏÂ½âÎölua´úÂë
+// ä¿æŠ¤æ¨¡å¼ä¸‹è§£æluaä»£ç 
 int luaD_protectedparser (lua_State *L, ZIO *z, const char *name,
                                         const char *mode) {
   struct SParser p;
   int status;
-  // ½âÎö½×¶Î²»ÔÊĞí¹ÒÆğ
+  // è§£æé˜¶æ®µä¸å…è®¸æŒ‚èµ·
   incnny(L);  /* cannot yield during parsing */
   p.z = z; p.name = name; p.mode = mode;
   p.dyd.actvar.arr = NULL; p.dyd.actvar.size = 0;

@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 ** $Id: lua.h $
 ** Lua - A Scripting Language
 ** Lua.org, PUC-Rio, Brazil (http://www.lua.org)
@@ -30,11 +30,11 @@
 
 
 /* mark for precompiled code ('<esc>Lua') */
-// Ô¤±àÒëºÃµÄlua´úÂë
+// é¢„ç¼–è¯‘å¥½çš„luaä»£ç 
 #define LUA_SIGNATURE	"\x1bLua"
 
 /* option for multiple returns in 'lua_pcall' and 'lua_call' */
-// ±íÊ¾Ò»¸öº¯Êı¿ÉÒÔ·µ»Ø¶à¸öÖµ
+// è¡¨ç¤ºä¸€ä¸ªå‡½æ•°å¯ä»¥è¿”å›å¤šä¸ªå€¼
 #define LUA_MULTRET	(-1)
 
 
@@ -45,12 +45,12 @@
 */
 // g->l_registry
 #define LUA_REGISTRYINDEX	(-LUAI_MAXSTACK - 1000)
-// ÓÃÓÚÉú³ÉÉÏÖµË÷Òı
+// ç”¨äºç”Ÿæˆä¸Šå€¼ç´¢å¼•ï¼Œç”¨æ¥è®¿é—®å½“å‰è°ƒç”¨å‡½æ•°ä¸­cclosureä¸­çš„ä¸Šå€¼
 #define lua_upvalueindex(i)	(LUA_REGISTRYINDEX - (i))
 
 
 /* thread status */
-// lua_State×´Ì¬»úµÄ×´Ì¬
+// lua_StateçŠ¶æ€æœºçš„çŠ¶æ€
 #define LUA_OK		0
 #define LUA_YIELD	1
 #define LUA_ERRRUN	2
@@ -71,7 +71,7 @@ typedef struct lua_State lua_State;
 #define LUA_TBOOLEAN		1
 #define LUA_TLIGHTUSERDATA	2
 #define LUA_TNUMBER		3
-// Õâ¸öÏÂÃæ¶¼ÊÇĞèÒªGC
+// è¿™ä¸ªä¸‹é¢éƒ½æ˜¯éœ€è¦GC
 #define LUA_TSTRING		4
 #define LUA_TTABLE		5
 #define LUA_TFUNCTION		6
@@ -87,9 +87,9 @@ typedef struct lua_State lua_State;
 
 
 /* predefined values in the registry */
-// LuaµÄÖ÷Ïß³Ì
+// Luaçš„ä¸»çº¿ç¨‹
 #define LUA_RIDX_MAINTHREAD	1
-// Lua µÄÈ«¾Ö»·¾³±í£¨_G£©
+// Lua çš„å…¨å±€ç¯å¢ƒè¡¨ï¼ˆ_Gï¼‰
 #define LUA_RIDX_GLOBALS	2
 #define LUA_RIDX_LAST		LUA_RIDX_GLOBALS
 
@@ -238,15 +238,15 @@ LUA_API const void     *(lua_topointer) (lua_State *L, int idx);
 #define LUA_OPBAND	7
 // or
 #define LUA_OPBOR	8
-// °´Î»Òì»ò ^
+// æŒ‰ä½å¼‚æˆ– ^
 #define LUA_OPBXOR	9
 // <<
 #define LUA_OPSHL	10
 // >>
 #define LUA_OPSHR	11
-// Ò»Ôª -
+// ä¸€å…ƒ -
 #define LUA_OPUNM	12
-// °´Î»È¡·´ ~
+// æŒ‰ä½å–å ~
 #define LUA_OPBNOT	13
 
 LUA_API void  (lua_arith) (lua_State *L, int op);
@@ -389,23 +389,23 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 ** ===============================================================
 */
 
-// »ñÈ¡lua_StateµÄ¶îÍâ´æ´¢¿Õ¼ä
+// è·å–lua_Stateçš„é¢å¤–å­˜å‚¨ç©ºé—´
 #define lua_getextraspace(L)	((void *)((char *)(L) - LUA_EXTRASPACE))
 
-// iË÷Òı»ñÈ¡Ò»¸ö¸¡µãÊı
+// iç´¢å¼•è·å–ä¸€ä¸ªæµ®ç‚¹æ•°
 #define lua_tonumber(L,i)	lua_tonumberx(L,(i),NULL)
-// iË÷Òı»ñÈ¡Ò»¸öÕûÊı
+// iç´¢å¼•è·å–ä¸€ä¸ªæ•´æ•°
 #define lua_tointeger(L,i)	lua_tointegerx(L,(i),NULL)
 
-// ´Óµ±Ç°Õ»ÖĞµ¯³ön¸öÔªËØ£¬µ±µÚ¶ş¸ö²ÎÊıÌîÈë-1Ê±µ¯³öËùÓĞÔªËØ
+// ä»å½“å‰æ ˆä¸­å¼¹å‡ºnä¸ªå…ƒç´ ï¼Œå½“ç¬¬äºŒä¸ªå‚æ•°å¡«å…¥-1æ—¶å¼¹å‡ºæ‰€æœ‰å…ƒç´ 
 #define lua_pop(L,n)		lua_settop(L, -(n)-1)
-// Ê¹ÓÃlua_createtable´´½¨Ò»¸öÊı×é´óĞ¡Îª0£¬hash´óĞ¡Îª0µÄtable£¬²¢ÇÒ½«Æä·ÅÔÚÕ»¶¥
+// ä½¿ç”¨lua_createtableåˆ›å»ºä¸€ä¸ªæ•°ç»„å¤§å°ä¸º0ï¼Œhashå¤§å°ä¸º0çš„tableï¼Œå¹¶ä¸”å°†å…¶æ”¾åœ¨æ ˆé¡¶
 #define lua_newtable(L)		lua_createtable(L, 0, 0)
 
-// Cº¯Êı×¢²áÎªLuaµÄÈ«¾Öº¯Êı
+// Cå‡½æ•°æ³¨å†Œä¸ºLuaçš„å…¨å±€å‡½æ•°
 #define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
 
-// light C functionÑ¹ÈëÕ»¶¥
+// light C functionå‹å…¥æ ˆé¡¶
 #define lua_pushcfunction(L,f)	lua_pushcclosure(L, (f), 0)
 
 #define lua_isfunction(L,n)	(lua_type(L, (n)) == LUA_TFUNCTION)
@@ -417,23 +417,23 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 #define lua_isnone(L,n)		(lua_type(L, (n)) == LUA_TNONE)
 #define lua_isnoneornil(L, n)	(lua_type(L, (n)) <= 0)
 
-// ×Ö·û´®×ÖÃæÖµÑ¹ÈëÕ»ÖĞ
+// å­—ç¬¦ä¸²å­—é¢å€¼å‹å…¥æ ˆä¸­
 #define lua_pushliteral(L, s)	lua_pushstring(L, "" s)
 
-// È«¾Ö±íÑ¹ÈëÕ»ÖĞ
+// å…¨å±€è¡¨å‹å…¥æ ˆä¸­
 #define lua_pushglobaltable(L)  \
 	((void)lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS))
 
 #define lua_tostring(L,i)	lua_tolstring(L, (i), NULL)
 
 
-// ½«Õ»¶¥ÔªËØ²åÈëµ½Ö¸¶¨Ë÷ÒıidxµÄÎ»ÖÃ£¬²¢½«Ô­À´´Óidx¿ªÊ¼µÄËùÓĞÔªËØÏòÕ»¶¥·½ÏòÒÆ¶¯Ò»¸öÎ»ÖÃ
+// å°†æ ˆé¡¶å…ƒç´ æ’å…¥åˆ°æŒ‡å®šç´¢å¼•idxçš„ä½ç½®ï¼Œå¹¶å°†åŸæ¥ä»idxå¼€å§‹çš„æ‰€æœ‰å…ƒç´ å‘æ ˆé¡¶æ–¹å‘ç§»åŠ¨ä¸€ä¸ªä½ç½®
 #define lua_insert(L,idx)	lua_rotate(L, (idx), 1)
 
-// ´ÓÖ¸¶¨Ë÷Òı´¦ÒÆ³ıÒ»¸öÔªËØ£¬°ÑÕâ¸öË÷ÒıÖ®ÉÏµÄËùÓĞÔªËØÒÆÏÂÀ´Ìî²¹ÉÏÕâ¸ö¿ÕÏ¶
+// ä»æŒ‡å®šç´¢å¼•å¤„ç§»é™¤ä¸€ä¸ªå…ƒç´ ï¼ŒæŠŠè¿™ä¸ªç´¢å¼•ä¹‹ä¸Šçš„æ‰€æœ‰å…ƒç´ ç§»ä¸‹æ¥å¡«è¡¥ä¸Šè¿™ä¸ªç©ºéš™
 #define lua_remove(L,idx)	(lua_rotate(L, (idx), -1), lua_pop(L, 1))
 
-// ½«Õ»¶¥µÄÖµ¸´ÖÆµ½Ö¸¶¨Ë÷ÒıidxµÄÎ»ÖÃ£¬²¢ÒÆ³ıÕ»¶¥µÄÖµ
+// å°†æ ˆé¡¶çš„å€¼å¤åˆ¶åˆ°æŒ‡å®šç´¢å¼•idxçš„ä½ç½®ï¼Œå¹¶ç§»é™¤æ ˆé¡¶çš„å€¼
 #define lua_replace(L,idx)	(lua_copy(L, -1, (idx)), lua_pop(L, 1))
 
 /* }============================================================== */
@@ -452,11 +452,11 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 
 #endif
 
-// ´´½¨Ò»¸öÖ¸¶¨´óĞ¡userdata£¬²¢ÎªÆä·ÖÅäÒ»¸öupvalue£¬ÔÚÕ»¶¥
+// åˆ›å»ºä¸€ä¸ªæŒ‡å®šå¤§å°userdataï¼Œå¹¶ä¸ºå…¶åˆ†é…ä¸€ä¸ªupvalueï¼Œåœ¨æ ˆé¡¶
 #define lua_newuserdata(L,s)	lua_newuserdatauv(L,s,1)
-// »ñÈ¡Ö¸¶¨Î»ÖÃuserdataµÄµÚÒ»¸öupvalue
+// è·å–æŒ‡å®šä½ç½®userdataçš„ç¬¬ä¸€ä¸ªupvalue
 #define lua_getuservalue(L,idx)	lua_getiuservalue(L,idx,1)
-// ÉèÖÃÖ¸¶¨Î»ÖÃuserdataµÄµÚÒ»¸öupvalue
+// è®¾ç½®æŒ‡å®šä½ç½®userdataçš„ç¬¬ä¸€ä¸ªupvalue
 #define lua_setuservalue(L,idx)	lua_setiuservalue(L,idx,1)
 
 #define LUA_NUMTAGS		LUA_NUMTYPES
@@ -473,7 +473,7 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 /*
 ** Event codes
 */
-// ¼ûÏÂÃæ×¢ÊÍ
+// è§ä¸‹é¢æ³¨é‡Š
 #define LUA_HOOKCALL	0
 #define LUA_HOOKRET	1
 #define LUA_HOOKLINE	2
@@ -484,14 +484,14 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 /*
 ** Event masks
 */
-// ´ú±í·Ö±ğº¯Êı¿ÉÒÔÔÚÒÔÏÂ½×¶ÎÉèÖÃ¹´×Ó
-// ±»µ÷ÓÃÊ±
+// ä»£è¡¨åˆ†åˆ«å‡½æ•°å¯ä»¥åœ¨ä»¥ä¸‹é˜¶æ®µè®¾ç½®å‹¾å­
+// è¢«è°ƒç”¨æ—¶
 #define LUA_MASKCALL	(1 << LUA_HOOKCALL)
-// Ö´ĞĞ½áÊø·µ»ØµÄÊ±ºò
+// æ‰§è¡Œç»“æŸè¿”å›çš„æ—¶å€™
 #define LUA_MASKRET	(1 << LUA_HOOKRET)
-// Ã¿Ò»ĞĞÖ´ĞĞÍêºó
+// æ¯ä¸€è¡Œæ‰§è¡Œå®Œå
 #define LUA_MASKLINE	(1 << LUA_HOOKLINE)
-// Ã¿´ÎÖ´ĞĞÍ³¼ÆÔËĞĞ´ÎÊı
+// æ¯æ¬¡æ‰§è¡Œç»Ÿè®¡è¿è¡Œæ¬¡æ•°
 #define LUA_MASKCOUNT	(1 << LUA_HOOKCOUNT)
 
 
@@ -513,55 +513,55 @@ LUA_API int (lua_gethookcount) (lua_State *L);
 
 LUA_API int (lua_setcstacklimit) (lua_State *L, unsigned int limit);
 
-// ´æ´¢Óëµ±Ç°Ö´ĞĞÉÏÏÂÎÄ»òµ÷ÓÃÕ»Ïà¹ØµÄĞÅÏ¢
+// å­˜å‚¨ä¸å½“å‰æ‰§è¡Œä¸Šä¸‹æ–‡æˆ–è°ƒç”¨æ ˆç›¸å…³çš„ä¿¡æ¯
 struct lua_Debug {
-  // ±íÊ¾µ±Ç°µ÷ÊÔÊÂ¼şµÄÀàĞÍ
-  // LUA_HOOKCALL£ºº¯Êıµ÷ÓÃÊÂ¼ş
-  // LUA_HOOKRET£ºº¯Êı·µ»ØÊÂ¼ş
-  // LUA_HOOKLINE£ºÖ´ĞĞµ½Ä³Ò»ĞĞ´úÂëµÄÊÂ¼ş
-  // LUA_HOOKCOUNT£ºÃ¿Ö´ĞĞÒ»¶¨ÊıÁ¿µÄÖ¸Áî´¥·¢µÄÊÂ¼ş
-  // LUA_HOOKTAILCALL£ºÎ²µ÷ÓÃÊÂ¼ş
+  // è¡¨ç¤ºå½“å‰è°ƒè¯•äº‹ä»¶çš„ç±»å‹
+  // LUA_HOOKCALLï¼šå‡½æ•°è°ƒç”¨äº‹ä»¶
+  // LUA_HOOKRETï¼šå‡½æ•°è¿”å›äº‹ä»¶
+  // LUA_HOOKLINEï¼šæ‰§è¡Œåˆ°æŸä¸€è¡Œä»£ç çš„äº‹ä»¶
+  // LUA_HOOKCOUNTï¼šæ¯æ‰§è¡Œä¸€å®šæ•°é‡çš„æŒ‡ä»¤è§¦å‘çš„äº‹ä»¶
+  // LUA_HOOKTAILCALLï¼šå°¾è°ƒç”¨äº‹ä»¶
   int event;
-  // µ±Ç°º¯Êı»ò±äÁ¿µÄÃû³Æ
+  // å½“å‰å‡½æ•°æˆ–å˜é‡çš„åç§°
   const char *name;	/* (n) */
-  // ÃèÊöname×Ö¶ÎµÄº¬Òå£¬°ïÖúÇø·Ö±äÁ¿µÄ×÷ÓÃÓò»òº¯ÊıµÄµ÷ÓÃ·½Ê½
-  // "global"£ºÈ«¾Ö±äÁ¿
-  // "local"£º¾Ö²¿±äÁ¿
-  // "field"£º±í×Ö¶Î
-  // "method"£º·½·¨
-  // ""£¨¿Õ×Ö·û´®£©£ºÎ´ÕÒµ½Ïà¹ØĞÅÏ¢
+  // æè¿°nameå­—æ®µçš„å«ä¹‰ï¼Œå¸®åŠ©åŒºåˆ†å˜é‡çš„ä½œç”¨åŸŸæˆ–å‡½æ•°çš„è°ƒç”¨æ–¹å¼
+  // "global"ï¼šå…¨å±€å˜é‡
+  // "local"ï¼šå±€éƒ¨å˜é‡
+  // "field"ï¼šè¡¨å­—æ®µ
+  // "method"ï¼šæ–¹æ³•
+  // ""ï¼ˆç©ºå­—ç¬¦ä¸²ï¼‰ï¼šæœªæ‰¾åˆ°ç›¸å…³ä¿¡æ¯
   const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */
-  // ÃèÊöµ±Ç°ÉÏÏÂÎÄµÄÀàĞÍ£¬ÓÃÓÚÇø·Öµ±Ç°ÉÏÏÂÎÄÊÇ Lua º¯Êı¡¢C º¯Êı»¹ÊÇÆäËûÀàĞÍ
-  // "Lua"£ºLua º¯Êı
-  // "C"£ºC º¯Êı
-  // "main"£ºÖ÷½Å±¾
-  // "tail"£ºÎ²µ÷ÓÃ
+  // æè¿°å½“å‰ä¸Šä¸‹æ–‡çš„ç±»å‹ï¼Œç”¨äºåŒºåˆ†å½“å‰ä¸Šä¸‹æ–‡æ˜¯ Lua å‡½æ•°ã€C å‡½æ•°è¿˜æ˜¯å…¶ä»–ç±»å‹
+  // "Lua"ï¼šLua å‡½æ•°
+  // "C"ï¼šC å‡½æ•°
+  // "main"ï¼šä¸»è„šæœ¬
+  // "tail"ï¼šå°¾è°ƒç”¨
   const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */
-  // µ±Ç°º¯ÊıµÄÔ´´úÂëÎÄ¼şÃû»òÔ´´úÂëÄÚÈİ
-  // Èç¹ûÊÇÎÄ¼ş£¬Í¨³£ÒÔ@¿ªÍ·£¬ÀıÈç@example.lua
-  // Èç¹ûÊÇ×Ö·û´®¼ÓÔØµÄ´úÂë£¬ÔòÖ±½Ó´æ´¢´úÂëÄÚÈİ
+  // å½“å‰å‡½æ•°çš„æºä»£ç æ–‡ä»¶åæˆ–æºä»£ç å†…å®¹
+  // å¦‚æœæ˜¯æ–‡ä»¶ï¼Œé€šå¸¸ä»¥@å¼€å¤´ï¼Œä¾‹å¦‚@example.lua
+  // å¦‚æœæ˜¯å­—ç¬¦ä¸²åŠ è½½çš„ä»£ç ï¼Œåˆ™ç›´æ¥å­˜å‚¨ä»£ç å†…å®¹
   const char *source;	/* (S) */
-  // source×Ö¶ÎµÄ³¤¶È
+  // sourceå­—æ®µçš„é•¿åº¦
   size_t srclen;	/* (S) */
-  // µ±Ç°ÕıÔÚÖ´ĞĞµÄ´úÂëĞĞºÅ
+  // å½“å‰æ­£åœ¨æ‰§è¡Œçš„ä»£ç è¡Œå·
   int currentline;	/* (l) */
-  // µ±Ç°º¯ÊıµÄÆğÊ¼¶¨ÒåĞĞºÅ
+  // å½“å‰å‡½æ•°çš„èµ·å§‹å®šä¹‰è¡Œå·
   int linedefined;	/* (S) */
-  // µ±Ç°º¯ÊıµÄ½áÊø¶¨ÒåĞĞºÅ
+  // å½“å‰å‡½æ•°çš„ç»“æŸå®šä¹‰è¡Œå·
   int lastlinedefined;	/* (S) */
-  // µ±Ç°º¯ÊıµÄÉÏÖµ£¨upvalue£©ÊıÁ¿
+  // å½“å‰å‡½æ•°çš„ä¸Šå€¼ï¼ˆupvalueï¼‰æ•°é‡
   unsigned char nups;	/* (u) number of upvalues */
-  // µ±Ç°º¯ÊıµÄ¹Ì¶¨²ÎÊıÊıÁ¿
+  // å½“å‰å‡½æ•°çš„å›ºå®šå‚æ•°æ•°é‡
   unsigned char nparams;/* (u) number of parameters */
-  // µ±Ç°º¯ÊıÊÇ·ñÊÇ¿É±ä²ÎÊı
+  // å½“å‰å‡½æ•°æ˜¯å¦æ˜¯å¯å˜å‚æ•°
   char isvararg;        /* (u) */
-  // µ±Ç°µ÷ÓÃÊÇ·ñÎªÎ²µ÷ÓÃ
+  // å½“å‰è°ƒç”¨æ˜¯å¦ä¸ºå°¾è°ƒç”¨
   char istailcall;	/* (t) */
   unsigned short ftransfer;   /* (r) index of first value transferred */
   unsigned short ntransfer;   /* (r) number of transferred values */
-  // µ±Ç°º¯ÊıµÄ¼ò¶ÌÔ´´úÂëĞÅÏ¢
+  // å½“å‰å‡½æ•°çš„ç®€çŸ­æºä»£ç ä¿¡æ¯
   char short_src[LUA_IDSIZE]; /* (S) */
-  // Ö¸Ïòµ±Ç°µ÷ÓÃÕ»Ö¡µÄÖ¸Õë
+  // æŒ‡å‘å½“å‰è°ƒç”¨æ ˆå¸§çš„æŒ‡é’ˆ
   /* private part */
   struct CallInfo *i_ci;  /* active function */
 };
