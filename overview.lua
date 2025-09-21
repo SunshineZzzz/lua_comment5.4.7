@@ -6,3 +6,5 @@ local function a()
 end
 
 a()
+
+return "hello", "world"

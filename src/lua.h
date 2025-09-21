@@ -34,7 +34,7 @@
 #define LUA_SIGNATURE	"\x1bLua"
 
 /* option for multiple returns in 'lua_pcall' and 'lua_call' */
-// 表示一个函数可以返回多个值
+// 调用一个(c/lua)函数期望的返回值，有多少返回值就返回多少返回值
 #define LUA_MULTRET	(-1)
 
 

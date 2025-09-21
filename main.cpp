@@ -14,6 +14,12 @@ namespace n_overview {
 			return false;
 		}
 
+		// lua_pcall(L, 0, LUA_MULTRET, 0)，调用一个(c/lua)函数期望的返回值，有多少返回值就返回多少返回值
+		const char* pArg2 = luaL_checkstring(L, -1);
+		const char* pArg1 = luaL_checkstring(L, -2);
+
+        fprintf(stdout, "overview.lua = %s,%s\n", pArg1, pArg2);
+
 		lua_close(L);
 		return true;
 	}
