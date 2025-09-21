@@ -45,7 +45,7 @@
 */
 // g->l_registry
 #define LUA_REGISTRYINDEX	(-LUAI_MAXSTACK - 1000)
-// 用于生成上值索引，用来访问当前调用函数中cclosure中的上值
+// 用于生成上值索引，用来访问当前调用函数cclosure的上值
 #define lua_upvalueindex(i)	(LUA_REGISTRYINDEX - (i))
 
 
