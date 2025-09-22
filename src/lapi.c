@@ -262,7 +262,7 @@ l_sinline void reverse (lua_State *L, StkId from, StkId to) {
 ** Let x = AB, where A is a prefix of length 'n'. Then,
 ** rotate x n == BA. But BA == (A^r . B^r)^r.
 */
-// idx到栈顶的段进行旋转，n是正数，表示向右旋转n个位置，n是负数，表示向左旋转|n|个位置
+// idx到栈顶的段进行旋转(循环移位)，段看成一个环，n是正数，顺时针n个位置，n是负数，逆时针旋转|n|个位置
 // 栈低[1,2,3,4,5]栈顶，idx=1，n=2，t=5，p=1，计算m=3，旋转:
 // （p, m）[3,2,1,4,5],
 // （m+1, t）[3,2,1,5,4],
