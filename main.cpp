@@ -91,6 +91,14 @@ namespace n_luacallc {
 		lua_writeline();
 		return 0;
 	}
+    static int lua_closurefunc_print(lua_State* L)
+    { 
+		auto up1 = lua_tostring(L, lua_upvalueindex(1));
+		auto up2 = lua_tostring(L, lua_upvalueindex(1));
+        lua_writestring(up1, strlen(up1));
+		lua_writestring(up1, strlen(up1));
+		return 0;
+    }
 	bool luacallc()
 	{
 		lua_State* L = luaL_newstate();
@@ -102,6 +110,13 @@ namespace n_luacallc {
 		lua_pushcfunction(L, lua_cfunc_print);
 		lua_setfield(L, -2, "lua_cfunc_print");
 		lua_pop(L, 1);
+
+		lua_pushglobaltable(L);
+		lua_pushstring(L, "cclosure1");
+		lua_pushstring(L, "cclosure2");
+		lua_pushcclosure(L, lua_closurefunc_print, 2);
+        lua_setfield(L, -2, "lua_closurefunc_print");
+        lua_pop(L, 1);
 
 		if (luaL_dofile(L, "luacallc.lua") != LUA_OK) {
 			fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
@@ -306,6 +321,7 @@ namespace n_lightuserdata
 		// 将lightuserdata保存到全局表中
 		lua_setglobal(L, "gPeople");
 		
+
 	    if (luaL_dofile(L, "lightuserdata.lua") != LUA_OK)
 		{
 			fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));

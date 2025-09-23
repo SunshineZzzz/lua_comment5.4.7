@@ -467,7 +467,6 @@ l_sinline void moveresults (lua_State *L, StkId res, int nres, int wanted) {
       break;
     default:  /* two/more results and/or to-be-closed variables */
       if (hastocloseCfunc(wanted)) {  /* to-be-closed variables? */
-        // 函数返回后会调用close，即我们前文提到的会把UpVal切换到close状态
         L->ci->callstatus |= CIST_CLSRET;  /* in case of yields */
         L->ci->u2.nres = nres;
         res = luaF_close(L, res, CLOSEKTOP, 1);
