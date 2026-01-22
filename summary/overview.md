@@ -67,6 +67,33 @@ typedef struct LClosure {
   // 会对数据进行一定的处理
   UpVal *upvals[1];  /* list of upvalues */
 } LClosure;
+
+/*
+** Upvalues for Lua closures
+*/
+// UpVal类型有两种状态：分别是open打开和close关闭状态。
+// 一个UpVal当它所属的那个函数返回之后（调用了return），
+// 或者Lua运行堆栈发生改变，函数已经不处于合理堆栈下标的时候，
+// 该函数所包含的UpVal即会切换到close状态。
+typedef struct UpVal {
+  CommonHeader;
+  union {
+    // 指向StkId
+    TValue *p;  /* points to stack or to its own value */
+    ptrdiff_t offset;  /* used while the stack is being reallocated */
+  } v;
+  union {
+    // open时候生效
+    struct {  /* (when open) */
+      // 下一个
+      struct UpVal *next;  /* linked list */
+      // 上一个
+      struct UpVal **previous;
+    } open;
+    // closed时候生效
+    TValue value;  /* the value (when closed) */
+  } u;
+} UpVal;
 ```
 
 - ```LClosure::UpVal```: lua闭包定义，把chunk作为一个最顶层lua闭包函数，该闭包默认带有一个UpValue，这个UpValue的变量名为"_ENV"，它指向Lua虚拟机的全局变量表，即_G表，可以理解为_G表即为当前Lua文件中代码的运行环境(env)。事实上，每一个Lua闭包它们第一个UpValue值都是_ENV。

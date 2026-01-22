@@ -358,6 +358,12 @@ static unsigned int findindex (lua_State *L, Table *t, TValue *key,
 }
 
 
+// table的迭代机制
+// 第一个参数是我们正在使用的lua虚拟机状态实例，
+// 第二个参数是表示我们要进行迭代的table，
+// 第三个参数传入的是一个key值。
+// 调用的结果是，将传入的key的下一个key和value压入栈中。
+// 当传入的key值是nil值时，将1和array数组的第一个值入栈。
 int luaH_next (lua_State *L, Table *t, StkId key) {
   unsigned int asize = luaH_realasize(t);
   unsigned int i = findindex(L, t, s2v(key), asize);  /* find original key */

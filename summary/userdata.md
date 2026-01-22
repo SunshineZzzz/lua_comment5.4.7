@@ -151,6 +151,112 @@ int userdata()
 ```
 
 7. light userdata例子
-```C++
+```lua
+print(gPeople.name)
+print(gPeople.age)
 
+gPeople.name = "sz"
+gPeople.age = 18
+
+print(gPeople.name)
+print(gPeople.age)
+```
+```C++
+// lightuserdata
+struct people
+{
+	char name[128];
+	int age;
+
+	people()
+	{
+		memset(name, 0, 128);
+		age = 0;
+	}
+};
+static int GetAttribute(lua_State* L)
+{
+	auto* pData = (people*)lua_touserdata(L, 1);
+	std::string attribute = luaL_checkstring(L, 2);
+	if (attribute == "name")
+	{
+		lua_pushstring(L, pData->name);
+		return 1;
+	}
+	else if (attribute == "age")
+	{
+		lua_pushinteger(L, pData->age);
+		return 1;
+	}
+	else
+	{
+		lua_pushstring(L, "invalid attribute");
+		return 1;
+	}
+}
+static int SetAttribute(lua_State* L)
+{
+	auto* pData = (people*)lua_touserdata(L, 1);
+	std::string attribute = luaL_checkstring(L, 2);
+	if (attribute == "name")
+	{
+		const char* pNewName = luaL_checkstring(L, 3);
+		if (pNewName == NULL)
+		{
+			return 0;
+		}
+		strncpy_s(pData->name, pNewName, 128);
+		return 0;
+	}
+	else if (attribute == "age")
+	{
+		pData->age = luaL_checkinteger(L, 3);
+		return 0;
+	}
+	else
+	{
+		lua_pushstring(L, "invalid attribute");
+		return 1;
+	}
+}
+static  luaL_Reg people_mts[] = 
+{
+	{ "__index", GetAttribute },
+	{ "__newindex", SetAttribute },
+	{ NULL, NULL }
+};
+bool lightuserdata()
+{
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+
+	// 创建一个新的元表，名称为PopleMT，这样子后面就可以判断获取的内存对象是否有对应名称的原表
+	// 这个元表会保存在全局表中
+	luaL_newmetatable(L, "peopleMT");
+	lua_pushvalue(L, -1);
+	// 元表.__index = 元表
+	lua_setfield(L, -2, "__index");
+	// 将数组people_mts中的所有函数注册到peopleMT中
+	luaL_setfuncs(L, people_mts, 0);
+	lua_pop(L, 1);
+
+	// 创建lightuserdata，并且设置元表
+	auto pPeople = std::make_unique<people>();
+	lua_pushlightuserdata(L, pPeople.get());
+	luaL_getmetatable(L, "peopleMT");
+	lua_setmetatable(L, -2);
+	// 将lightuserdata保存到全局表中
+	lua_setglobal(L, "gPeople");
+	
+
+	if (luaL_dofile(L, "lightuserdata.lua") != LUA_OK)
+	{
+		fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
+		lua_close(L);
+		return false;
+	}
+
+	lua_close(L);
+	return true;
+}
 ```
